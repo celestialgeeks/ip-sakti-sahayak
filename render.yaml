@@ -22,6 +22,13 @@ services:
         value: https://ipsakti-frontend.onrender.com
 
   - type: web
+    name: ipsakti-qdrant
+    runtime: docker
+    dockerfilePath: ./Dockerfile.qdrant
+    # Free tier: no disk → ephemeral storage. Corpus is (re)seeded
+    # externally: QDRANT_URL=<service-url> python -m scripts.ingest_documents
+
+  - type: web
     name: ipsakti-frontend
     runtime: node
     buildCommand: cd frontend && npm install && npm run build
