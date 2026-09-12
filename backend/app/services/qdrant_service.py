@@ -14,10 +14,18 @@ class QdrantService:
     """Client for Qdrant vector database operations."""
 
     def __init__(self):
-        # Use local file-based Qdrant since Docker is not available in this environment
-        self.client = QdrantClient(
-            path="./data/qdrant"
-        )
+        # Cloud mode when QDRANT_URL is http(s) (e.g. Qdrant Cloud on Render);
+        # otherwise fall back to local file-based storage for dev.
+        if settings.QDRANT_URL.startswith(("http://", "https://")):
+            self.client = QdrantClient(
+                url=settings.QDRANT_URL,
+                api_key=settings.QDRANT_API_KEY or None,
+            )
+        else:
+            # Use local file-based Qdrant since Docker is not available in this environment
+            self.client = QdrantClient(
+                path="./data/qdrant"
+            )
         self.embed_dim = settings.NVIDIA_EMBED_DIMENSIONS
 
     def ensure_collections(self):
