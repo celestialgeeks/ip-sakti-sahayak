@@ -76,7 +76,13 @@ class NvidiaIMService:
             except Exception as e:
                 last_err = e
                 import asyncio as _aio
+                import logging as _logging
 
+                cause = getattr(e, "__cause__", None)
+                _logging.getLogger("uvicorn.error").error(
+                    "NIM chat attempt %d failed: %r | cause: %r | cause-cause: %r",
+                    attempt + 1, e, cause, getattr(cause, "__cause__", None),
+                )
                 await _aio.sleep(2 * (attempt + 1))
         raise last_err
 
