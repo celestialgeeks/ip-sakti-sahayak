@@ -15,7 +15,13 @@ async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown hooks."""
     # --- Startup ---
     print(f"🚀 Starting {settings.APP_NAME} v{settings.APP_VERSION}")
-    # Initialize services (Qdrant, NIM, etc.) will be done here
+    # Self-heal ephemeral Qdrant (free tier wipes on restart): reseed if empty.
+    try:
+        from app.core.seed import seed_corpus_if_empty
+
+        await seed_corpus_if_empty()
+    except Exception as e:
+        print(f"⚠️ Boot seed failed (chat will report low confidence): {e}")
     yield
     # --- Shutdown ---
     print(f"👋 Shutting down {settings.APP_NAME}")
