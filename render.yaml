@@ -13,7 +13,7 @@ services:
       - key: SARVAM_API_KEY
         sync: false
       - key: QDRANT_URL
-        sync: false
+        value: https://ipsakti-qdrant.onrender.com
       - key: QDRANT_API_KEY
         sync: false
       - key: SARVAM_API_KEY

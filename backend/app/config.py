@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     NVIDIA_NIM_API_KEY: str = Field(default="", validation_alias="NVIDIA_API_KEY")
     NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
     NVIDIA_LLM_MODEL: str = "deepseek-ai/deepseek-v4-flash-0731"
-    NVIDIA_EMBED_MODEL: str = "all-MiniLM-L6-v2"
-    NVIDIA_EMBED_DIMENSIONS: int = 384
+    NVIDIA_EMBED_MODEL: str = "nvidia/nemotron-3-embed-1b"
+    NVIDIA_EMBED_DIMENSIONS: int = 2048
 
     # --- Qdrant ---
     QDRANT_URL: str = "http://localhost:6333"

@@ -72,21 +72,32 @@ class NvidiaIMService:
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
         """
-        Generate embeddings for a list of texts using local SentenceTransformer.
-        
+        Generate embeddings via NVIDIA NIM (cloud, no local deps);
+        falls back to local SentenceTransformer for offline dev.
+
         Args:
             texts: List of text strings to embed.
-        
+
         Returns:
-            List of embedding vectors (each 384-dim).
+            List of embedding vectors (NIM model dim, e.g. 2048).
         """
+        if settings.NVIDIA_NIM_API_KEY:
+            resp = await self.client.embeddings.create(
+                model=self.embed_model, input=texts,
+            )
+            return [row.embedding for row in resp.data]
         if self.local_embedder:
             embeddings = self.local_embedder.encode(texts)
             return embeddings.tolist()
         return []
 
     async def embed_single(self, text: str) -> List[float]:
-        """Generate embedding for a single text."""
+        """Generate embedding for a single text (NIM first, local fallback)."""
+        if settings.NVIDIA_NIM_API_KEY:
+            resp = await self.client.embeddings.create(
+                model=self.embed_model, input=[text],
+            )
+            return resp.data[0].embedding
         if self.local_embedder:
             embedding = self.local_embedder.encode(text)
             return embedding.tolist()
