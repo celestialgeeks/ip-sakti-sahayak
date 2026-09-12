@@ -131,7 +131,7 @@ class QdrantService:
             for hit in points
         ]
 
-    def search_across_collections(
+    async def search_across_collections(
         self,
         query_vector: List[float],
         jurisdiction: str = "india",
@@ -174,6 +174,23 @@ class QdrantService:
                     jurisdiction_filter=jurisdiction if jurisdiction != "both" else None,
                 )
                 all_results.extend(results)
+            except LookupError:
+                # Ephemeral Qdrant was wiped (free-tier sleep/restart):
+                # reseed just this collection, then retry once.
+                try:
+                    from app.core.seed import seed_collection
+
+                    print(f"🔄 {coll} missing, reseeding on demand...")
+                    await seed_collection(coll)
+                    results = self.search(
+                        collection=coll,
+                        query_vector=query_vector,
+                        limit=limit // len(collections) + 1,
+                        jurisdiction_filter=jurisdiction if jurisdiction != "both" else None,
+                    )
+                    all_results.extend(results)
+                except Exception as e:
+                    print(f"⚠️ Error searching {coll}: {e}")
             except Exception as e:
                 print(f"⚠️ Error searching {coll}: {e}")
 

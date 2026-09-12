@@ -42,7 +42,7 @@ async def run_rag_pipeline(
     query_embedding = await nim_service.embed_single(query)
 
     # Step 3: Search Qdrant across relevant collections
-    search_results = qdrant_service.search_across_collections(
+    search_results = await qdrant_service.search_across_collections(
         query_vector=query_embedding,
         jurisdiction=jurisdiction.value,
         limit=10,
