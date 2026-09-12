@@ -4,7 +4,7 @@ Reads all settings from environment variables / .env file.
 """
 
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, AliasChoices
 from typing import Optional
 
 
@@ -18,7 +18,10 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
 
     # --- NVIDIA NIM ---
-    NVIDIA_NIM_API_KEY: str = Field(default="", validation_alias="NVIDIA_API_KEY")
+    NVIDIA_NIM_API_KEY: str = Field(
+        default="",
+        validation_alias=AliasChoices("NVIDIA_NIM_API_KEY", "NVIDIA_API_KEY"),
+    )
     NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
     NVIDIA_LLM_MODEL: str = "deepseek-ai/deepseek-v4-flash-0731"
     NVIDIA_EMBED_MODEL: str = "nvidia/nemotron-3-embed-1b"
