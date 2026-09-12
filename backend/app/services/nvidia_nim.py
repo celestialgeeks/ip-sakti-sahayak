@@ -47,13 +47,30 @@ class NvidiaIMService:
         if stream:
             return self._stream_generate(messages, temperature, max_tokens)
 
-        response = await self.client.chat.completions.create(
-            model=self.llm_model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        return response.choices[0].message.content or ""
+        last_err = None
+        for attempt in range(3):
+            try:
+                response = await self.client.chat.completions.create(
+                    model=self.llm_model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    timeout=120,
+                )
+                msg = response.choices[0].message
+                content = msg.content
+                if not content:
+                    # Reasoning models (e.g. deepseek-v4-flash) put output here
+                    content = getattr(msg, "reasoning_content", None) or (
+                        msg.model_extra or {}
+                    ).get("reasoning_content", "")
+                return content or ""
+            except Exception as e:
+                last_err = e
+                import asyncio as _aio
+
+                await _aio.sleep(2 * (attempt + 1))
+        raise last_err
 
     async def _stream_generate(
         self, messages: list[dict], temperature: float, max_tokens: int
