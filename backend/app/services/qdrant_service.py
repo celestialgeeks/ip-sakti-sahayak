@@ -30,9 +30,14 @@ class QdrantService:
                 return json.load(resp)
         except urllib.error.HTTPError as e:
             # Missing collection (ingest only seeds dirs that exist) — not fatal
+            detail = ""
+            try:
+                detail = e.read().decode()[:500]
+            except Exception:
+                pass
             if e.code == 404:
                 raise LookupError(f"collection not found: {path}")
-            raise
+            raise RuntimeError(f"Qdrant {e.code} on {path}: {detail}")
 
     def ensure_collections(self):
         """Create all required collections if they don't exist."""
