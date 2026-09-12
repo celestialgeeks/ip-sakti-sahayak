@@ -56,6 +56,15 @@ async def seed_collection(collection: str) -> int:
         )
     except Exception:
         pass  # already exists
+    # Query API requires keyword indexes for filtered fields
+    for field in ("jurisdiction", "category"):
+        try:
+            qdrant_service._rest(
+                "PUT", f"/collections/{collection}/index",
+                {"field_name": field, "field_schema": "keyword"},
+            )
+        except Exception:
+            pass  # already indexed
     total = 0
     files = sorted(f for f in d.glob("*.txt") if not f.name.endswith(".meta.json"))
     for fp in files:

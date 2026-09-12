@@ -117,7 +117,22 @@ class QdrantService:
         if must_conditions:
             body["filter"] = {"must": must_conditions}
 
-        data = self._rest("POST", f"/collections/{collection}/points/query", body)
+        try:
+            data = self._rest("POST", f"/collections/{collection}/points/query", body)
+        except RuntimeError as e:
+            if "Index required" not in str(e):
+                raise
+            # Newer Qdrant Query API mandates keyword indexes for filtered
+            # fields — create them, then retry once.
+            for field in ("jurisdiction", "category"):
+                try:
+                    self._rest(
+                        "PUT", f"/collections/{collection}/index",
+                        {"field_name": field, "field_schema": "keyword"},
+                    )
+                except Exception:
+                    pass  # already indexed
+            data = self._rest("POST", f"/collections/{collection}/points/query", body)
         points = data.get("result", {}).get("points", [])
 
         return [
