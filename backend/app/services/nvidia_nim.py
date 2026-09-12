@@ -9,6 +9,14 @@ from openai import AsyncOpenAI
 from app.config import settings
 
 
+def _fresh_client() -> AsyncOpenAI:
+    """Fresh client per call — avoids reusing server-closed pooled connections."""
+    return AsyncOpenAI(
+        api_key=settings.NVIDIA_NIM_API_KEY,
+        base_url=settings.NVIDIA_NIM_BASE_URL,
+    )
+
+
 class NvidiaIMService:
     """Client for NVIDIA NIM API (LLM + Embeddings)."""
 
@@ -50,7 +58,7 @@ class NvidiaIMService:
         last_err = None
         for attempt in range(3):
             try:
-                response = await self.client.chat.completions.create(
+                response = await _fresh_client().chat.completions.create(
                     model=self.llm_model,
                     messages=messages,
                     temperature=temperature,
@@ -76,7 +84,7 @@ class NvidiaIMService:
         self, messages: list[dict], temperature: float, max_tokens: int
     ) -> AsyncGenerator[str, None]:
         """Stream response tokens."""
-        stream = await self.client.chat.completions.create(
+        stream = await _fresh_client().chat.completions.create(
             model=self.llm_model,
             messages=messages,
             temperature=temperature,
@@ -99,7 +107,7 @@ class NvidiaIMService:
             List of embedding vectors (NIM model dim, e.g. 2048).
         """
         if settings.NVIDIA_NIM_API_KEY:
-            resp = await self.client.embeddings.create(
+            resp = await _fresh_client().embeddings.create(
                 model=self.embed_model, input=texts,
             )
             return [row.embedding for row in resp.data]
@@ -111,7 +119,7 @@ class NvidiaIMService:
     async def embed_single(self, text: str) -> List[float]:
         """Generate embedding for a single text (NIM first, local fallback)."""
         if settings.NVIDIA_NIM_API_KEY:
-            resp = await self.client.embeddings.create(
+            resp = await _fresh_client().embeddings.create(
                 model=self.embed_model, input=[text],
             )
             return resp.data[0].embedding
