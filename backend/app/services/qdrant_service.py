@@ -3,45 +3,55 @@ Qdrant Service — Vector database operations for RAG.
 """
 
 from typing import List, Optional, Dict, Any
-from qdrant_client import QdrantClient, models
-from qdrant_client.http.exceptions import UnexpectedResponse
+import json
+import urllib.request
+import urllib.error
 
 from app.config import settings
 from app.models.enums import QdrantCollection
 
 
 class QdrantService:
-    """Client for Qdrant vector database operations."""
+    """Client for Qdrant vector database operations (raw REST via urllib)."""
 
     def __init__(self):
-        # Cloud mode when QDRANT_URL is http(s) (e.g. Qdrant Cloud on Render);
-        # otherwise fall back to local file-based storage for dev.
-        if settings.QDRANT_URL.startswith(("http://", "https://")):
-            self.client = QdrantClient(
-                url=settings.QDRANT_URL,
-                api_key=settings.QDRANT_API_KEY or None,
-            )
-        else:
-            # Use local file-based Qdrant since Docker is not available in this environment
-            self.client = QdrantClient(
-                path="./data/qdrant"
-            )
+        self.base_url = settings.QDRANT_URL.rstrip("/")
+        self.api_key = settings.QDRANT_API_KEY or None
         self.embed_dim = settings.NVIDIA_EMBED_DIMENSIONS
+
+    def _rest(self, method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        data = json.dumps(body).encode() if body is not None else None
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["api-key"] = self.api_key
+        req = urllib.request.Request(self.base_url + path, data=data, method=method, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                return json.load(resp)
+        except urllib.error.HTTPError as e:
+            # Missing collection (ingest only seeds dirs that exist) — not fatal
+            if e.code == 404:
+                raise LookupError(f"collection not found: {path}")
+            raise
 
     def ensure_collections(self):
         """Create all required collections if they don't exist."""
+        existing = set()
+        try:
+            data = self._rest("GET", "/collections")
+            existing = {c["name"] for c in data.get("result", {}).get("collections", [])}
+        except Exception:
+            pass
         for collection in QdrantCollection:
+            if collection.value in existing:
+                continue
             try:
-                self.client.get_collection(collection.value)
-            except (UnexpectedResponse, Exception):
-                self.client.create_collection(
-                    collection_name=collection.value,
-                    vectors_config=models.VectorParams(
-                        size=self.embed_dim,
-                        distance=models.Distance.COSINE,
-                    ),
-                )
+                self._rest("PUT", f"/collections/{collection.value}", {
+                    "vectors": {"size": self.embed_dim, "distance": "Cosine"}
+                })
                 print(f"✅ Created collection: {collection.value}")
+            except Exception as e:
+                print(f"⚠️ Could not create {collection.value}: {e}")
 
     def upsert_documents(
         self,
@@ -60,17 +70,10 @@ class QdrantService:
             payloads: Metadata payloads for each chunk
         """
         points = [
-            models.PointStruct(
-                id=doc_id,
-                vector=vector,
-                payload=payload,
-            )
+            {"id": doc_id, "vector": vector, "payload": payload}
             for doc_id, vector, payload in zip(ids, vectors, payloads)
         ]
-        self.client.upsert(
-            collection_name=collection,
-            points=points,
-        )
+        self._rest("PUT", f"/collections/{collection}/points", {"points": points})
 
     def search(
         self,
@@ -93,46 +96,39 @@ class QdrantService:
         Returns:
             List of search results with scores and payloads.
         """
-        # Build filters
+        # Raw REST via urllib: the qdrant-client SDK transport 404s from
+        # Render's egress while plain HTTPS works. Body mirrors Query API.
         must_conditions = []
         if jurisdiction_filter:
             must_conditions.append(
-                models.FieldCondition(
-                    key="jurisdiction",
-                    match=models.MatchValue(value=jurisdiction_filter),
-                )
+                {"key": "jurisdiction", "match": {"value": jurisdiction_filter}}
             )
         if category_filter:
             must_conditions.append(
-                models.FieldCondition(
-                    key="category",
-                    match=models.MatchValue(value=category_filter),
-                )
+                {"key": "category", "match": {"value": category_filter}}
             )
 
-        query_filter = models.Filter(must=must_conditions) if must_conditions else None
+        body: Dict[str, Any] = {"query": query_vector, "limit": limit}
+        if must_conditions:
+            body["filter"] = {"must": must_conditions}
 
-        response = self.client.query_points(
-            collection_name=collection,
-            query=query_vector,
-            limit=limit,
-            query_filter=query_filter,
-        )
-        
-        results = response.points
+        data = self._rest("POST", f"/collections/{collection}/points/query", body)
+        points = data.get("result", {}).get("points", [])
 
         return [
             {
-                "id": str(hit.id),
-                "score": hit.score,
-                "text": hit.payload.get("text", ""),
-                "source": hit.payload.get("source", ""),
-                "jurisdiction": hit.payload.get("jurisdiction", ""),
-                "category": hit.payload.get("category", ""),
-                "confidence_tier": hit.payload.get("confidence_tier", ""),
-                "metadata": hit.payload,
+                "id": str(hit["id"]),
+                "score": hit["score"],
+                "text": (hit.get("payload") or {}).get("text", ""),
+                "source": (hit.get("payload") or {}).get("source", ""),
+                "jurisdiction": (hit.get("payload") or {}).get("jurisdiction", ""),
+                "category": (hit.get("payload") or {}).get("category", ""),
+                "confidence_tier": (hit.get("payload") or {}).get(
+                    "confidence_tier", ""
+                ),
+                "metadata": hit.get("payload") or {},
             }
-            for hit in results
+            for hit in points
         ]
 
     def search_across_collections(
