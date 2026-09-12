@@ -1,0 +1,35 @@
+TKDL REFERENCE: Charaka Samhita RS/1024
+
+Reference ID: CS-RS/1024
+Text: Charaka Samhita
+Section: Chikitsa Sthana (Treatment Section)
+Chapter: Kushtha Chikitsa (Treatment of Skin Diseases)
+
+Formulation Description:
+Haridra-based preparation for external application (Lepa) in inflammatory skin conditions.
+
+Composition:
+- Haridra (Curcuma longa) — primary ingredient
+- Daruharidra (Berberis aristata) — synergistic anti-inflammatory
+- Nimba (Azadirachta indica) — antimicrobial
+- Chandana (Santalum album) — cooling, anti-inflammatory
+- Manjishtha (Rubia cordifolia) — blood purifier, skin healer
+
+Method of Preparation:
+Fine powders (Churna) of all ingredients mixed in equal proportions, 
+made into paste (Kalka) with water or honey for topical application.
+
+Therapeutic Indication:
+- Kushtha (skin diseases)
+- Vrana (wounds/ulcers)
+- Shotha (inflammation/swelling)
+- Kandu (itching)
+
+TKDL Classification:
+- IPC: A61K 36/9068 (Curcuma), A61K 36/185 (Berberis)
+- Therapeutic: A61P 17/00 (Dermatological), A61P 29/00 (Anti-inflammatory)
+
+Prior Art Relevance:
+Any patent claiming a topical formulation combining turmeric with neem, 
+berberis, or sandalwood for anti-inflammatory/skin conditions is anticipated 
+by this reference under Section 3(p) of the Patents Act, 1970.

@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Next.js
+.next/
+out/
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Corpus (large files - track via Git LFS or exclude)
+backend/data/corpus/**/*.pdf
+backend/data/corpus/**/*.docx
+
+# Qdrant storage
+qdrant_storage/

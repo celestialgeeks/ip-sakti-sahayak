@@ -1,0 +1,31 @@
+LANDMARK CASE: CSIR v. USPTO — Turmeric Patent Revocation (1997)
+
+US Patent No.: 5,401,504
+Title: "Use of turmeric in wound healing"
+Granted to: University of Mississippi Medical Center (March 28, 1995)
+Challenged by: Council of Scientific and Industrial Research (CSIR), India
+
+FACTS:
+- Patent claimed the method of promoting healing of wounds by administering turmeric (Curcuma longa) to a patient
+- CSIR challenged the patent as lacking novelty, citing traditional knowledge documentation
+
+EVIDENCE PRESENTED:
+1. Ancient Sanskrit text references (Sushruta Samhita, ~600 BCE)
+2. Ayurvedic Pharmacopoeia entries
+3. Published scientific papers from Indian journals
+4. Oral tradition documentation
+
+OUTCOME:
+- USPTO cancelled the patent on August 21, 1997
+- Held that the claimed use was anticipated by prior art from Indian traditional knowledge
+- First successful challenge of a US patent based on traditional knowledge
+
+SIGNIFICANCE:
+- Catalyzed the creation of TKDL (established 2001)
+- Demonstrated that traditional knowledge constitutes valid prior art
+- Led to international recognition of need for TK protection
+- India subsequently challenged 36+ patents at EPO and USPTO using TKDL
+
+PRECEDENT VALUE:
+- Established that documented traditional uses constitute prior art under US patent law
+- Validated the approach of digitizing and translating traditional knowledge for defensive IP protection

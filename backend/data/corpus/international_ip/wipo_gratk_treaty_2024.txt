@@ -1,0 +1,30 @@
+WIPO TREATY ON INTELLECTUAL PROPERTY, GENETIC RESOURCES AND ASSOCIATED TRADITIONAL KNOWLEDGE
+Adopted: May 24, 2024 at the Diplomatic Conference in Geneva
+
+KEY PROVISIONS:
+
+Article 3 — Disclosure Requirement
+1. Each Contracting Party shall require patent applicants to disclose:
+   (a) the country of origin or source of genetic resources, when the claimed invention is 
+       materially based on genetic resources;
+   (b) the indigenous peoples or local community that provided the traditional knowledge, 
+       when the claimed invention is materially based on traditional knowledge associated 
+       with genetic resources.
+
+Article 4 — Sanctions and Remedies
+1. Each Contracting Party shall put in place appropriate, effective and proportionate 
+   legal, administrative and/or policy measures to address non-compliance with the 
+   disclosure requirement.
+2. Sanctions may include:
+   (a) preventing further processing of the patent application
+   (b) post-grant revocation or invalidation based on fraudulent intent
+
+Article 5 — Databases and Digital Sequence Information
+1. Contracting Parties are encouraged to make publicly available databases of genetic 
+   resources and traditional knowledge, such as India's TKDL.
+
+SIGNIFICANCE FOR AYURVEDA:
+- First binding international treaty requiring TK disclosure in patent applications
+- India's TKDL model recognized as a best practice
+- Strengthens India's ability to challenge biopiracy patents internationally
+- Requires patent offices worldwide to search TKDL and similar databases

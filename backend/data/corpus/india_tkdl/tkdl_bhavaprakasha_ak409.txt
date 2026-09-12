@@ -1,0 +1,39 @@
+TKDL REFERENCE: Bhavaprakasha AK/409
+
+Reference ID: BP-AK/409
+Text: Bhavaprakasha Nighantu
+Author: Bhavamishra (16th century CE)
+Section: Haridra Varga (Turmeric Section)
+
+Monograph: Haridra (Curcuma longa L.)
+
+Sanskrit Synonyms:
+- Haridra (हरिद्रा) — yellow colored
+- Kanchani (काञ्चनी) — golden
+- Gauri (गौरी) — fair/bright
+- Nisha (निशा) — night (color of sunset)
+- Yoshitpriya (योषित्प्रिया) — dear to women
+
+Rasa (Taste): Tikta (Bitter), Katu (Pungent)
+Guna (Quality): Ruksha (Dry), Laghu (Light)
+Virya (Potency): Ushna (Hot)
+Vipaka (Post-digestive): Katu (Pungent)
+Dosha Karma: Kapha-Pitta Shamaka (Pacifies Kapha and Pitta)
+
+Pharmacological Actions (Karma):
+- Varnya (complexion enhancer)
+- Krimighna (antiparasitic)
+- Vishahara (antitoxin)
+- Vranaropaka (wound healer)
+- Shothahara (anti-inflammatory)
+- Raktashodhaka (blood purifier)
+
+Classical Formulations Referenced:
+1. Haridra Khanda — for allergic disorders
+2. Haridra Lepa — topical anti-inflammatory paste
+3. Nisha-Amalaki — for Prameha (diabetes)
+4. Haridra Taila — medicated oil for skin
+
+TKDL Classification:
+- IPC: A61K 36/9068
+- ECLA: A61K-036/9068

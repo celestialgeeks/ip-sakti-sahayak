@@ -1,0 +1,22 @@
+AGREEMENT ON TRADE-RELATED ASPECTS OF INTELLECTUAL PROPERTY RIGHTS (TRIPS)
+
+Article 27 — Patentable Subject Matter
+1. Subject to the provisions of paragraphs 2 and 3, patents shall be available for any 
+   inventions, whether products or processes, in all fields of technology, provided that 
+   they are new, involve an inventive step and are capable of industrial application.
+
+3. Members may also exclude from patentability:
+   (b) diagnostic, therapeutic and surgical methods for the treatment of humans or animals;
+
+Article 29 — Conditions on Patent Applicants
+1. Members shall require that an applicant for a patent shall disclose the invention in a 
+   manner sufficiently clear and complete for the invention to be carried out by a person 
+   skilled in the art and may require the applicant to indicate the best mode for carrying 
+   out the invention known to the inventor at the filing date.
+
+RELEVANCE TO AYURVEDA:
+- TRIPS Art. 27(1) requires novelty + inventive step — traditional formulations may lack novelty
+- Art. 27(3)(b) allows exclusion of plant varieties and biological processes
+- India's §3(p) is a TRIPS-compliant mechanism for excluding TK from patentability
+- The relationship between TRIPS, CBD, and the Nagoya Protocol is the core tension in 
+  international Ayurvedic IP protection

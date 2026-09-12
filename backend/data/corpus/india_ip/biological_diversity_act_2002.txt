@@ -1,0 +1,26 @@
+BIOLOGICAL DIVERSITY ACT, 2002 (No. 18 of 2003) [As amended by the Biological Diversity (Amendment) Act, 2023]
+
+CHAPTER II — REGULATION OF ACCESS TO BIOLOGICAL DIVERSITY
+
+Section 3 — Certain persons not to undertake biodiversity-related activities without approval of National Biodiversity Authority
+
+(1) No person referred to in sub-section (2) shall, without previous approval of the National Biodiversity Authority, obtain any biological resource occurring in India or knowledge associated thereto for research or for commercial utilisation or for bio-survey and bio-utilisation.
+
+(2) The persons referred to in sub-section (1) are:
+(a) a person who is not a citizen of India;
+(b) a citizen of India who is a non-resident as defined in clause (30) of section 2 of the Income-tax Act, 1961;
+(c) a body corporate, association or organisation—
+    (i) not incorporated or registered in India; or
+    (ii) incorporated or registered in India under any law for the time being in force which has any non-Indian participation in its share capital or management.
+
+Section 6 — Application for intellectual property rights
+(1) No person shall apply for any intellectual property right, by whatever name called, in or outside India for any invention based on any research or information on a biological resource obtained from India without obtaining the previous approval of the National Biodiversity Authority before making such application.
+
+Section 7 — Prior intimation to State Biodiversity Board for obtaining biological resource for certain purposes
+No Indian citizen or body corporate, association or organisation which is registered in India shall obtain any biological resource for commercial utilisation, or bio-survey and bio-utilisation without giving prior intimation to the concerned State Biodiversity Board.
+
+2023 Amendment Key Changes:
+- Codified users of biological resources who are exempted from ABS provisions
+- AYUSH practitioners and registered Vaidyas exempted from NBA approval for certain uses
+- Simplified benefit-sharing mechanism through a flat 'access fee' model
+- Traditional knowledge holders' rights strengthened through Biodiversity Management Committees

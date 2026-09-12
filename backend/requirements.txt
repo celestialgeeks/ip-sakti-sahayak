@@ -1,0 +1,31 @@
+# Web Framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.19
+sse-starlette==2.2.1
+
+# NVIDIA NIM (OpenAI-compatible)
+openai==1.82.0
+
+# Vector Database
+qdrant-client==1.13.3
+
+# Document Processing
+langchain==0.3.25
+langchain-text-splitters==0.3.8
+pymupdf==1.25.5
+python-docx==1.1.2
+
+# Sarvam AI
+httpx==0.28.1
+aiohttp==3.11.18
+
+# Data & Utilities
+pydantic==2.11.3
+pydantic-settings==2.9.1
+python-dotenv==1.1.0
+aiosqlite==0.21.0
+
+# Testing
+pytest==8.4.1
+pytest-asyncio==1.0.0

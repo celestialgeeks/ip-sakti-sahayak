@@ -1,0 +1,30 @@
+DRUGS AND COSMETICS ACT, 1940 — SCHEDULE T
+Good Manufacturing Practices for Ayurvedic, Siddha and Unani Medicines
+
+PART I — AYURVEDIC MEDICINES
+
+1. Classification of ASU Drugs:
+   (a) Classical/Generic Medicines: Formulations described in authoritative texts listed in the First Schedule.
+   (b) Patent/Proprietary Medicines: Formulations not described in authoritative texts, having novel composition or claims.
+
+2. First Schedule Authoritative Texts (Ayurveda):
+   - Charaka Samhita (चरक संहिता)
+   - Sushruta Samhita (सुश्रुत संहिता)
+   - Ashtanga Hridaya (अष्टाङ्ग हृदय)
+   - Ashtanga Sangraha (अष्टाङ्ग संग्रह)
+   - Sharangadhara Samhita (शारंगधर संहिता)
+   - Bhavaprakasha (भावप्रकाश)
+   - Yoga Ratnakara (योगरत्नाकर)
+   - Rasatarangini (रसतरंगिणी)
+   - And 50+ other listed texts
+
+3. Regulatory Pathway:
+   - Classical drugs: No clinical trial required, ASU drug license under Rule 158(b)
+   - Proprietary drugs: Require safety & efficacy data, Rule 158-B
+   - New ASU drugs: Full clinical trial pathway under Rule 158-C
+
+4. Quality Standards:
+   - Must comply with Ayurvedic Pharmacopoeia of India (API)
+   - Ayurvedic Formulary of India (AFI) standards
+   - Heavy metal limits as per WHO guidelines
+   - Microbial contamination testing mandatory

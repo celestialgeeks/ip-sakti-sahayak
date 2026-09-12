@@ -1,0 +1,11 @@
+THE PATENTS ACT, 1970 (As amended by Patents (Amendment) Act, 2005 and Patents (Amendment) Rules, 2024)
+
+SECTION 3 — What are not inventions
+
+The following are not inventions within the meaning of this Act:
+
+(p) an invention which, in effect, is traditional knowledge or which is an aggregation or duplication of known properties of traditionally known component or components.
+
+Explanation: For the purposes of this clause, "traditional knowledge" shall mean knowledge available in any treatise, publication, literature, or oral tradition of India or any other country, including knowledge contained in the Traditional Knowledge Digital Library (TKDL) established under the Department of Ayurveda, Yoga and Naturopathy, Unani, Siddha and Homoeopathy (AYUSH).
+
+Note: Section 3(p) was introduced by the Patents (Amendment) Act, 2005 specifically to prevent the grant of patents on traditional knowledge, including Ayurvedic formulations that are documented in classical texts or TKDL.

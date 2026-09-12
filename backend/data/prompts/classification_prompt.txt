@@ -1,0 +1,20 @@
+Classify the following Ayurvedic formulation into one of these categories:
+
+1. CLASSICAL — Formulation from a First Schedule authoritative text (Charaka Samhita, Sushruta Samhita, etc.)
+2. PROPRIETARY — Proprietary combination not in authoritative texts
+3. NEW_DRUG — Novel claims requiring clinical proof of safety and efficacy
+4. PHYTOPHARMACEUTICAL — Standardized plant extract with new drug application
+5. AYURVEDA_AAHAR — Food/supplement/nutraceutical
+6. COSMETIC — Cosmetic application
+
+Formulation: {formulation_name}
+Description: {description}
+Ingredients: {ingredients}
+Intended Use: {intended_use}
+
+Provide:
+- Category
+- Applicable IP protections
+- Regulatory pathway
+- ABS obligations
+- TKDL implications
