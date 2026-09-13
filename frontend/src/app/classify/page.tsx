@@ -22,7 +22,10 @@ export default function ClassifyPage() {
     try {
       const response = await classifyFormulation({
         formulation_name: formulation,
-        ingredients: ingredients.split(",").map(i => i.trim()).filter(Boolean)
+        description: "Automated classification request",
+        ingredients: ingredients.split(",").map(i => i.trim()).filter(Boolean),
+        intended_use: "general wellness",
+        is_in_authoritative_text: false
       });
       setResult(response);
     } catch (err) {
@@ -90,34 +93,43 @@ export default function ClassifyPage() {
               
               <div className="flex items-center gap-3 mb-6">
                 <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-                  result.classification === "Classical Ayurvedic" ? "bg-green-100 text-green-800" :
-                  result.classification === "Proprietary Ayurvedic" ? "bg-blue-100 text-blue-800" :
-                  "bg-red-100 text-red-800"
+                  result.category === "Classical Ayurvedic" ? "bg-green-100 text-green-800" :
+                  result.category === "Proprietary Ayurvedic" ? "bg-blue-100 text-blue-800" :
+                  "bg-amber-100 text-amber-800"
                 }`}>
-                  {result.classification}
-                </span>
-                <span className="label-sm" style={{ color: "var(--ink-muted)" }}>
-                  Confidence: {(result.confidence * 100).toFixed(1)}%
+                  {result.category}
                 </span>
               </div>
 
               <div className="mb-4">
-                <h3 className="label-md mb-1" style={{ color: "var(--ink-muted)" }}>Reasoning</h3>
-                <p className="body-md" style={{ color: "var(--ink-primary)" }}>{result.reasoning}</p>
+                <h3 className="label-md mb-1" style={{ color: "var(--ink-muted)" }}>Description</h3>
+                <p className="body-md" style={{ color: "var(--ink-primary)" }}>{result.description}</p>
               </div>
 
-              {result.flags.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="label-md mb-2" style={{ color: "var(--ink-muted)" }}>Flags & Warnings</h3>
+                  <h3 className="label-md mb-1" style={{ color: "var(--ink-muted)" }}>Regulatory Pathway</h3>
+                  <p className="body-sm text-slate-700">{result.regulatory_pathway}</p>
+                </div>
+                <div>
+                  <h3 className="label-md mb-1" style={{ color: "var(--ink-muted)" }}>TKDL Implications</h3>
+                  <p className="body-sm text-slate-700">{result.tkdl_implications}</p>
+                </div>
+                <div>
+                  <h3 className="label-md mb-1" style={{ color: "var(--ink-muted)" }}>ABS Obligations</h3>
+                  <p className="body-sm text-slate-700">{result.abs_obligations}</p>
+                </div>
+                <div>
+                  <h3 className="label-md mb-1" style={{ color: "var(--ink-muted)" }}>IP Protections</h3>
                   <ul className="list-disc pl-5 flex flex-col gap-1">
-                    {result.flags.map((flag, idx) => (
-                      <li key={idx} className="body-sm text-red-600 font-medium">
-                        {flag}
+                    {result.ip_protections.map((ip, idx) => (
+                      <li key={idx} className="body-sm text-slate-700 font-medium">
+                        {ip}
                       </li>
                     ))}
                   </ul>
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>

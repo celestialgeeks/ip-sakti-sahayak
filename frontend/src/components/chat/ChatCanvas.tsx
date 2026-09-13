@@ -25,11 +25,7 @@ export function ChatCanvas({ messages, isLoading = false }: ChatCanvasProps) {
       {messages.map((msg, i) => (
         <MessageBubble
           key={i}
-          role={msg.role}
-          content={msg.content}
-          citations={msg.citations}
-          confidence={msg.confidence}
-          confidenceLevel={msg.confidenceLevel}
+          message={msg}
         />
       ))}
 
