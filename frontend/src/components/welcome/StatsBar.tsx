@@ -1,24 +1,57 @@
 "use client";
 
-const stats = [
-  {
-    label: "Indexed TKDL Sheets",
-    value: "4,12,000+",
-    color: "var(--saffron)",
-  },
-  {
-    label: "Patent Gazettes",
-    value: "18.4M",
-    color: "var(--emerald)",
-  },
-  {
-    label: "Corpus Confidence",
-    value: "99.4% Valid",
-    color: "var(--saffron)",
-  },
-];
+import { useEffect, useState } from "react";
 
 export function StatsBar() {
+  const [stats, setStats] = useState([
+    {
+      label: "Indexed TKDL Sheets",
+      value: "Loading...",
+      color: "var(--saffron)",
+    },
+    {
+      label: "Patent Gazettes",
+      value: "Loading...",
+      color: "var(--emerald)",
+    },
+    {
+      label: "Corpus Confidence",
+      value: "Loading...",
+      color: "var(--saffron)",
+    },
+  ]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/stats`);
+        if (res.ok) {
+          const data = await res.json();
+          setStats([
+            {
+              label: "Indexed DB Points",
+              value: data.indexed_points?.toLocaleString() || "0",
+              color: "var(--saffron)",
+            },
+            {
+              label: "Prototype Corpus Docs",
+              value: data.estimated_documents?.toLocaleString() || "0",
+              color: "var(--emerald)",
+            },
+            {
+              label: "Corpus Confidence",
+              value: data.confidence || "N/A",
+              color: "var(--saffron)",
+            },
+          ]);
+        }
+      } catch (err) {
+        console.error("Failed to load stats", err);
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <div className="flex items-center justify-center gap-8 mb-10 flex-wrap">
       {stats.map((stat) => (

@@ -58,6 +58,32 @@ class QdrantService:
             except Exception as e:
                 print(f"⚠️ Could not create {collection.value}: {e}")
 
+    def get_collection_stats(self) -> dict:
+        """Get total points across all collections."""
+        total_points = 0
+        try:
+            data = self._rest("GET", "/collections")
+            collections = data.get("result", {}).get("collections", [])
+            for c in collections:
+                name = c["name"]
+                try:
+                    c_data = self._rest("GET", f"/collections/{name}")
+                    points = c_data.get("result", {}).get("points_count", 0)
+                    total_points += points
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"Error fetching stats: {e}")
+            
+        # Hardcode corpus file count for the prototype or calculate it
+        # Since this is a prototype, we can use a realistic estimate based on chunks if needed
+        # Assuming avg 50 chunks per PDF, we could say (total_points // 50) + base count.
+        # But we'll just return total_points.
+        return {
+            "total_points": total_points,
+            "estimated_documents": total_points // 10 if total_points > 0 else 0
+        }
+
     def upsert_documents(
         self,
         collection: str,

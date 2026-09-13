@@ -64,5 +64,6 @@ def build_rag_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
         f"1. Answer based strictly on the reference documents above.\n"
         f"2. Cite sources inline using [Source Name, Section].\n"
         f"3. If the documents don't contain enough information, say so clearly.\n"
-        f"4. End with a 'Sources' section listing all cited references."
+        f"4. End with a 'Sources' section listing all cited references.\n"
+        f"5. Output ONLY the final answer. Do NOT include any thinking process, internal monologue, or 'Here's a thinking process:'."
     )

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health
+from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats
 
 
 @asynccontextmanager
@@ -49,6 +49,7 @@ app.add_middleware(
 
 # --- Routes ---
 app.include_router(health.router, prefix="/api", tags=["Health"])
+app.include_router(stats.router, prefix="/api", tags=["Stats"])
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(classify.router, prefix="/api", tags=["Classification"])
 app.include_router(abs_check.router, prefix="/api", tags=["ABS Compliance"])

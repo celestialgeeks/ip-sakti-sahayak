@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const navItems = [
   {
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
       </svg>
     ),
@@ -16,35 +15,44 @@ const navItems = [
   },
   {
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
       </svg>
     ),
-    label: "TKDL",
-    href: "#",
+    label: "TKDL Registry",
+    href: "/tkdl",
   },
   {
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
         <line x1="8" y1="21" x2="16" y2="21" />
         <line x1="12" y1="17" x2="12" y2="21" />
       </svg>
     ),
-    label: "Patents",
-    href: "#",
+    label: "Patent Gazette",
+    href: "/patents",
   },
   {
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 12 2" />
+      </svg>
+    ),
+    label: "Classify",
+    href: "/classify",
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" y1="20" x2="18" y2="10" />
         <line x1="12" y1="20" x2="12" y2="4" />
         <line x1="6" y1="20" x2="6" y2="14" />
       </svg>
     ),
     label: "Analytics",
-    href: "#",
+    href: "/analytics",
   },
 ];
 
@@ -53,45 +61,171 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-[56px] bottom-0 flex flex-col items-center py-4 border-r z-40 hidden md:flex"
+      className="fixed left-0 top-[56px] bottom-0 flex flex-col justify-between z-40 hidden md:flex border-r"
       style={{
         width: "var(--sidebar-width)",
-        background: "var(--surface)",
-        borderColor: "var(--border-hairline)",
+        background: "#0f172a", // slate-900 equivalent
+        color: "#cbd5e1", // slate-300 equivalent
+        borderColor: "#1e293b", // slate-800 equivalent
+        fontSize: "13px",
       }}
     >
-      {/* Nav Icons */}
-      <nav className="flex flex-col items-center gap-1 flex-1">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors no-underline"
-              style={{
-                color: isActive ? "var(--saffron)" : "var(--ink-muted)",
-                background: isActive ? "var(--saffron-light)" : "transparent",
-              }}
-              title={item.label}
-            >
-              {item.icon}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="flex flex-col flex-1 p-3 overflow-y-auto overflow-x-hidden">
+        {/* Top Action Item: New Session */}
+        <Link
+          href="/"
+          className="flex items-center justify-between w-full px-2.5 py-2 rounded-lg transition-colors group mb-1 no-underline"
+          style={{ color: "#e2e8f0" }}
+        >
+          <div className="flex items-center gap-2.5 font-medium hover:text-white transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-white">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <line x1="12" y1="7" x2="12" y2="13"></line>
+              <line x1="9" y1="10" x2="15" y2="10"></line>
+            </svg>
+            <span>New session</span>
+          </div>
+          <div className="flex items-center gap-0.5 text-[10px] text-slate-400 font-mono">
+            <span className="px-1 py-0.5 rounded border" style={{ borderColor: "#334155", background: "rgba(30, 41, 59, 0.8)" }}>⌘</span>
+            <span className="px-1 py-0.5 rounded border" style={{ borderColor: "#334155", background: "rgba(30, 41, 59, 0.8)" }}>N</span>
+          </div>
+        </Link>
 
-      {/* Bottom: Settings */}
-      <button
-        className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-        style={{ color: "var(--ink-muted)" }}
-        title="Settings"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
-        </svg>
-      </button>
+        {/* Tool Links */}
+        <nav className="flex flex-col gap-0.5 border-b pb-3 mb-3" style={{ borderColor: "rgba(30, 41, 59, 0.8)" }}>
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-colors no-underline"
+                style={{
+                  color: isActive ? "#ffffff" : "#cbd5e1",
+                  background: isActive ? "rgba(30, 41, 59, 0.7)" : "transparent",
+                }}
+                title={item.label}
+              >
+                <div style={{ color: isActive ? "#ffffff" : "#94a3b8" }}>{item.icon}</div>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Search Sessions Input */}
+        <div className="relative mb-3 px-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-[7px] pointer-events-none" style={{ color: "#64748b" }}>
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search sessions..."
+            className="w-full rounded-lg pl-8 pr-2.5 py-1.5 text-[12px] focus:outline-none focus:border-slate-500"
+            style={{
+              background: "rgba(30, 41, 59, 0.6)",
+              borderColor: "rgba(51, 65, 85, 0.6)",
+              color: "#e2e8f0",
+              borderWidth: "1px",
+            }}
+          />
+        </div>
+
+        {/* PINNED Section */}
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold tracking-wider uppercase" style={{ color: "#94a3b8" }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Pinned</span>
+          </div>
+        </div>
+
+        {/* SESSIONS Section */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-semibold tracking-wider uppercase" style={{ color: "#94a3b8" }}>
+            <div className="flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              <span>Sessions</span>
+            </div>
+          </div>
+
+          {/* LAST WEEK Header */}
+          <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+            Last Week
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                <span className="truncate">Haridra novelty check</span>
+              </div>
+              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>3d</span>
+            </div>
+            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                <span className="truncate">Ashwagandha extracts</span>
+              </div>
+              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>5d</span>
+            </div>
+          </div>
+
+          {/* EARLIER THIS MONTH Header */}
+          <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+            Earlier this month
+          </div>
+          <div className="flex flex-col gap-0.5 mb-2">
+            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                <span className="truncate">Bhavaprakasha AK/409 citation</span>
+              </div>
+              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>12d</span>
+            </div>
+            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                <span className="truncate">Charaka Samhita Chikitsa Ch. 4</span>
+              </div>
+              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>18d</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom System Settings Footer */}
+      <div className="p-3 border-t flex items-center justify-between" style={{ borderColor: "rgba(30, 41, 59, 0.8)", background: "rgba(15, 23, 42, 0.9)" }}>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full text-white flex items-center justify-center text-[11px] font-bold" style={{ background: "#0b3c5d" }}>
+            GOI
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[12px] font-medium leading-none" style={{ color: "#e2e8f0" }}>Ayush Cell</span>
+            <span className="text-[10px] leading-tight mt-0.5" style={{ color: "#94a3b8" }}>IP-SAKTI 2.0</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="p-1.5 rounded-lg transition-colors hover:bg-[rgba(30,41,59,1)] hover:text-white"
+          style={{ color: "#94a3b8" }}
+          title="Portal Preferences"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
     </aside>
   );
 }

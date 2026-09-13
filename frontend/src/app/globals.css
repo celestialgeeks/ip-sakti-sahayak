@@ -42,7 +42,7 @@
   --gradient-accent: linear-gradient(90deg, rgba(192, 57, 43, 0.85) 0%, rgba(26, 127, 78, 0.85) 100%);
 
   /* ── Layout ── */
-  --sidebar-width: 64px;
+  --sidebar-width: 256px;
   --context-rail-width: 320px;
   --content-max-width: 840px;
   --content-min-width: 680px;

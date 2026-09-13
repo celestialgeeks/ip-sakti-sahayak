@@ -47,18 +47,6 @@ export function Composer({
             borderColor: "var(--border-hairline)",
           }}
         >
-          {/* Attach Button */}
-          <button
-            type="button"
-            className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center"
-            style={{ color: "var(--ink-muted)" }}
-            title="Attach document"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-            </svg>
-          </button>
-
           {/* Text Input */}
           <input
             type="text"

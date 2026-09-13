@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Message, Jurisdiction, ChatResponse } from "@/lib/types";
-import { sendChatMessage } from "@/lib/api";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /**
  * Hook for managing chat state and API communication.
@@ -10,43 +11,133 @@ import { sendChatMessage } from "@/lib/api";
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWaking, setIsWaking] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>();
+  
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("chat_messages");
+    const savedSession = localStorage.getItem("chat_session");
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved));
+      } catch (e) {}
+    }
+    if (savedSession) {
+      setSessionId(savedSession);
+    }
+  }, []);
+
+  // Save to localStorage when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem("chat_messages", JSON.stringify(messages));
+    }
+    if (sessionId) {
+      localStorage.setItem("chat_session", sessionId);
+    }
+  }, [messages, sessionId]);
 
   const send = useCallback(
     async (query: string, jurisdiction: Jurisdiction = "india") => {
-      // Add user message
       const userMessage: Message = { role: "user", content: query };
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
+      setIsWaking(false);
+
+      // Add a temporary empty assistant message to stream into
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      const timeoutId = setTimeout(() => {
+        setIsWaking(true);
+      }, 25000);
 
       try {
-        const response: ChatResponse = await sendChatMessage({
-          query,
-          jurisdiction,
-          language: "en",
-          session_id: sessionId,
+        const res = await fetch(`${API_URL}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query,
+            jurisdiction,
+            language: localStorage.getItem("app_language") || "en",
+            session_id: sessionId,
+            stream: true,
+          }),
         });
 
-        // Add assistant message
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: response.answer,
-          citations: response.citations,
-          confidence: response.confidence,
-          confidenceLevel: response.confidence_level,
-        };
+        clearTimeout(timeoutId);
+        setIsWaking(false);
 
-        setMessages((prev) => [...prev, assistantMessage]);
-        setSessionId(response.session_id);
+        if (!res.ok) {
+          throw new Error(`Chat API error: ${res.status}`);
+        }
+
+        if (!res.body) throw new Error("No response body");
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        let currentContent = "";
+
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+          if (value) {
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n\n");
+            
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6);
+                if (data === "[DONE]") {
+                  break;
+                }
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.chunk) {
+                    currentContent += parsed.chunk;
+                    // Update the last message in state
+                    setMessages((prev) => {
+                      const newMsgs = [...prev];
+                      newMsgs[newMsgs.length - 1] = {
+                        ...newMsgs[newMsgs.length - 1],
+                        content: currentContent,
+                      };
+                      return newMsgs;
+                    });
+                  } else if (parsed.metadata) {
+                    // Update final metadata (citations, confidence)
+                    setSessionId(parsed.metadata.session_id);
+                    setMessages((prev) => {
+                      const newMsgs = [...prev];
+                      newMsgs[newMsgs.length - 1] = {
+                        ...newMsgs[newMsgs.length - 1],
+                        citations: parsed.metadata.citations,
+                        confidence: parsed.metadata.confidence,
+                        confidenceLevel: parsed.metadata.confidence_level,
+                      };
+                      return newMsgs;
+                    });
+                  }
+                } catch (e) {
+                  // Incomplete chunk, ignore
+                }
+              }
+            }
+          }
+        }
       } catch (error) {
-        // Add error message
-        const errorMessage: Message = {
-          role: "assistant",
-          content:
-            "I apologize, but I'm unable to process your query at the moment. Please ensure the backend service is running and try again.",
-          confidenceLevel: "low",
-        };
-        setMessages((prev) => [...prev, errorMessage]);
+        clearTimeout(timeoutId);
+        setIsWaking(false);
+        setMessages((prev) => {
+          const newMsgs = [...prev];
+          newMsgs[newMsgs.length - 1] = {
+            role: "assistant",
+            content: "I apologize, but I'm unable to process your query at the moment. Please ensure the backend service is running and try again.",
+            confidenceLevel: "low",
+          };
+          return newMsgs;
+        });
       } finally {
         setIsLoading(false);
       }
@@ -57,7 +148,9 @@ export function useChat() {
   const clear = useCallback(() => {
     setMessages([]);
     setSessionId(undefined);
+    localStorage.removeItem("chat_messages");
+    localStorage.removeItem("chat_session");
   }, []);
 
-  return { messages, isLoading, send, clear, sessionId };
+  return { messages, isLoading, isWaking, send, clear, sessionId };
 }
