@@ -1,38 +1,37 @@
 """
-Gemini AI Service — LLM inference and embedding generation via Google Gemini API.
-
-File kept as nvidia_nim.py to preserve existing import paths.
-Exports: nim_service (backward-compatible singleton).
+NVIDIA NIM Service — LLM inference and embedding generation.
+Uses OpenAI-compatible API via the `openai` Python SDK.
 """
 
-import logging
 from typing import List, Optional, AsyncGenerator
-
-import google.generativeai as genai
+from openai import AsyncOpenAI
 
 from app.config import settings
 
-_log = logging.getLogger("uvicorn.error")
 
-
-def _configure():
-    """Configure the Gemini SDK once."""
-    if settings.GEMINI_API_KEY:
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-
-
-_configure()
+def _fresh_client() -> AsyncOpenAI:
+    """Fresh client per call — avoids reusing server-closed pooled connections."""
+    return AsyncOpenAI(
+        api_key=settings.NVIDIA_NIM_API_KEY,
+        base_url=settings.NVIDIA_NIM_BASE_URL,
+    )
 
 
 class NvidiaIMService:
-    """
-    LLM + embedding service backed by Google Gemini.
-    Named NvidiaIMService for import compatibility.
-    """
+    """Client for NVIDIA NIM API (LLM + Embeddings)."""
 
     def __init__(self):
-        self.llm_model_name = settings.GEMINI_LLM_MODEL
-        self.embed_model_name = settings.GEMINI_EMBED_MODEL
+        self.client = AsyncOpenAI(
+            api_key=settings.NVIDIA_NIM_API_KEY,
+            base_url=settings.NVIDIA_NIM_BASE_URL,
+        )
+        self.llm_model = settings.NVIDIA_LLM_MODEL
+        self.embed_model = settings.NVIDIA_EMBED_MODEL
+        try:
+            from sentence_transformers import SentenceTransformer
+            self.local_embedder = SentenceTransformer(self.embed_model)
+        except ImportError:
+            self.local_embedder = None
 
     async def generate(
         self,
@@ -42,123 +41,105 @@ class NvidiaIMService:
         stream: bool = False,
     ) -> str | AsyncGenerator[str, None]:
         """
-        Generate a response from Gemini Flash.
-
+        Generate a response from the LLM.
+        
         Args:
             messages: List of chat messages [{"role": "...", "content": "..."}]
-            temperature: Sampling temperature
+            temperature: Sampling temperature (lower = more deterministic)
             max_tokens: Maximum tokens in response
-            stream: Not currently used (Gemini async streaming not needed for Render free tier)
-
+            stream: Whether to stream the response
+        
         Returns:
-            Generated text string.
+            Generated text or async generator of text chunks.
         """
-        import asyncio
-
-        if not settings.GEMINI_API_KEY:
-            _log.error("GEMINI_API_KEY is not set — LLM generation skipped.")
-            return "I cannot answer at the moment: the AI backend is not configured."
-
-        # Convert from OpenAI-style messages to Gemini format
-        system_text = ""
-        gemini_history = []
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            if role == "system":
-                system_text = content
-            elif role == "user":
-                gemini_history.append({"role": "user", "parts": [content]})
-            elif role == "assistant":
-                gemini_history.append({"role": "model", "parts": [content]})
-
-        # If there's a system prompt, prepend it to the first user message
-        if system_text and gemini_history and gemini_history[0]["role"] == "user":
-            gemini_history[0]["parts"][0] = f"{system_text}\n\n{gemini_history[0]['parts'][0]}"
-
-        last_user_msg = ""
-        history_to_send = gemini_history
-        if gemini_history and gemini_history[-1]["role"] == "user":
-            last_user_msg = gemini_history[-1]["parts"][0]
-            history_to_send = gemini_history[:-1]
+        if stream:
+            return self._stream_generate(messages, temperature, max_tokens)
 
         last_err = None
         for attempt in range(3):
             try:
-                model = genai.GenerativeModel(
-                    model_name=self.llm_model_name,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=temperature,
-                        max_output_tokens=max_tokens,
-                    ),
+                response = await _fresh_client().chat.completions.create(
+                    model=self.llm_model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    timeout=120,
                 )
-                chat = model.start_chat(history=history_to_send)
-                # Run sync Gemini call in executor to keep it non-blocking
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(
-                    None, lambda: chat.send_message(last_user_msg)
-                )
-                return response.text or ""
+                msg = response.choices[0].message
+                content = msg.content
+                if not content:
+                    # Reasoning models (e.g. deepseek-v4-flash) put output here
+                    content = getattr(msg, "reasoning_content", None) or (
+                        msg.model_extra or {}
+                    ).get("reasoning_content", "")
+                return content or ""
             except Exception as e:
                 last_err = e
-                _log.error(
-                    "Gemini LLM attempt %d failed: %r", attempt + 1, e
-                )
-                await asyncio.sleep(2 * (attempt + 1))
+                import asyncio as _aio
+                import logging as _logging
 
+                cause = getattr(e, "__cause__", None)
+                _logging.getLogger("uvicorn.error").error(
+                    "NIM chat attempt %d failed: %r | cause: %r | cause-cause: %r",
+                    attempt + 1, e, cause, getattr(cause, "__cause__", None),
+                )
+                await _aio.sleep(2 * (attempt + 1))
         raise last_err
+
+    async def _stream_generate(
+        self, messages: list[dict], temperature: float, max_tokens: int
+    ) -> AsyncGenerator[str, None]:
+        """Stream response tokens."""
+        stream = await _fresh_client().chat.completions.create(
+            model=self.llm_model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True,
+        )
+        async for chunk in stream:
+            if chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
         """
-        Generate embeddings for a list of texts using Gemini text-embedding-004.
+        Generate embeddings via NVIDIA NIM (cloud, no local deps);
+        falls back to local SentenceTransformer for offline dev.
         """
-        import asyncio
-
-        if not settings.GEMINI_API_KEY:
-            _log.warning("GEMINI_API_KEY not set — embeddings skipped.")
-            return []
-        try:
-            loop = asyncio.get_event_loop()
-            results = await loop.run_in_executor(
-                None,
-                lambda: genai.embed_content(
-                    model=self.embed_model_name,
-                    content=texts,
-                    task_type="retrieval_document",
+        if settings.NVIDIA_NIM_API_KEY:
+            try:
+                resp = await _fresh_client().embeddings.create(
+                    model=self.embed_model, input=texts,
                 )
-            )
-            embeddings = results.get("embedding", [])
-            # embed_content with a list returns a list of embeddings
-            if embeddings and isinstance(embeddings[0], float):
-                # single text returned flat — wrap it
-                embeddings = [embeddings]
-            return embeddings
-        except Exception as e:
-            _log.error("Gemini embed failed: %r", e)
-            return []
+                return [row.embedding for row in resp.data]
+            except Exception as e:
+                import logging as _log
+                _log.getLogger("uvicorn.error").error(
+                    "NIM embed failed, falling back to local: %r", e
+                )
+        if self.local_embedder:
+            embeddings = self.local_embedder.encode(texts, show_progress_bar=False)
+            return embeddings.tolist()
+        return []
 
     async def embed_single(self, text: str) -> List[float]:
-        """Generate embedding for a single query text using Gemini."""
-        import asyncio
-
-        if not settings.GEMINI_API_KEY:
-            _log.warning("GEMINI_API_KEY not set — embed_single skipped.")
-            return []
-        try:
-            loop = asyncio.get_event_loop()
-            result = await loop.run_in_executor(
-                None,
-                lambda: genai.embed_content(
-                    model=self.embed_model_name,
-                    content=text,
-                    task_type="retrieval_query",
+        """Generate embedding for a single text (NIM first, local fallback)."""
+        if settings.NVIDIA_NIM_API_KEY:
+            try:
+                resp = await _fresh_client().embeddings.create(
+                    model=self.embed_model, input=[text],
                 )
-            )
-            return result.get("embedding", [])
-        except Exception as e:
-            _log.error("Gemini embed_single failed: %r", e)
-            return []
+                return resp.data[0].embedding
+            except Exception as e:
+                import logging as _log
+                _log.getLogger("uvicorn.error").error(
+                    "NIM embed_single failed, falling back to local: %r", e
+                )
+        if self.local_embedder:
+            embedding = self.local_embedder.encode(text)
+            return embedding.tolist()
+        return []
 
 
-# Singleton — backward-compatible name
+# Singleton instance
 nim_service = NvidiaIMService()

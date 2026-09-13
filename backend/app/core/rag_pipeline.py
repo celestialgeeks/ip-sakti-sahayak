@@ -41,12 +41,12 @@ async def run_rag_pipeline(
     # Step 2: Generate query embedding
     query_embedding = await nim_service.embed_single(query)
 
-    # Guard: if embedding failed (API key missing or model error), skip retrieval
+    # Guard: if embedding failed (no NIM key or model error), skip retrieval
     if not query_embedding:
         import logging as _log
         _log.getLogger("uvicorn.error").warning(
             "Query embedding is empty — Qdrant search skipped. "
-            "Check GEMINI_API_KEY in Render env."
+            "Check NVIDIA_NIM_API_KEY and NVIDIA_EMBED_MODEL in Render env."
         )
 
     # Step 3: Search Qdrant across relevant collections

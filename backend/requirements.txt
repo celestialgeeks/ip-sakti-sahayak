@@ -4,8 +4,8 @@ uvicorn[standard]==0.34.0
 python-multipart==0.0.19
 sse-starlette==2.2.1
 
-# Google Gemini AI (LLM + embeddings, free tier)
-google-generativeai==0.8.5
+# NVIDIA NIM (OpenAI-compatible)
+openai==1.82.0
 
 # Vector Database
 # qdrant-client removed — raw REST via urllib (SDK transport 404s from Render)

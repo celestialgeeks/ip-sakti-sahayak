@@ -17,14 +17,15 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
 
-    # --- Google Gemini ---
-    GEMINI_API_KEY: str = Field(
+    # --- NVIDIA NIM ---
+    NVIDIA_NIM_API_KEY: str = Field(
         default="",
-        validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY"),
+        validation_alias=AliasChoices("NVIDIA_NIM_API_KEY", "NVIDIA_API_KEY"),
     )
-    GEMINI_LLM_MODEL: str = "gemini-1.5-flash"
-    GEMINI_EMBED_MODEL: str = "models/text-embedding-004"
-    GEMINI_EMBED_DIMENSIONS: int = 768
+    NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    NVIDIA_LLM_MODEL: str = "meta/llama-3.1-8b-instruct"
+    NVIDIA_EMBED_MODEL: str = "nvidia/nv-embedqa-e5-v5"
+    NVIDIA_EMBED_DIMENSIONS: int = 1024
 
     # --- Qdrant ---
     QDRANT_URL: str = "http://localhost:6333"
