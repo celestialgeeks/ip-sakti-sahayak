@@ -86,12 +86,6 @@ export function Header() {
 
         {/* Right Header Indicators & Actions */}
         <div className="flex items-center gap-3">
-          {/* Engine Version Pill */}
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md border border-slate-200 bg-slate-50 text-[12px] text-slate-500">
-            <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse"></span>
-            Online
-          </div>
-
           {/* Utility Buttons */}
           <div className="flex items-center gap-1">
             <button 
