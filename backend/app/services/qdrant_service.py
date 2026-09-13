@@ -159,15 +159,19 @@ class QdrantService:
     ) -> List[Dict[str, Any]]:
         """
         Search across all relevant collections based on jurisdiction.
-        
+
         Args:
             query_vector: Query embedding
             jurisdiction: 'india', 'international', or 'both'
             limit: Max results per collection
-        
+
         Returns:
             Merged and sorted results from all collections.
         """
+        # Guard: never send an empty vector to Qdrant — it crashes
+        if not query_vector:
+            return []
+
         collections = []
         if jurisdiction in ("india", "both"):
             collections.extend([

@@ -105,30 +105,36 @@ class NvidiaIMService:
         """
         Generate embeddings via NVIDIA NIM (cloud, no local deps);
         falls back to local SentenceTransformer for offline dev.
-
-        Args:
-            texts: List of text strings to embed.
-
-        Returns:
-            List of embedding vectors (NIM model dim, e.g. 2048).
         """
         if settings.NVIDIA_NIM_API_KEY:
-            resp = await _fresh_client().embeddings.create(
-                model=self.embed_model, input=texts,
-            )
-            return [row.embedding for row in resp.data]
+            try:
+                resp = await _fresh_client().embeddings.create(
+                    model=self.embed_model, input=texts,
+                )
+                return [row.embedding for row in resp.data]
+            except Exception as e:
+                import logging as _log
+                _log.getLogger("uvicorn.error").error(
+                    "NIM embed failed, falling back to local: %r", e
+                )
         if self.local_embedder:
-            embeddings = self.local_embedder.encode(texts)
+            embeddings = self.local_embedder.encode(texts, show_progress_bar=False)
             return embeddings.tolist()
         return []
 
     async def embed_single(self, text: str) -> List[float]:
         """Generate embedding for a single text (NIM first, local fallback)."""
         if settings.NVIDIA_NIM_API_KEY:
-            resp = await _fresh_client().embeddings.create(
-                model=self.embed_model, input=[text],
-            )
-            return resp.data[0].embedding
+            try:
+                resp = await _fresh_client().embeddings.create(
+                    model=self.embed_model, input=[text],
+                )
+                return resp.data[0].embedding
+            except Exception as e:
+                import logging as _log
+                _log.getLogger("uvicorn.error").error(
+                    "NIM embed_single failed, falling back to local: %r", e
+                )
         if self.local_embedder:
             embedding = self.local_embedder.encode(text)
             return embedding.tolist()
