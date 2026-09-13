@@ -46,12 +46,12 @@ async def seed_collection(collection: str) -> int:
     if subdir is None:
         return 0
     d = CORPUS_DIR / subdir
-    if not d.exists() or not settings.NVIDIA_NIM_API_KEY:
+    if not d.exists() or not settings.GEMINI_API_KEY:
         return 0
     try:
         qdrant_service._rest(
             "PUT", f"/collections/{collection}",
-            {"vectors": {"size": settings.NVIDIA_EMBED_DIMENSIONS,
+            {"vectors": {"size": settings.GEMINI_EMBED_DIMENSIONS,
                          "distance": "Cosine"}},
         )
     except Exception:
@@ -104,8 +104,8 @@ async def seed_collection(collection: str) -> int:
 
 async def seed_corpus_if_empty() -> int:
     """Seed corpus dirs whose collection is missing/empty. Returns chunk count."""
-    if not settings.NVIDIA_NIM_API_KEY:
-        print("⏭️  Seed skipped: no NVIDIA key (offline dev, Qdrant stays as-is)")
+    if not settings.GEMINI_API_KEY:
+        print("⏭️  Seed skipped: no GEMINI_API_KEY (offline dev, Qdrant stays as-is)")
         return 0
     total = 0
     for subdir, collection in COLLECTION_MAP.items():

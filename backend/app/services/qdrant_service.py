@@ -17,7 +17,7 @@ class QdrantService:
     def __init__(self):
         self.base_url = settings.QDRANT_URL.rstrip("/")
         self.api_key = settings.QDRANT_API_KEY or None
-        self.embed_dim = settings.NVIDIA_EMBED_DIMENSIONS
+        self.embed_dim = settings.GEMINI_EMBED_DIMENSIONS
 
     def _rest(self, method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         data = json.dumps(body).encode() if body is not None else None
