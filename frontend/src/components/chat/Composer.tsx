@@ -46,16 +46,28 @@ export function Composer({
     <div className="w-full max-w-[800px] mx-auto bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200 p-2 relative">
       {/* Input Area */}
       <form onSubmit={handleSubmit} className="flex items-end gap-2">
-        <button 
-          type="button" 
-          className="p-2.5 text-slate-400 hover:text-[#0b3c5d] hover:bg-slate-50 rounded-lg transition-colors" 
-          title="Attach Dossier"
-          disabled={disabled}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path>
-          </svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button 
+            type="button" 
+            className="p-2.5 text-slate-400 hover:text-[#0b3c5d] hover:bg-slate-50 rounded-lg transition-colors" 
+            title="Attach Dossier"
+            disabled={disabled}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path>
+            </svg>
+          </button>
+          <select
+            value={jurisdiction}
+            onChange={(e) => onJurisdictionChange(e.target.value)}
+            disabled={disabled}
+            className="bg-transparent border-none text-[12px] font-semibold text-slate-500 uppercase cursor-pointer hover:text-[#0b3c5d] focus:outline-none"
+            title="Select Jurisdiction"
+          >
+            <option value="india">National (India)</option>
+            <option value="international">International</option>
+          </select>
+        </div>
         
         <textarea 
           ref={textareaRef}

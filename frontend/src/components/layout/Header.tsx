@@ -4,16 +4,58 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export function Header() {
-  const [language, setLanguage] = useState("en");
+  const [fontSize, setFontSize] = useState(100);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("app_language");
-    if (saved) setLanguage(saved);
+    const savedLang = localStorage.getItem("app_language");
+    if (savedLang) setLanguage(savedLang);
+
+    const savedSize = localStorage.getItem("app_font_size");
+    if (savedSize) {
+      const size = parseInt(savedSize, 10);
+      setFontSize(size);
+      document.documentElement.style.fontSize = `${size}%`;
+    }
+
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) setUser(data.user);
+      });
+      
+      supabase.auth.onAuthStateChange((event, session) => {
+        setUser(session?.user || null);
+      });
+    });
   }, []);
+
+  const handleSignOut = async () => {
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const handleLanguageChange = (val: string) => {
     setLanguage(val);
     localStorage.setItem("app_language", val);
+  };
+
+  const handleFontSizeChange = (increment: number) => {
+    let newSize = fontSize + increment;
+    if (newSize < 80) newSize = 80;
+    if (newSize > 150) newSize = 150;
+    
+    setFontSize(newSize);
+    localStorage.setItem("app_font_size", newSize.toString());
+    document.documentElement.style.fontSize = `${newSize}%`;
+  };
+
+  const resetFontSize = () => {
+    setFontSize(100);
+    localStorage.setItem("app_font_size", "100");
+    document.documentElement.style.fontSize = "100%";
   };
 
   const handleDownload = () => {
@@ -40,9 +82,9 @@ export function Header() {
           {/* Accessibility Font Controls */}
           <div className="flex items-center gap-1.5 border-r border-slate-700 pr-3">
             <span className="text-slate-400 mr-1 text-[10px] uppercase">Font Size:</span>
-            <button className="px-1 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors" title="Decrease Font">A-</button>
-            <button className="px-1 py-0.5 rounded bg-slate-800 text-white font-bold" title="Standard Font">A</button>
-            <button className="px-1 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors" title="Increase Font">A+</button>
+            <button onClick={() => handleFontSizeChange(-10)} className="px-1 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors" title="Decrease Font">A-</button>
+            <button onClick={resetFontSize} className={`px-1 py-0.5 rounded ${fontSize === 100 ? 'bg-slate-800 text-white font-bold' : 'hover:bg-slate-800 hover:text-white transition-colors'}`} title="Standard Font">A</button>
+            <button onClick={() => handleFontSizeChange(10)} className="px-1 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors" title="Increase Font">A+</button>
           </div>
           
           {/* Language Switcher */}
@@ -107,10 +149,22 @@ export function Header() {
             <div className="h-6 w-px bg-slate-200 mx-1"></div>
             
             {/* Profile Badge */}
-            <div className="flex items-center gap-2 pl-1">
-              <div className="w-8 h-8 rounded-full bg-[#0b3c5d] flex items-center justify-center text-white shadow-sm font-semibold text-[13px]">
-                GOI
-              </div>
+            <div className="flex items-center gap-2 pl-1 relative group">
+              {user ? (
+                <>
+                  <div className="w-8 h-8 rounded-full bg-[#0b3c5d] flex items-center justify-center text-white shadow-sm font-semibold text-[13px] uppercase cursor-pointer">
+                    {user.email ? user.email.charAt(0) : "U"}
+                  </div>
+                  <div className="absolute top-full right-0 mt-2 hidden group-hover:block bg-white border border-slate-200 shadow-lg rounded-md py-1 z-50 min-w-[120px]">
+                    <div className="px-3 py-2 text-xs text-slate-500 border-b border-slate-100 truncate">{user.email}</div>
+                    <button onClick={handleSignOut} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-slate-50">Sign Out</button>
+                  </div>
+                </>
+              ) : (
+                <Link href="/login" className="text-sm font-semibold text-[#0b3c5d] hover:underline px-2 py-1">
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         </div>

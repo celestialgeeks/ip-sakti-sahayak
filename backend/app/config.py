@@ -35,8 +35,11 @@ class Settings(BaseSettings):
     SARVAM_API_KEY: str = ""
     SARVAM_BASE_URL: str = "https://api.sarvam.ai"
 
-    # --- SQLite ---
-    SQLITE_DB_PATH: str = "./data/ipsakti.db"
+    # --- Supabase ---
+    NEXT_PUBLIC_SUPABASE_URL: str = ""
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: str = ""
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
+    JWT_SECRET: str = "" # (Optional) If validating JWTs manually without the Supabase client
 
     # --- RAG Settings ---
     RAG_TOP_K: int = 10

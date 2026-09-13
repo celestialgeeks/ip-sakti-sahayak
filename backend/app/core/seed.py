@@ -12,6 +12,7 @@ ids make re-seeds idempotent.
 import json
 import uuid
 from pathlib import Path
+from qdrant_client.http import models as qmodels
 
 from app.config import settings
 from app.services.nvidia_nim import nim_service
@@ -32,10 +33,10 @@ COLLECTION_MAP = {
 COLLECTION_TO_SUBDIR = {v: k for k, v in COLLECTION_MAP.items()}
 
 
-def _points_count(collection: str) -> int:
+async def _points_count(collection: str) -> int:
     try:
-        data = qdrant_service._rest("GET", f"/collections/{collection}")
-        return int(data.get("result", {}).get("points_count", 0))
+        coll_info = await qdrant_service.client.get_collection(collection)
+        return coll_info.points_count
     except Exception:
         return -1  # missing or unreachable
 
@@ -49,19 +50,22 @@ async def seed_collection(collection: str) -> int:
     if not d.exists() or not settings.NVIDIA_NIM_API_KEY:
         return 0
     try:
-        qdrant_service._rest(
-            "PUT", f"/collections/{collection}",
-            {"vectors": {"size": settings.NVIDIA_EMBED_DIMENSIONS,
-                         "distance": "Cosine"}},
+        await qdrant_service.client.create_collection(
+            collection_name=collection,
+            vectors_config=qmodels.VectorParams(
+                size=settings.NVIDIA_EMBED_DIMENSIONS,
+                distance=qmodels.Distance.COSINE
+            )
         )
     except Exception:
         pass  # already exists
     # Query API requires keyword indexes for filtered fields
     for field in ("jurisdiction", "category"):
         try:
-            qdrant_service._rest(
-                "PUT", f"/collections/{collection}/index",
-                {"field_name": field, "field_schema": "keyword"},
+            await qdrant_service.client.create_payload_index(
+                collection_name=collection,
+                field_name=field,
+                field_schema=qmodels.PayloadSchemaType.KEYWORD
             )
         except Exception:
             pass  # already indexed
@@ -87,15 +91,16 @@ async def seed_collection(collection: str) -> int:
             continue
         vectors = await nim_service.embed([c["text"] for c in chunks])
         points = [
-            {
-                "id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"{fp.name}:{i}")),
-                "vector": vec,
-                "payload": {k: v for k, v in c.items() if k != "id"},
-            }
+            qmodels.PointStruct(
+                id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{fp.name}:{i}")),
+                vector=vec,
+                payload={k: v for k, v in c.items() if k != "id"}
+            )
             for i, (c, vec) in enumerate(zip(chunks, vectors))
         ]
-        qdrant_service._rest(
-            "PUT", f"/collections/{collection}/points", {"points": points}
+        await qdrant_service.client.upsert(
+            collection_name=collection,
+            points=points
         )
         total += len(chunks)
         print(f"  🌱 {fp.name}: {len(chunks)} chunks → {collection}", flush=True)
@@ -111,7 +116,7 @@ async def seed_corpus_if_empty() -> int:
     for subdir, collection in COLLECTION_MAP.items():
         if not (CORPUS_DIR / subdir).exists():
             continue
-        if _points_count(collection) > 0:
+        if await _points_count(collection) > 0:
             continue
         total += await seed_collection(collection)
     if total:

@@ -53,9 +53,21 @@ export function useChat() {
       }, 25000);
 
       try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        const headers: Record<string, string> = { 
+          "Content-Type": "application/json" 
+        };
+        
+        if (session?.access_token) {
+          headers["Authorization"] = `Bearer ${session.access_token}`;
+        }
+
         const res = await fetch(`${API_URL}/api/chat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({
             query,
             jurisdiction,

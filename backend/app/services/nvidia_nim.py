@@ -30,7 +30,8 @@ class NvidiaIMService:
         try:
             from sentence_transformers import SentenceTransformer
             self.local_embedder = SentenceTransformer(self.embed_model)
-        except ImportError:
+        except Exception as e:
+            print(f"⚠️ Local embedder disabled: {e}")
             self.local_embedder = None
 
     async def generate(
