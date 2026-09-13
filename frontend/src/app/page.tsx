@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Composer } from "@/components/chat/Composer";
 
 export default function HomePage() {
   const router = useRouter();
   const [jurisdiction, setJurisdiction] = useState("india");
+
+  // Wake up the backend service on load (useful for Render free tier)
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    fetch(`${apiUrl}/api/health`).catch(() => {
+      // Silently fail if there's an error, this is just a wake-up ping
+    });
+  }, []);
 
   const handleSend = (message: string) => {
     // Navigate to chat page with the query
