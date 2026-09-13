@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { playfairDisplay, inter } from "@/styles/fonts";
+import { inter, notoSans, publicSans } from "@/styles/fonts";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfairDisplay.variable} ${inter.variable}`}>
+    <html lang="en" className={`${inter.variable} ${notoSans.variable} ${publicSans.variable}`}>
       <body className="min-h-screen">
         {/* Gradient accent line at top */}
         <div className="header-accent" />
@@ -36,13 +36,13 @@ export default function RootLayout({
         <Header />
 
         {/* Main Layout: Sidebar + Content */}
-        <div className="flex pt-[56px]">
+        <div className="flex pt-[95px]">
           {/* Left Sidebar */}
           <Sidebar />
 
           {/* Main Content Area */}
           <main
-            className="flex-1 min-h-[calc(100vh-56px)]"
+            className="flex-1 min-h-[calc(100vh-95px)] flex flex-col"
             style={{ marginLeft: "var(--sidebar-width)" }}
           >
             {children}

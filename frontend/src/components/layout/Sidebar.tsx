@@ -61,7 +61,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-[56px] bottom-0 flex flex-col justify-between z-40 hidden md:flex border-r"
+      className="fixed left-0 top-[95px] bottom-0 flex flex-col justify-between z-40 hidden md:flex border-r"
       style={{
         width: "var(--sidebar-width)",
         background: "#0f172a", // slate-900 equivalent

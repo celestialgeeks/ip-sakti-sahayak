@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export function Header() {
-  const [showSettings, setShowSettings] = useState(false);
   const [language, setLanguage] = useState("en");
 
   useEffect(() => {
@@ -12,8 +11,7 @@ export function Header() {
     if (saved) setLanguage(saved);
   }, []);
 
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
+  const handleLanguageChange = (val: string) => {
     setLanguage(val);
     localStorage.setItem("app_language", val);
   };
@@ -23,84 +21,104 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-[2px] left-0 right-0 z-50 h-[54px] flex items-center justify-between px-4 border-b"
-      style={{ background: "var(--surface)", borderColor: "var(--border-hairline)" }}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-portal-border shadow-sm">
+      {/* National Tricolor Strip */}
+      <div className="h-[3px] w-full tricolor-stripe"></div>
       
-      {/* Left: Logo + Brand */}
-      <div className="flex items-center gap-3">
-        <Link href="/" className="flex items-center gap-2.5 no-underline">
-          {/* Emblem */}
-          <div className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "var(--saffron-light)", border: "1.5px solid var(--saffron)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                fill="var(--saffron)" />
-            </svg>
-          </div>
-          <span className="label-lg" style={{ color: "var(--ink-primary)" }}>
-            IP-SAKTI Sahayak
+      {/* Accessibility & Official Apex Bar */}
+      <div className="bg-slate-900 text-slate-300 text-[11px] px-4 sm:px-6 py-1 flex items-center justify-between font-label border-b border-slate-800">
+        <div className="flex items-center gap-4">
+          <span className="font-semibold text-white tracking-wider flex items-center gap-1.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#FF9933]"></span>
+            भारत सरकार | GOVERNMENT OF INDIA
           </span>
-        </Link>
-
-        {/* Ministry Badge */}
-        <span className="badge-emerald hidden sm:inline-block">
-          Ministry of Ayush
-        </span>
+          <span className="hidden md:inline-block text-slate-500">•</span>
+          <span className="hidden md:inline text-slate-400">आयुष मंत्रालय | Ministry of Ayush</span>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Accessibility Font Controls */}
+          <div className="flex items-center gap-1.5 border-r border-slate-700 pr-3">
+            <span className="text-slate-400 mr-1 text-[10px] uppercase">Font Size:</span>
+            <button className="px-1 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors" title="Decrease Font">A-</button>
+            <button className="px-1 py-0.5 rounded bg-slate-800 text-white font-bold" title="Standard Font">A</button>
+            <button className="px-1 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors" title="Increase Font">A+</button>
+          </div>
+          
+          {/* Language Switcher */}
+          <div className="flex items-center gap-1 font-semibold text-slate-200">
+            <span 
+              className={`hover:underline cursor-pointer ${language === 'en' ? 'text-white' : 'text-slate-300 font-normal'}`}
+              onClick={() => handleLanguageChange('en')}
+            >
+              English
+            </span>
+            <span className="text-slate-600">|</span>
+            <span 
+              className={`hover:underline cursor-pointer ${language === 'hi' ? 'text-white' : 'text-slate-300 font-normal'}`}
+              onClick={() => handleLanguageChange('hi')}
+            >
+              हिन्दी
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Center: Engine Version */}
-      <div className="hidden md:flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full" style={{ background: "var(--emerald)" }} />
-        <span className="body-sm" style={{ color: "var(--ink-muted)" }}>
-          Ayush Knowledge Engine v2.1
-        </span>
-      </div>
+      {/* Primary Nav Header */}
+      <div className="h-16 px-4 sm:px-6 flex items-center justify-between">
+        {/* Ayush & Lion Emblem Title */}
+        <div className="flex items-center gap-3.5">
+          <Link href="/" className="flex items-center gap-3 no-underline">
+            <img 
+              alt="State Emblem of India" 
+              className="h-11 w-auto object-contain" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRRLbJAeuvaAbipe1qusQWrdyjYbkPpSRTQjTFXKDFGTK2VASQpi2mYI-njar5O2de332KW2YXGlfYE--ZP_o2nmp9nWZwxH09PW7GOZ-bZRsXfshvXvCXQuSyZpF8qpxgrxh4hG644v4ntLctywctQRnC2MULsjROmIEo-dPIhwt-ry0sWWDg-fEG1UMencs_sIB5GrlPRkv-6qy8wlB9kzvmUJ5SxPyK5PqOtaLeSJh2DJOcOfaglH6vt16C31DPQQ" 
+            />
+            <div className="flex flex-col justify-center">
+              <div className="text-[13px] font-semibold tracking-tight text-slate-700 leading-tight font-heading">भारत सरकार</div>
+              <div className="text-[17px] font-bold tracking-tight text-[#002855] leading-tight font-heading">आयुष मंत्रालय</div>
+              <div className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
+                Ministry of Ayush <span className="text-slate-300">|</span> IP-SAKTI Sahayak
+              </div>
+            </div>
+          </Link>
+        </div>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-2 relative">
-        <button 
-          onClick={() => setShowSettings(!showSettings)}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-          style={{ background: "var(--canvas)", color: showSettings ? "var(--saffron)" : "var(--ink-muted)" }}
-          title="Settings">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-          </svg>
-        </button>
+        {/* Right Header Indicators & Actions */}
+        <div className="flex items-center gap-3">
+          {/* Engine Version Pill */}
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md border border-slate-200 bg-slate-50 text-[12px] text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse"></span>
+            Online
+          </div>
 
-        {showSettings && (
-          <div className="absolute top-10 right-10 w-48 rounded-md shadow-lg border p-3" 
-               style={{ background: "var(--surface)", borderColor: "var(--border-hairline)" }}>
-            <h4 className="label-sm mb-2" style={{ color: "var(--ink-muted)" }}>Settings</h4>
-            <div className="flex flex-col gap-2">
-              <label className="body-sm flex justify-between items-center" style={{ color: "var(--ink-primary)" }}>
-                Language
-                <select 
-                  className="border rounded bg-transparent p-1"
-                  value={language}
-                  onChange={handleLanguageChange}
-                >
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
-                </select>
-              </label>
+          {/* Utility Buttons */}
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={handleDownload}
+              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#0b3c5d] transition-colors" 
+              title="Export Certified Ayush Dossier"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+              </svg>
+            </button>
+            <button className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#0b3c5d] transition-colors" title="National Patent Cell Directory">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </button>
+            <div className="h-6 w-px bg-slate-200 mx-1"></div>
+            
+            {/* Profile Badge */}
+            <div className="flex items-center gap-2 pl-1">
+              <div className="w-8 h-8 rounded-full bg-[#0b3c5d] flex items-center justify-center text-white shadow-sm font-semibold text-[13px]">
+                GOI
+              </div>
             </div>
           </div>
-        )}
-
-        <button 
-          onClick={handleDownload}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-          style={{ background: "var(--canvas)" }}
-          title="Download Transcript">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-          </svg>
-        </button>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-          style={{ background: "var(--saffron)" }}>
-          U
         </div>
       </div>
     </header>
