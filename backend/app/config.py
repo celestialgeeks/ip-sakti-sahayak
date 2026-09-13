@@ -23,9 +23,9 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("NVIDIA_NIM_API_KEY", "NVIDIA_API_KEY"),
     )
     NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
-    NVIDIA_LLM_MODEL: str = "mistralai/mistral-7b-instruct-v0.3"
-    NVIDIA_EMBED_MODEL: str = "snowflake/arctic-embed-l"
-    NVIDIA_EMBED_DIMENSIONS: int = 1024
+    NVIDIA_LLM_MODEL: str = "nvidia/nemotron-3.5-lightning-30b-a3b"
+    NVIDIA_EMBED_MODEL: str = "nvidia/nemotron-3-embed-1b"
+    NVIDIA_EMBED_DIMENSIONS: int = 2048
 
     # --- Qdrant ---
     QDRANT_URL: str = "http://localhost:6333"
