@@ -107,7 +107,27 @@ export function useChat() {
                     });
                   } else if (parsed.metadata) {
                     // Update final metadata (citations, confidence)
-                    setSessionId(parsed.metadata.session_id);
+                    const newSessionId = parsed.metadata.session_id;
+                    setSessionId(newSessionId);
+                    
+                    // Save to history list for the sidebar
+                    if (newSessionId) {
+                      try {
+                        const historyStr = localStorage.getItem("chat_sessions_history");
+                        const history = historyStr ? JSON.parse(historyStr) : [];
+                        if (!history.find((s: any) => s.id === newSessionId)) {
+                          history.unshift({
+                            id: newSessionId,
+                            title: query,
+                            timestamp: new Date().toISOString()
+                          });
+                          localStorage.setItem("chat_sessions_history", JSON.stringify(history));
+                          // Dispatch custom event to trigger Sidebar re-render
+                          window.dispatchEvent(new Event("sessions_updated"));
+                        }
+                      } catch (e) {}
+                    }
+
                     setMessages((prev) => {
                       const newMsgs = [...prev];
                       newMsgs[newMsgs.length - 1] = {

@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 const navItems = [
   {
@@ -58,6 +59,47 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [sessions, setSessions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadSessions = () => {
+      try {
+        const historyStr = localStorage.getItem("chat_sessions_history");
+        if (historyStr) {
+          setSessions(JSON.parse(historyStr));
+        }
+      } catch (e) {}
+    };
+
+    loadSessions();
+    window.addEventListener("sessions_updated", loadSessions);
+    return () => window.removeEventListener("sessions_updated", loadSessions);
+  }, []);
+
+  const categorizeSessions = () => {
+    const now = new Date();
+    const today: any[] = [];
+    const lastWeek: any[] = [];
+    const earlier: any[] = [];
+
+    sessions.forEach((s) => {
+      const date = new Date(s.timestamp);
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 1) {
+        today.push({ ...s, daysStr: "today" });
+      } else if (diffDays <= 7) {
+        lastWeek.push({ ...s, daysStr: `${diffDays}d` });
+      } else {
+        earlier.push({ ...s, daysStr: `${diffDays}d` });
+      }
+    });
+
+    return { today, lastWeek, earlier };
+  };
+
+  const { today, lastWeek, earlier } = categorizeSessions();
 
   return (
     <aside
@@ -159,47 +201,68 @@ export function Sidebar() {
             </div>
           </div>
 
-          {/* LAST WEEK Header */}
-          <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
-            Last Week
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
-              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
-                <span className="truncate">Haridra novelty check</span>
+          {today.length > 0 && (
+            <>
+              <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                Today
               </div>
-              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>3d</span>
-            </div>
-            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
-              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
-                <span className="truncate">Ashwagandha extracts</span>
+              <div className="flex flex-col gap-0.5">
+                {today.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+                    <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                      <span className="truncate" title={s.title}>{s.title}</span>
+                    </div>
+                    <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>{s.daysStr}</span>
+                  </div>
+                ))}
               </div>
-              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>5d</span>
-            </div>
-          </div>
+            </>
+          )}
 
-          {/* EARLIER THIS MONTH Header */}
-          <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
-            Earlier this month
-          </div>
-          <div className="flex flex-col gap-0.5 mb-2">
-            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
-              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
-                <span className="truncate">Bhavaprakasha AK/409 citation</span>
+          {lastWeek.length > 0 && (
+            <>
+              <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                Last Week
               </div>
-              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>12d</span>
-            </div>
-            <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
-              <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
-                <span className="truncate">Charaka Samhita Chikitsa Ch. 4</span>
+              <div className="flex flex-col gap-0.5">
+                {lastWeek.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+                    <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                      <span className="truncate" title={s.title}>{s.title}</span>
+                    </div>
+                    <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>{s.daysStr}</span>
+                  </div>
+                ))}
               </div>
-              <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>18d</span>
+            </>
+          )}
+
+          {earlier.length > 0 && (
+            <>
+              <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>
+                Earlier this month
+              </div>
+              <div className="flex flex-col gap-0.5 mb-2">
+                {earlier.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-[rgba(30,41,59,0.6)]" style={{ color: "#94a3b8" }}>
+                    <div className="flex items-center gap-2 overflow-hidden hover:text-[#e2e8f0]">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#64748b" }}></span>
+                      <span className="truncate" title={s.title}>{s.title}</span>
+                    </div>
+                    <span className="text-[11px] shrink-0 ml-1" style={{ color: "#64748b" }}>{s.daysStr}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {sessions.length === 0 && (
+            <div className="px-2 py-4 text-[11px] text-center italic" style={{ color: "#64748b" }}>
+              No recent sessions
             </div>
-          </div>
+          )}
         </div>
       </div>
 

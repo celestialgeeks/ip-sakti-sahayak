@@ -41,7 +41,7 @@ export default function HomePage() {
       {/* Centered Hermes-style Content Canvas (Max 860px) */}
       <div className="relative z-10 w-full max-w-[860px] mx-auto px-4 sm:px-6 pt-6 pb-4 flex flex-col items-center flex-1">
         {/* Top Official Ayush Portal Welcome Header */}
-        <div className="flex flex-col items-center text-center w-full mb-6">
+        <div className="flex flex-col items-center text-center w-full mb-12">
           {/* Dignified Portal Title */}
           <h1 className="font-heading font-bold text-3xl sm:text-4xl text-[#002855] tracking-tight mb-2">
             IP-SAKTI Sahayak
