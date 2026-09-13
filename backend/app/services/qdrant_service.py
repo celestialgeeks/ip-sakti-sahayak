@@ -113,7 +113,7 @@ class QdrantService:
                 {"key": "category", "match": {"value": category_filter}}
             )
 
-        body: Dict[str, Any] = {"query": query_vector, "limit": limit}
+        body: Dict[str, Any] = {"query": query_vector, "limit": limit, "with_payload": True}
         if must_conditions:
             body["filter"] = {"must": must_conditions}
 
