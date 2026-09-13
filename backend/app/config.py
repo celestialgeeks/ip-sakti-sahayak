@@ -23,8 +23,8 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("NVIDIA_NIM_API_KEY", "NVIDIA_API_KEY"),
     )
     NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
-    NVIDIA_LLM_MODEL: str = "meta/llama-3.1-8b-instruct"
-    NVIDIA_EMBED_MODEL: str = "nvidia/nv-embedqa-e5-v5"
+    NVIDIA_LLM_MODEL: str = "mistralai/mistral-7b-instruct-v0.3"
+    NVIDIA_EMBED_MODEL: str = "snowflake/arctic-embed-l"
     NVIDIA_EMBED_DIMENSIONS: int = 1024
 
     # --- Qdrant ---
