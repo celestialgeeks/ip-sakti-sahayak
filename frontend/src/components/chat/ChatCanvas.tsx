@@ -19,8 +19,7 @@ export function ChatCanvas({ messages, isLoading = false }: ChatCanvasProps) {
 
   return (
     <div
-      className="flex-1 overflow-y-auto px-4 py-6"
-      style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }}
+      className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-6 w-full max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto"
     >
       {messages.map((msg, i) => (
         <MessageBubble

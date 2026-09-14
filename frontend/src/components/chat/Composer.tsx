@@ -43,7 +43,7 @@ export function Composer({
   };
 
   return (
-    <div className="w-full max-w-[800px] mx-auto bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200 p-2 relative">
+    <div className="w-full max-w-4xl xl:max-w-5xl mx-auto bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200 p-2 sm:p-2.5 relative">
       {/* Input Area */}
       <form onSubmit={handleSubmit} className="flex items-end gap-2">
         <div className="flex items-center gap-1">

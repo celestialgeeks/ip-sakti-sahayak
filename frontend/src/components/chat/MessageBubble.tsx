@@ -165,9 +165,13 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
       {/* Bubble Container */}
       <div
-        className={`max-w-[85%] sm:max-w-[80%] px-5 py-4 ${isUser ? "user-bubble" : "assistant-bubble"} relative group shadow-xs`}
+        className={`${
+          isUser 
+            ? "max-w-[85%] sm:max-w-[75%] px-4 py-3 user-bubble shadow-sm" 
+            : "w-full flex-1 px-5 sm:px-6 py-5 assistant-bubble shadow-xs border border-slate-200/70"
+        } relative group transition-all`}
         style={{
-          borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          borderRadius: isUser ? "20px 20px 4px 20px" : "16px",
         }}
       >
         {/* Section 3(p) Statutory Alert — Triggered ONLY on real legal detection */}
