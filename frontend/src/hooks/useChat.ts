@@ -107,6 +107,21 @@ export function useChat(initialSessionId?: string) {
         localStorage.setItem("chat_session", activeSessionId);
       }
 
+      // Immediately register in local history for instant sidebar responsiveness
+      try {
+        const historyStr = localStorage.getItem("chat_sessions_history");
+        const history = historyStr ? JSON.parse(historyStr) : [];
+        if (!history.find((s: any) => s.id === activeSessionId)) {
+          history.unshift({
+            id: activeSessionId,
+            title: query.length > 55 ? query.slice(0, 52) + "..." : query,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem("chat_sessions_history", JSON.stringify(history));
+          window.dispatchEvent(new Event("sessions_updated"));
+        }
+      } catch (e) {}
+
       try {
         const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();

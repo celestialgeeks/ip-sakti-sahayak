@@ -22,9 +22,13 @@ export default function HomePage() {
   }, []);
 
   const executeSend = (message: string) => {
+    const newSessionId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `session_${Date.now()}`;
+    localStorage.setItem("chat_session", newSessionId);
+    localStorage.removeItem("chat_messages");
     const params = new URLSearchParams({
       q: message,
       j: jurisdiction,
+      session: newSessionId,
     });
     router.push(`/chat?${params.toString()}`);
   };

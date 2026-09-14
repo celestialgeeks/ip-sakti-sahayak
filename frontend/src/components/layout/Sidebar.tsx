@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { SignInModal } from "@/components/auth/SignInModal";
 
 // Navigation Tools strictly matching User Screenshot 3 & Stitch Mockups
 const navItems = [
@@ -58,9 +59,19 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [activeSessionParam, setActiveSessionParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      setActiveSessionParam(urlParams.get("session"));
+    }
+  }, [pathname]);
+
   const [sessions, setSessions] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -138,14 +149,25 @@ export function Sidebar() {
     };
   }, [loadSessions]);
 
+  // When clicking New session, clear state and return to the default dashboard with recommendations
   const handleNewSession = () => {
     localStorage.removeItem("chat_messages");
     localStorage.removeItem("chat_session");
-    router.push("/chat");
+    router.push("/");
   };
 
   const handleSelectSession = (sessionId: string) => {
     router.push(`/chat?session=${sessionId}`);
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setSessions([]);
+    localStorage.removeItem("chat_messages");
+    localStorage.removeItem("chat_session");
+    router.push("/");
   };
 
   const categorizeSessions = () => {
@@ -178,201 +200,248 @@ export function Sidebar() {
   const { today, lastWeek, earlier } = categorizeSessions();
 
   return (
-    <aside
-      className="fixed left-0 top-[95px] bottom-0 flex flex-col justify-between z-40 hidden md:flex border-r"
-      style={{
-        width: "var(--sidebar-width)",
-        background: "#0f172a", // slate-900
-        color: "#cbd5e1", // slate-300
-        borderColor: "#1e293b", // slate-800
-        fontSize: "13px",
-      }}
-    >
-      <div className="flex flex-col flex-1 p-3 overflow-y-auto overflow-x-hidden">
-        {/* Top Action Item: New Session with ⌘ N badge */}
-        <button
-          onClick={handleNewSession}
-          className="flex items-center justify-between w-full px-2.5 py-2.5 rounded-xl transition-all group mb-2 text-left cursor-pointer hover:bg-slate-800 border border-transparent hover:border-slate-700/60 shadow-sm"
-          style={{ color: "#e2e8f0" }}
-          title="Start a new session (⌘ N)"
-        >
-          <div className="flex items-center gap-2.5 font-medium text-slate-200 group-hover:text-white transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-white">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
-            </svg>
-            <span className="font-semibold tracking-tight text-[14px]">New session</span>
-          </div>
-          <div className="flex items-center gap-0.5 text-[10px] text-slate-400 font-mono">
-            <span className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800/80 font-bold">⌘</span>
-            <span className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800/80 font-bold">N</span>
-          </div>
-        </button>
-
-        {/* Feature / Tool Links strictly matching Screenshot 3 */}
-        <nav className="flex flex-col gap-1 border-b pb-3 mb-3 border-slate-800/80">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all no-underline font-medium text-[13px]"
-                style={{
-                  color: isActive ? "#ffffff" : "#cbd5e1",
-                  background: isActive ? "rgba(30, 41, 59, 0.9)" : "transparent",
-                }}
-                title={item.label}
-              >
-                <div style={{ color: isActive ? "#38bdf8" : "#94a3b8" }}>{item.icon}</div>
-                <span className="truncate">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Search Sessions Input */}
-        <div className="relative mb-3 px-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-[8px] pointer-events-none text-slate-500">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search sessions..."
-            className="w-full rounded-lg pl-8 pr-2.5 py-1.5 text-[12px] bg-slate-800/60 border border-slate-700/60 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-slate-500 transition-colors"
-          />
-        </div>
-
-        {/* SESSIONS Section */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold tracking-wider uppercase text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
+    <>
+      <aside
+        className="fixed left-0 top-[95px] bottom-0 flex flex-col justify-between z-40 hidden md:flex border-r"
+        style={{
+          width: "var(--sidebar-width)",
+          background: "#0f172a", // slate-900
+          color: "#cbd5e1", // slate-300
+          borderColor: "#1e293b", // slate-800
+          fontSize: "13px",
+        }}
+      >
+        <div className="flex flex-col flex-1 p-3 overflow-y-auto overflow-x-hidden">
+          {/* Top Action Item: New Session with ⌘ N badge */}
+          <button
+            onClick={handleNewSession}
+            className={`flex items-center justify-between w-full px-2.5 py-2.5 rounded-xl transition-all group mb-2 text-left cursor-pointer border ${
+              pathname === "/"
+                ? "bg-slate-800/90 border-slate-700 text-white shadow-sm"
+                : "border-transparent hover:bg-slate-800/60 hover:border-slate-700/60 text-slate-200"
+            }`}
+            title="Start a new session on the dashboard (⌘ N)"
+          >
+            <div className="flex items-center gap-2.5 font-medium text-slate-200 group-hover:text-white transition-colors">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-white">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
               </svg>
-              <span>Sessions</span>
+              <span className="font-semibold tracking-tight text-[14px]">New session</span>
             </div>
-            {sessions.length > 0 && (
-              <span className="text-[10px] text-slate-500 font-mono">({sessions.length})</span>
+            <div className="flex items-center gap-0.5 text-[10px] text-slate-400 font-mono">
+              <span className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800/80 font-bold">⌘</span>
+              <span className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800/80 font-bold">N</span>
+            </div>
+          </button>
+
+          {/* Feature / Tool Links strictly matching Screenshot 3 */}
+          <nav className="flex flex-col gap-1 border-b pb-3 mb-3 border-slate-800/80">
+            {navItems.map((item) => {
+              // Highlight only if exact match or subroute (except for /chat when on /)
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all no-underline font-medium text-[13px] ${
+                    isActive
+                      ? "bg-slate-800 text-white shadow-xs"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/40"
+                  }`}
+                  title={item.label}
+                >
+                  <div style={{ color: isActive ? "#38bdf8" : "#94a3b8" }}>{item.icon}</div>
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Search Sessions Input */}
+          <div className="relative mb-3 px-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-[8px] pointer-events-none text-slate-500">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search sessions..."
+              className="w-full rounded-lg pl-8 pr-2.5 py-1.5 text-[12px] bg-slate-800/60 border border-slate-700/60 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-slate-500 transition-colors"
+            />
+          </div>
+
+          {/* SESSIONS Section */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold tracking-wider uppercase text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Sessions</span>
+              </div>
+              {sessions.length > 0 && (
+                <span className="text-[10px] text-slate-500 font-mono">({sessions.length})</span>
+              )}
+            </div>
+
+            {/* If no sessions yet */}
+            {sessions.length === 0 && (
+              <div className="px-2 py-6 text-center text-xs text-slate-500">
+                <p>No past sessions recorded.</p>
+                <p className="text-[11px] text-slate-600 mt-1">Queries you send will appear here.</p>
+              </div>
+            )}
+
+            {/* Today Group */}
+            {today.length > 0 && (
+              <>
+                <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Today
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  {today.map((s, i) => {
+                    const isSelected = activeSessionParam === s.id;
+                    return (
+                      <div
+                        key={s.id || i}
+                        onClick={() => handleSelectSession(s.id)}
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] group ${
+                          isSelected
+                            ? "bg-slate-800 text-white font-medium border-l-2 border-emerald-500 pl-2"
+                            : "hover:bg-slate-800/80 text-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-emerald-400" : "bg-emerald-500"}`}></span>
+                          <span className="truncate" title={s.title}>{s.title}</span>
+                        </div>
+                        <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* Last Week Group */}
+            {lastWeek.length > 0 && (
+              <>
+                <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Last Week
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  {lastWeek.map((s, i) => {
+                    const isSelected = activeSessionParam === s.id;
+                    return (
+                      <div
+                        key={s.id || i}
+                        onClick={() => handleSelectSession(s.id)}
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] group ${
+                          isSelected
+                            ? "bg-slate-800 text-white font-medium border-l-2 border-emerald-500 pl-2"
+                            : "hover:bg-slate-800/80 text-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-slate-500"></span>
+                          <span className="truncate" title={s.title}>{s.title}</span>
+                        </div>
+                        <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* Earlier Group */}
+            {earlier.length > 0 && (
+              <>
+                <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Earlier
+                </div>
+                <div className="flex flex-col gap-0.5 mb-2">
+                  {earlier.map((s, i) => {
+                    const isSelected = activeSessionParam === s.id;
+                    return (
+                      <div
+                        key={s.id || i}
+                        onClick={() => handleSelectSession(s.id)}
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] group ${
+                          isSelected
+                            ? "bg-slate-800 text-white font-medium border-l-2 border-emerald-500 pl-2"
+                            : "hover:bg-slate-800/80 text-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-slate-600"></span>
+                          <span className="truncate" title={s.title}>{s.title}</span>
+                        </div>
+                        <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
+        </div>
 
-          {/* If no sessions yet */}
-          {sessions.length === 0 && (
-            <div className="px-2 py-6 text-center text-xs text-slate-500">
-              <p>No past sessions recorded.</p>
-              <p className="text-[11px] text-slate-600 mt-1">Queries you send will appear here.</p>
+        {/* Footer Profile / Auth State — Gateway Online Removed */}
+        <div className="p-3 border-t border-slate-800/80 bg-slate-950/40">
+          {!user ? (
+            <button
+              onClick={() => setShowSignInModal(true)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-[#195280] hover:bg-[#002855] text-white font-medium text-xs transition-all shadow-sm cursor-pointer border border-blue-500/40 hover:border-blue-400"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              <span>Login / Sign Up</span>
+            </button>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-200 shrink-0">
+                  {user.email ? user.email.slice(0, 2).toUpperCase() : "IP"}
+                </div>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-xs font-semibold text-slate-200 truncate">
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </button>
             </div>
           )}
-
-          {/* Today Group */}
-          {today.length > 0 && (
-            <>
-              <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Today
-              </div>
-              <div className="flex flex-col gap-0.5">
-                {today.map((s, i) => (
-                  <div
-                    key={s.id || i}
-                    onClick={() => handleSelectSession(s.id)}
-                    className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-slate-800/80 text-slate-300 group"
-                  >
-                    <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-emerald-500"></span>
-                      <span className="truncate" title={s.title}>{s.title}</span>
-                    </div>
-                    <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Last Week Group */}
-          {lastWeek.length > 0 && (
-            <>
-              <div className="px-2 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Last Week
-              </div>
-              <div className="flex flex-col gap-0.5">
-                {lastWeek.map((s, i) => (
-                  <div
-                    key={s.id || i}
-                    onClick={() => handleSelectSession(s.id)}
-                    className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-slate-800/80 text-slate-300 group"
-                  >
-                    <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-slate-500"></span>
-                      <span className="truncate" title={s.title}>{s.title}</span>
-                    </div>
-                    <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Earlier Group */}
-          {earlier.length > 0 && (
-            <>
-              <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Earlier
-              </div>
-              <div className="flex flex-col gap-0.5 mb-2">
-                {earlier.map((s, i) => (
-                  <div
-                    key={s.id || i}
-                    onClick={() => handleSelectSession(s.id)}
-                    className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer text-[12px] hover:bg-slate-800/80 text-slate-300 group"
-                  >
-                    <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-slate-600"></span>
-                      <span className="truncate" title={s.title}>{s.title}</span>
-                    </div>
-                    <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
-      </div>
+      </aside>
 
-      {/* Footer Profile / Portal Status */}
-      <div className="p-3 border-t border-slate-800/80 flex items-center justify-between bg-slate-950/40">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-200 shrink-0">
-            {user?.email ? user.email.slice(0, 2).toUpperCase() : "IP"}
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-xs font-semibold text-slate-200 truncate">
-              {user?.email ? user.email : "Ayush Officer"}
-            </span>
-            <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              Gateway Online
-            </span>
-          </div>
-        </div>
-        <Link
-          href="/login"
-          className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-          title={user ? "Account Settings" : "Sign In"}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </Link>
-      </div>
-    </aside>
+      {/* Sign-In Modal from navigation panel */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onSuccess={() => loadSessions()}
+      />
+    </>
   );
 }
