@@ -49,26 +49,50 @@ async def run_rag_pipeline(
         query = await sarvam_service.translate(query, detected_lang, Language.ENGLISH)
 
     # Step 1.5: Intent Classification & Dynamic Routing
-    intent_prompt = f"""
-    You are an intent classifier for IP-SAKTI Sahayak, an assistant for Ayurveda Intellectual Property.
-    Analyze the following user query and classify its intent into one of three categories:
-    1. "relevant": The query is about Intellectual Property, Patents, Trademarks, Ayurveda, Traditional Knowledge, TKDL, biology, law, or related fields.
-    2. "chit_chat": The query is a simple greeting, expression of gratitude, or conversational pleasantry (e.g., "hi", "hello", "thanks", "how are you", "who are you").
-    3. "irrelevant": The query is asking for something completely unrelated (e.g., writing code, general knowledge outside IP/Ayurveda, harmful requests).
+    # Stage 1: Fast keyword pre-filter (no LLM cost)
+    _q_lower = query.strip().lower()
+    _chit_chat_triggers = {
+        "hi", "hello", "hey", "hii", "hiii", "namaste", "good morning", "good evening",
+        "good afternoon", "good night", "thanks", "thank you", "thank you so much",
+        "thx", "ty", "ok", "okay", "great", "nice", "cool", "got it", "understood",
+        "who are you", "what are you", "how are you", "what can you do", "help me"
+    }
+    _irrelevant_triggers = {
+        "write code", "python code", "javascript", "html code", "sort a list",
+        "recipe", "cricket score", "weather", "movie", "song", "joke",
+        "stock price", "share market", "crypto", "bitcoin",
+    }
 
-    Query: "{query}"
+    if _q_lower in _chit_chat_triggers or any(_q_lower.startswith(t) for t in _chit_chat_triggers):
+        intent = "chit_chat"
+    elif any(t in _q_lower for t in _irrelevant_triggers):
+        intent = "irrelevant"
+    else:
+        # Stage 2: LLM classifier only for ambiguous queries
+        intent_prompt = f"""You are a strict intent classifier for IP-SAKTI Sahayak, an Ayurveda IP assistant.
+Classify the query into exactly one label. Respond with ONLY the label word, nothing else.
 
-    Respond with ONLY the exact string: "relevant", "chit_chat", or "irrelevant". Do not output anything else.
-    """
-    
-    intent = await nim_service.generate([{"role": "user", "content": intent_prompt}], temperature=0.1, max_tokens=10)
-    intent = str(intent).strip().lower()
-    
-    if "chit_chat" in intent or "irrelevant" in intent:
-        if "chit_chat" in intent:
-            fast_answer = "Hello! I am IP-SAKTI Sahayak, your AI assistant for Ayurvedic Intellectual Property and Traditional Knowledge. How can I help you with patents or regulations today?"
+Labels:
+- relevant: about IP, Patents, Trademarks, Ayurveda, Traditional Knowledge, TKDL, herbs, formulations, law, biodiversity
+- chit_chat: greeting, gratitude, pleasantry, or identity question
+- irrelevant: unrelated to Ayurveda/IP (coding help, general facts, entertainment, harmful)
+
+Query: "{query}"
+Label:"""
+        intent = await nim_service.generate(
+            [{"role": "user", "content": intent_prompt}],
+            temperature=0.0, max_tokens=5
+        )
+        intent = str(intent).strip().lower().split()[0] if intent else "relevant"
+        # Normalise any variation
+        if intent not in ("relevant", "chit_chat", "irrelevant"):
+            intent = "relevant"
+
+    if intent in ("chit_chat", "irrelevant"):
+        if intent == "chit_chat":
+            fast_answer = "Hello! I am IP-SAKTI Sahayak, your AI assistant for Ayurvedic Intellectual Property and Traditional Knowledge. How can I help you with patents, TKDL, or regulations today?"
         else:
-            fast_answer = "I am an IP-SAKTI Sahayak. I can only assist with questions related to Ayurveda Intellectual Property, Patents, and Traditional Knowledge. I cannot answer other queries."
+            fast_answer = "I am IP-SAKTI Sahayak — I can only assist with Ayurveda Intellectual Property, Patents, Traditional Knowledge, and related legal matters. I cannot answer other queries."
             
         if language != Language.ENGLISH:
             fast_answer = await sarvam_service.translate(fast_answer, Language.ENGLISH, language)
@@ -77,16 +101,17 @@ async def run_rag_pipeline(
             
         if not stream:
             return ChatResponse(
-                answer=fast_answer, citations=[], confidence=1.0, 
-                confidence_level=ConfidenceLevel.HIGH, jurisdiction=jurisdiction, 
+                answer=fast_answer, citations=[], confidence=1.0,
+                confidence_level=ConfidenceLevel.HIGH, jurisdiction=jurisdiction,
                 disclaimer="", session_id=session_id
             )
         async def stream_generator_fast():
-            yield f"data: {json.dumps({'chunk': fast_answer})}\\n\\n"
+            yield f"data: {json.dumps({'chunk': fast_answer})}\n\n"
             metadata = {"citations": [], "confidence": 1.0, "confidence_level": "high", "session_id": session_id}
-            yield f"data: {json.dumps({'metadata': metadata})}\\n\\n"
-            yield "data: [DONE]\\n\\n"
+            yield f"data: {json.dumps({'metadata': metadata})}\n\n"
+            yield "data: [DONE]\n\n"
         return stream_generator_fast()
+
 
     # Step 2: Generate query embedding
     query_embedding = await nim_service.embed_single(query)
