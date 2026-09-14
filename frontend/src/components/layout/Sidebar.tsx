@@ -1,10 +1,25 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { SignInModal } from "@/components/auth/SignInModal";
+
+function SidebarSearchParamWatcher({
+  onSessionChange,
+}: {
+  onSessionChange: (sessionId: string | null) => void;
+}) {
+  const searchParams = useSearchParams();
+  const session = searchParams.get("session");
+
+  useEffect(() => {
+    onSessionChange(session);
+  }, [session, onSessionChange]);
+
+  return null;
+}
 
 // Navigation Tools strictly matching User Screenshot 3 & Stitch Mockups
 const navItems = [
@@ -61,12 +76,16 @@ export function Sidebar() {
   const router = useRouter();
   const [activeSessionParam, setActiveSessionParam] = useState<string | null>(null);
 
-  useEffect(() => {
+  const syncSessionFromUrl = useCallback(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       setActiveSessionParam(urlParams.get("session"));
     }
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    syncSessionFromUrl();
+  }, [pathname, syncSessionFromUrl]);
 
   const [sessions, setSessions] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,6 +149,7 @@ export function Sidebar() {
 
     const handleSessionsUpdated = () => {
       loadSessions();
+      syncSessionFromUrl();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -140,17 +160,20 @@ export function Sidebar() {
     };
 
     window.addEventListener("sessions_updated", handleSessionsUpdated);
+    window.addEventListener("popstate", syncSessionFromUrl);
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       authListener.subscription.unsubscribe();
       window.removeEventListener("sessions_updated", handleSessionsUpdated);
+      window.removeEventListener("popstate", syncSessionFromUrl);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [loadSessions]);
+  }, [loadSessions, syncSessionFromUrl]);
 
   // When clicking New session, clear state and return to the default dashboard with recommendations
   const handleNewSession = () => {
+    setActiveSessionParam(null);
     localStorage.removeItem("chat_messages");
     localStorage.removeItem("chat_session");
     router.push("/");
@@ -201,6 +224,9 @@ export function Sidebar() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <SidebarSearchParamWatcher onSessionChange={setActiveSessionParam} />
+      </Suspense>
       <aside
         className="fixed left-0 top-[95px] bottom-0 flex flex-col justify-between z-40 hidden md:flex border-r"
         style={{
@@ -239,12 +265,19 @@ export function Sidebar() {
           {/* Feature / Tool Links strictly matching Screenshot 3 */}
           <nav className="flex flex-col gap-1 border-b pb-3 mb-3 border-slate-800/80">
             {navItems.map((item) => {
-              // Highlight only if exact match or subroute (except for /chat when on /)
-              const isActive = pathname === item.href;
+              // Highlight only if exact match, but for Legal Advisor (/chat) don't highlight if an active session is in view
+              const isActive = item.href === "/chat"
+                ? pathname === "/chat" && !activeSessionParam
+                : pathname === item.href;
               return (
                 <Link
                   key={item.label}
                   href={item.href}
+                  onClick={() => {
+                    if (item.href === "/chat") {
+                      setActiveSessionParam(null);
+                    }
+                  }}
                   className={`flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all no-underline font-medium text-[13px] ${
                     isActive
                       ? "bg-slate-800 text-white shadow-xs"

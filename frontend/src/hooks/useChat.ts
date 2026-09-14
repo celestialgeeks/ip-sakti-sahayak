@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Message, Jurisdiction, ChatResponse } from "@/lib/types";
 import { getApiUrl } from "@/lib/api";
 
@@ -12,9 +12,13 @@ export function useChat(initialSessionId?: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [isWaking, setIsWaking] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
+  const isStreamingRef = useRef(false);
 
   // Load session messages either from Supabase (if authenticated) or localStorage
   const loadSession = useCallback(async (targetSessionId: string) => {
+    if (isStreamingRef.current) {
+      return;
+    }
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
@@ -26,6 +30,10 @@ export function useChat(initialSessionId?: string) {
           .select("*")
           .eq("session_id", targetSessionId)
           .order("created_at", { ascending: true });
+
+        if (isStreamingRef.current) {
+          return;
+        }
 
         if (data && data.length > 0 && !error) {
           const loaded: Message[] = data.map((m: any) => ({
@@ -40,6 +48,10 @@ export function useChat(initialSessionId?: string) {
           localStorage.setItem("chat_messages", JSON.stringify(loaded));
           return;
         }
+      }
+
+      if (isStreamingRef.current) {
+        return;
       }
 
       // Fallback to localStorage if no DB messages found
@@ -57,7 +69,16 @@ export function useChat(initialSessionId?: string) {
   // Initialize from props or local storage on mount
   useEffect(() => {
     if (initialSessionId) {
-      loadSession(initialSessionId);
+      // If there is an active query in the URL, don't preemptively load session
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("q")) {
+          return;
+        }
+      }
+      if (!isStreamingRef.current) {
+        loadSession(initialSessionId);
+      }
     } else {
       const saved = localStorage.getItem("chat_messages");
       const savedSession = localStorage.getItem("chat_session");
@@ -87,13 +108,22 @@ export function useChat(initialSessionId?: string) {
 
   const send = useCallback(
     async (query: string, jurisdiction: Jurisdiction = "india") => {
-      const userMessage: Message = { role: "user", content: query };
-      setMessages((prev) => [...prev, userMessage]);
+      isStreamingRef.current = true;
+      const userMessage: Message = { 
+        role: "user", 
+        content: query,
+        timestamp: new Date().toISOString(),
+      };
+      const initialAssistantMessage: Message = { 
+        role: "assistant", 
+        content: "",
+        timestamp: new Date().toISOString(),
+      };
+
+      // Atomically append both user message and empty assistant message
+      setMessages((prev) => [...prev, userMessage, initialAssistantMessage]);
       setIsLoading(true);
       setIsWaking(false);
-
-      // Add a temporary empty assistant message to stream into
-      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
       const timeoutId = setTimeout(() => {
         setIsWaking(true);
@@ -104,6 +134,16 @@ export function useChat(initialSessionId?: string) {
       if (!sessionId) {
         setSessionId(activeSessionId);
         localStorage.setItem("chat_session", activeSessionId);
+      }
+
+      // Sync active session ID to URL without page reload
+      if (typeof window !== "undefined" && window.history?.replaceState) {
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.searchParams.get("session") !== activeSessionId) {
+          currentUrl.searchParams.set("session", activeSessionId);
+          currentUrl.searchParams.delete("q");
+          window.history.replaceState(null, "", currentUrl.pathname + currentUrl.search);
+        }
       }
 
       // Immediately register in local history for instant sidebar responsiveness
@@ -228,13 +268,28 @@ export function useChat(initialSessionId?: string) {
                         .trimStart();
                     }
 
-                    // Update the last message in state
+                    // Safely update the assistant message in state
                     setMessages((prev) => {
                       const newMsgs = [...prev];
-                      newMsgs[newMsgs.length - 1] = {
-                        ...newMsgs[newMsgs.length - 1],
-                        content: displayContent,
-                      };
+                      if (newMsgs.length === 0) {
+                        return [{ role: "assistant", content: displayContent, timestamp: new Date().toISOString() }];
+                      }
+                      const lastIndex = newMsgs.length - 1;
+                      const lastMsg = newMsgs[lastIndex];
+
+                      if (lastMsg.role === "assistant") {
+                        newMsgs[lastIndex] = {
+                          ...lastMsg,
+                          content: displayContent,
+                        };
+                      } else {
+                        // Crucial safety check: if last message is a user message, NEVER overwrite it! Append!
+                        newMsgs.push({
+                          role: "assistant",
+                          content: displayContent,
+                          timestamp: new Date().toISOString(),
+                        });
+                      }
                       return newMsgs;
                     });
                   } else if (parsed.metadata) {
@@ -259,13 +314,29 @@ export function useChat(initialSessionId?: string) {
 
                     setMessages((prev) => {
                       const newMsgs = [...prev];
-                      newMsgs[newMsgs.length - 1] = {
-                        ...newMsgs[newMsgs.length - 1],
-                        citations: parsed.metadata.citations,
-                        confidence: parsed.metadata.confidence,
-                        confidenceLevel: parsed.metadata.confidence_level,
-                        statutoryAlert: parsed.metadata.statutory_alert,
-                      };
+                      if (newMsgs.length === 0) return newMsgs;
+                      const lastIndex = newMsgs.length - 1;
+                      const lastMsg = newMsgs[lastIndex];
+
+                      if (lastMsg.role === "assistant") {
+                        newMsgs[lastIndex] = {
+                          ...lastMsg,
+                          citations: parsed.metadata.citations,
+                          confidence: parsed.metadata.confidence,
+                          confidenceLevel: parsed.metadata.confidence_level,
+                          statutoryAlert: parsed.metadata.statutory_alert,
+                        };
+                      } else {
+                        newMsgs.push({
+                          role: "assistant",
+                          content: currentContent,
+                          citations: parsed.metadata.citations,
+                          confidence: parsed.metadata.confidence,
+                          confidenceLevel: parsed.metadata.confidence_level,
+                          statutoryAlert: parsed.metadata.statutory_alert,
+                          timestamp: new Date().toISOString(),
+                        });
+                      }
                       return newMsgs;
                     });
                   }
@@ -298,14 +369,22 @@ export function useChat(initialSessionId?: string) {
         console.error("useChat fatal send error:", error);
         setMessages((prev) => {
           const newMsgs = [...prev];
-          newMsgs[newMsgs.length - 1] = {
+          const lastIndex = newMsgs.length - 1;
+          const errorMsg: Message = {
             role: "assistant",
             content: `I apologize, but I encountered an error: ${error?.message || "unable to connect to backend service"}. Please ensure the service is online and try again.`,
             confidenceLevel: "low",
+            timestamp: new Date().toISOString(),
           };
+          if (lastIndex >= 0 && newMsgs[lastIndex].role === "assistant") {
+            newMsgs[lastIndex] = errorMsg;
+          } else {
+            newMsgs.push(errorMsg);
+          }
           return newMsgs;
         });
       } finally {
+        isStreamingRef.current = false;
         setIsLoading(false);
       }
     },

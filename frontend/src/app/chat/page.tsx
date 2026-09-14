@@ -20,12 +20,13 @@ function ChatPageContent() {
   const [showSignInModal, setShowSignInModal] = useState(false);
   const pendingMessageRef = useRef<string | null>(null);
 
-  // Load session if URL changes to a different session
+  // Load session if URL changes to a different session and no active query is being sent
   useEffect(() => {
-    if (sessionParam) {
+    const q = searchParams.get("q");
+    if (sessionParam && !q && !isLoading) {
       loadSession(sessionParam);
     }
-  }, [sessionParam, loadSession]);
+  }, [sessionParam, searchParams, loadSession, isLoading]);
 
   // Handle initial query from URL parameters
   useEffect(() => {
@@ -33,9 +34,13 @@ function ChatPageContent() {
     const q = searchParams.get("q");
     const j = searchParams.get("j") as Jurisdiction | null;
     if (q) {
+      setInitialSent(true);
       if (j) setJurisdiction(j);
       send(q, j || "india");
-      setInitialSent(true);
+      const currentSession = searchParams.get("session");
+      if (currentSession && window.history?.replaceState) {
+        window.history.replaceState(null, "", `/chat?session=${currentSession}`);
+      }
     }
   }, [searchParams, send, initialSent]);
 
