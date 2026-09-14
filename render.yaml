@@ -51,7 +51,7 @@ services:
     name: ipsakti-frontend
     runtime: node
     buildCommand: cd frontend && npm install && npm run build -- --webpack
-    startCommand: cd frontend && npm start
+    startCommand: cd frontend && node .next/standalone/server.js
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://ipsakti-api.onrender.com
