@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export function Header() {
+  const [language, setLanguage] = useState("en");
   const [fontSize, setFontSize] = useState(100);
   const [user, setUser] = useState<any>(null);
 
