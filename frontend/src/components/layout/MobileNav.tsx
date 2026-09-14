@@ -7,7 +7,7 @@ const bottomNavItems = [
   { label: "Advisor", icon: "⚖️", href: "/chat" },
   { label: "TKDL", icon: "📖", href: "/tkdl" },
   { label: "Patents", icon: "🔬", href: "/patents" },
-  { label: "Rules", icon: "📜", href: "/classify" },
+  { label: "Rules", icon: "📜", href: "/rules" },
 ];
 
 export function MobileNav() {

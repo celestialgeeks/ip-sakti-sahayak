@@ -43,7 +43,7 @@ const navItems = [
       </svg>
     ),
     label: "Latest Rules & Regulations",
-    href: "/classify",
+    href: "/rules",
   },
   {
     icon: (
