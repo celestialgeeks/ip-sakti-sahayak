@@ -120,13 +120,23 @@ class QdrantService:
         filter_obj = qmodels.Filter(must=must_conditions) if must_conditions else None
 
         try:
-            hits = await self.client.search(
-                collection_name=collection,
-                query_vector=query_vector,
-                limit=limit,
-                query_filter=filter_obj,
-                with_payload=True
-            )
+            if hasattr(self.client, "query_points"):
+                response = await self.client.query_points(
+                    collection_name=collection,
+                    query=query_vector,
+                    limit=limit,
+                    query_filter=filter_obj,
+                    with_payload=True,
+                )
+                hits = response.points
+            else:
+                hits = await self.client.search(
+                    collection_name=collection,
+                    query_vector=query_vector,
+                    limit=limit,
+                    query_filter=filter_obj,
+                    with_payload=True,
+                )
         except Exception as e:
             if "not found" in str(e).lower():
                 raise LookupError(f"collection not found: {collection}")
