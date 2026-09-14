@@ -1,4 +1,5 @@
 services:
+  # ── Backend: FastAPI ─────────────────────────────────────────────────────────
   - type: web
     name: ipsakti-api
     runtime: python
@@ -8,31 +9,53 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.12
+
+      # NVIDIA NIM
       - key: NVIDIA_NIM_API_KEY
         sync: false
+      - key: NVIDIA_NIM_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: NVIDIA_LLM_MODEL
+        value: nvidia/nemotron-3.5-lightning-30b-a3b
+      - key: NVIDIA_EMBED_MODEL
+        value: nvidia/nemotron-3-embed-1b
+      - key: NVIDIA_EMBED_DIMENSIONS
+        value: 2048
+
+      # Sarvam
       - key: SARVAM_API_KEY
         sync: false
+
+      # Qdrant Cloud (persistent external cluster)
       - key: QDRANT_URL
-        value: https://ipsakti-qdrant.onrender.com
+        sync: false
       - key: QDRANT_API_KEY
         sync: false
-      - key: SARVAM_API_KEY
+
+      # Supabase
+      - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+      # CORS
       - key: CORS_ORIGINS
-        value: https://ipsakti-frontend.onrender.com
+        value: https://ipsakti-frontend.onrender.com,http://localhost:3000
 
-  - type: web
-    name: ipsakti-qdrant
-    runtime: docker
-    dockerfilePath: ./Dockerfile.qdrant
-    # Free tier: no disk → ephemeral storage. Corpus is (re)seeded
-    # externally: QDRANT_URL=<service-url> python -m scripts.ingest_documents
-
+  # ── Frontend: Next.js ────────────────────────────────────────────────────────
   - type: web
     name: ipsakti-frontend
     runtime: node
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm install && npm run build -- --webpack
     startCommand: cd frontend && npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
+        value: https://ipsakti-api.onrender.com
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
