@@ -38,7 +38,7 @@ class NvidiaIMService:
         self,
         messages: list[dict],
         temperature: float = 0.3,
-        max_tokens: int = 1024,
+        max_tokens: int = 8192,
         stream: bool = False,
     ) -> str | AsyncGenerator[str, None]:
         """
@@ -47,7 +47,7 @@ class NvidiaIMService:
         Args:
             messages: List of chat messages [{"role": "...", "content": "..."}]
             temperature: Sampling temperature (lower = more deterministic)
-            max_tokens: Maximum tokens in response
+            max_tokens: Maximum tokens in response (default 8192 for thorough answers)
             stream: Whether to stream the response
         
         Returns:
@@ -59,13 +59,18 @@ class NvidiaIMService:
         last_err = None
         for attempt in range(3):
             try:
-                response = await _fresh_client().chat.completions.create(
-                    model=self.llm_model,
-                    messages=messages,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    timeout=120,
-                )
+                kwargs: dict = {
+                    "model": self.llm_model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "timeout": 120,
+                }
+                # Attempt to disable thinking trace in Nemotron / reasoning models on NIM
+                if attempt == 0:
+                    kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
+                
+                response = await _fresh_client().chat.completions.create(**kwargs)
                 msg = response.choices[0].message
                 content = msg.content
                 if not content:
@@ -81,25 +86,38 @@ class NvidiaIMService:
 
                 cause = getattr(e, "__cause__", None)
                 _logging.getLogger("uvicorn.error").error(
-                    "NIM chat attempt %d failed: %r | cause: %r | cause-cause: %r",
-                    attempt + 1, e, cause, getattr(cause, "__cause__", None),
+                    "NIM chat attempt %d failed: %r | cause: %r",
+                    attempt + 1, e, cause,
                 )
-                await _aio.sleep(2 * (attempt + 1))
+                await _aio.sleep(1.5 * (attempt + 1))
         raise last_err
 
     async def _stream_generate(
-        self, messages: list[dict], temperature: float, max_tokens: int
+        self, messages: list[dict], temperature: float, max_tokens: int = 8192
     ) -> AsyncGenerator[str, None]:
         """Stream response tokens."""
-        stream = await _fresh_client().chat.completions.create(
-            model=self.llm_model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stream=True,
-        )
+        client = _fresh_client()
+        try:
+            stream = await client.chat.completions.create(
+                model=self.llm_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=True,
+                extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+            )
+        except Exception:
+            # Fallback without extra_body if not supported
+            stream = await client.chat.completions.create(
+                model=self.llm_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=True,
+            )
+
         async for chunk in stream:
-            if chunk.choices[0].delta.content:
+            if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
 
     async def embed(self, texts: List[str]) -> List[List[float]]:

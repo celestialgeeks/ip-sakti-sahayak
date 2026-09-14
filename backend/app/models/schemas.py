@@ -41,6 +41,9 @@ class ChatResponse(BaseModel):
         default="This is information, not legal advice. Validate with registered patent attorneys."
     )
     session_id: Optional[str] = None
+    statutory_alert: Optional[dict] = Field(
+        default=None, description="Active statutory alert if Section 3(p) or novelty conflict is detected"
+    )
 
 
 # ─── Classification ───────────────────────────────────────────────────

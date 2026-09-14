@@ -4,9 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChatCanvas } from "@/components/chat/ChatCanvas";
 import { Composer } from "@/components/chat/Composer";
-import { ContextRail } from "@/components/layout/ContextRail";
 import { useChat } from "@/hooks/useChat";
-import { Jurisdiction, Citation } from "@/lib/types";
+import { Jurisdiction } from "@/lib/types";
 
 function ChatPageContent() {
   const searchParams = useSearchParams();
@@ -30,18 +29,10 @@ function ChatPageContent() {
     send(message, jurisdiction);
   };
 
-  // Collect all citations from assistant messages for the context rail
-  const allCitations: Citation[] = messages
-    .filter((m) => m.role === "assistant" && m.citations)
-    .flatMap((m) => m.citations || []);
-
   return (
-    <div className="flex h-[calc(100vh-56px)]">
-      {/* Chat Area */}
-      <div
-        className="flex flex-col flex-1"
-        style={{ marginRight: allCitations.length > 0 ? "var(--context-rail-width)" : "0" }}
-      >
+    <div className="flex h-[calc(100vh-56px)] w-full justify-center">
+      {/* Full-width Chat Canvas with responsive centered flow */}
+      <div className="flex flex-col flex-1 max-w-5xl w-full h-full">
         <ChatCanvas messages={messages} isLoading={isLoading} />
         <Composer
           onSend={handleSend}
@@ -50,17 +41,6 @@ function ChatPageContent() {
           disabled={isLoading}
         />
       </div>
-
-      {/* Context Rail */}
-      <ContextRail
-        citations={allCitations.map((c) => ({
-          id: c.id,
-          source: c.source,
-          text: c.text,
-          category: c.category,
-        }))}
-        isVisible={allCitations.length > 0}
-      />
     </div>
   );
 }

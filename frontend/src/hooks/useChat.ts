@@ -108,17 +108,27 @@ export function useChat() {
                   const parsed = JSON.parse(data);
                   if (parsed.chunk) {
                     currentContent += parsed.chunk;
+                    // Sanitize any residual thinking process on the client
+                    let displayContent = currentContent;
+                    if (displayContent.includes("Here's a thinking process:") || displayContent.includes("<think>")) {
+                      displayContent = displayContent
+                        .replace(/<think>[\s\S]*?<\/think>/gi, "")
+                        .replace(/^Here's a thinking process:[\s\S]*?(?=\n\n(?:###|[A-Z]|\d+\.\s+\*\*)|$)/i, "")
+                        .replace(/^\s*1\.\s+\*\*Analyze User Request:\*\*[\s\S]*?(?=\n\n(?:###|[A-Z])|$)/i, "")
+                        .trimStart();
+                    }
+
                     // Update the last message in state
                     setMessages((prev) => {
                       const newMsgs = [...prev];
                       newMsgs[newMsgs.length - 1] = {
                         ...newMsgs[newMsgs.length - 1],
-                        content: currentContent,
+                        content: displayContent,
                       };
                       return newMsgs;
                     });
                   } else if (parsed.metadata) {
-                    // Update final metadata (citations, confidence)
+                    // Update final metadata (citations, confidence, statutoryAlert)
                     const newSessionId = parsed.metadata.session_id;
                     setSessionId(newSessionId);
                     
@@ -147,6 +157,7 @@ export function useChat() {
                         citations: parsed.metadata.citations,
                         confidence: parsed.metadata.confidence,
                         confidenceLevel: parsed.metadata.confidence_level,
+                        statutoryAlert: parsed.metadata.statutory_alert,
                       };
                       return newMsgs;
                     });

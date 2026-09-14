@@ -149,15 +149,31 @@ Label:"""
         {"role": "user", "content": user_prompt},
     ]
 
-    # Helper to strip reasoning blocks
+    # Helper to strip reasoning blocks and planning echoes
     def strip_reasoning(text: str) -> str:
         text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-        text = re.sub(r"Here's a thinking process:.*?(\n\n|$)", "", text, flags=re.DOTALL)
+        text = re.sub(r"Here's a thinking process:.*?(?=\n\n(?:###|[A-Z]|\d+\.\s+\*\*)|$)", "", text, flags=re.DOTALL)
+        text = re.sub(r"^\s*1\.\s+\*\*Analyze User Request:\*\*.*?(?=\n\n(?:###|[A-Z])|$)", "", text, flags=re.DOTALL)
         return text.strip()
 
+    def detect_statutory_alert(answer_text: str) -> Optional[Dict[str, str]]:
+        """Precision detection: only trigger statutory alert if Section 3(p) objection is genuinely identified."""
+        lower_ans = answer_text.lower()
+        has_3p = bool(re.search(r"section\s*3\s*\(\s*p\s*\)|3\s*\(\s*p\s*\)", lower_ans))
+        has_objection = bool(re.search(
+            r"\b(objection|bar|bars|prohibited|not patentable|anticipat|traditional knowledge prior art|lack of novelty|refusal|section 25)\b",
+            lower_ans
+        ))
+        if has_3p and has_objection:
+            return {
+                "title": "Statutory Alert: Section 3(p) / TKDL Prior Art Detected",
+                "description": "This formulation intersects with documented Traditional Knowledge and faces objection under Section 3(p) of the Patents Act, 1970. Review TKDL citations and provide non-obvious synergistic efficacy data.",
+            }
+        return None
+
     if not stream:
-        # Non-streaming path
-        answer = await nim_service.generate(messages, temperature=0.3, max_tokens=1024)
+        # Non-streaming path with 8192 max tokens
+        answer = await nim_service.generate(messages, temperature=0.2, max_tokens=8192)
         answer = strip_reasoning(answer)
         
         citations = extract_citations(answer, context_chunks)
@@ -167,6 +183,7 @@ Label:"""
             else ConfidenceLevel.MEDIUM if confidence_score >= 0.60
             else ConfidenceLevel.LOW
         )
+        statutory_alert = detect_statutory_alert(answer)
 
         if language != Language.ENGLISH:
             answer = await sarvam_service.translate(answer, Language.ENGLISH, language)
@@ -182,54 +199,84 @@ Label:"""
             jurisdiction=jurisdiction,
             disclaimer="Verified against Ministry of Ayush & TKDL digital archives. Validate with registered patent attorneys.",
             session_id=session_id,
+            statutory_alert=statutory_alert,
         )
 
-    # Streaming path
+    # Streaming path with smart preamble buffering
     async def stream_generator() -> AsyncGenerator[str, None]:
-        generator = await nim_service.generate(messages, temperature=0.3, max_tokens=1024, stream=True)
+        generator = await nim_service.generate(messages, temperature=0.2, max_tokens=8192, stream=True)
         full_answer = ""
+        buffer = ""
         in_think_block = False
+        thinking_cleared = False
         
         async for chunk in generator:
-            # Very basic streaming reasoning stripper:
-            # If we see <think>, we stop yielding until we see </think>.
-            # This is simplified; a robust one would buffer.
-            # We will just accumulate and yield chunk by chunk if not in think block.
-            
-            # Simple buffer approach to filter out "<think>" dynamically is complex in async,
-            # so we'll just yield the chunks and filter out the known strings if possible, 
-            # or rely on the prompt to prevent it. Since the prompt tells it NOT to output thinking,
-            # we just yield chunks directly and accumulate to calculate citations at the end.
-            if "<think>" in chunk:
-                in_think_block = True
-            if in_think_block:
-                if "</think>" in chunk:
-                    in_think_block = False
-                continue
-                
             full_answer += chunk
-            # Yield as SSE data
-            yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+
+            # If still checking initial stream for thinking preambles
+            if not thinking_cleared:
+                buffer += chunk
+
+                if "<think>" in buffer:
+                    in_think_block = True
+                
+                if in_think_block:
+                    if "</think>" in buffer:
+                        # Extract everything after </think>
+                        after_think = buffer.split("</think>", 1)[1]
+                        in_think_block = False
+                        thinking_cleared = True
+                        buffer = after_think.lstrip()
+                        if buffer:
+                            yield f"data: {json.dumps({'chunk': buffer})}\n\n"
+                    continue
+
+                # Check if buffer starts with "Here's a thinking process:" or "1. **Analyze"
+                if re.search(r"Here's a thinking process:|1\.\s+\*\*Analyze User Request", buffer, re.IGNORECASE):
+                    # Keep accumulating in buffer until thinking section ends
+                    match = re.search(r"\n\n(###\s+|[A-Z][a-z]+|\*\*Executive Summary|\*\*Statutory)", buffer)
+                    if match:
+                        clean_content = buffer[match.start():].lstrip()
+                        thinking_cleared = True
+                        if clean_content:
+                            yield f"data: {json.dumps({'chunk': clean_content})}\n\n"
+                    continue
+
+                # If buffer reached 120 chars and has no thinking pattern, flush and stream directly
+                if len(buffer) >= 120:
+                    thinking_cleared = True
+                    yield f"data: {json.dumps({'chunk': buffer})}\n\n"
+                    buffer = ""
+            else:
+                yield f"data: {json.dumps({'chunk': chunk})}\n\n"
             
-        # End of stream - compute citations on the full answer
-        full_answer = strip_reasoning(full_answer)
-        citations = extract_citations(full_answer, context_chunks)
+        # Flush any remaining buffer if never cleared
+        if not thinking_cleared and buffer:
+            cleaned = strip_reasoning(buffer)
+            if cleaned:
+                yield f"data: {json.dumps({'chunk': cleaned})}\n\n"
+
+        # End of stream - compute citations and alerts on the sanitized full answer
+        sanitized_full = strip_reasoning(full_answer)
+        citations = extract_citations(sanitized_full, context_chunks)
         confidence_score = compute_confidence(search_results, citations)
         confidence_level = (
             ConfidenceLevel.HIGH if confidence_score >= 0.85
             else ConfidenceLevel.MEDIUM if confidence_score >= 0.60
             else ConfidenceLevel.LOW
         )
+        statutory_alert = detect_statutory_alert(sanitized_full)
         
         if user_id:
-            await supabase_service.save_message(session_id, "assistant", full_answer, citations=[c.model_dump() for c in citations])
+            await supabase_service.save_message(session_id, "assistant", sanitized_full, citations=[c.model_dump() for c in citations])
         
         # Yield final metadata block
         metadata = {
             "citations": [c.model_dump() for c in citations],
             "confidence": confidence_score,
             "confidence_level": confidence_level.value,
-            "session_id": session_id
+            "session_id": session_id,
+            "statutory_alert": statutory_alert,
         }
         yield f"data: {json.dumps({'metadata': metadata})}\n\n"
         yield "data: [DONE]\n\n"

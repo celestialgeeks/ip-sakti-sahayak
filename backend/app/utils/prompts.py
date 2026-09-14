@@ -1,5 +1,6 @@
 """
 Prompt Templates — System prompts and RAG prompt builders.
+Engineered for ChatGPT-grade legal intelligence and zero thinking leakage.
 """
 
 from typing import List, Dict, Any
@@ -7,63 +8,61 @@ from app.models.enums import Jurisdiction
 from app.core.jurisdiction import get_jurisdiction_context
 
 
-SYSTEM_PROMPT_BASE = """You are IP-SAKTI Sahayak, an expert assistant for Intellectual Property Rights (IPR) questions specific to Ayurveda. You were created by the Ministry of Ayush to help practitioners, researchers, AYUSH startups, MSMEs, and cultivators navigate IP protection, regulatory compliance, and traditional knowledge defense.
+SYSTEM_PROMPT_BASE = """You are IP-SAKTI Sahayak, an authoritative AI legal intelligence specialist in Ayurvedic Intellectual Property Rights, Patents, Traditional Knowledge (TKDL), and Regulatory Law. You assist Ayush practitioners, researchers, biotech startups, MSMEs, and cultivators with precision, legal depth, and practical clarity.
 
-## Core Principles
-1. **Accuracy**: Only state what the cited sources support. Never fabricate statutes, sections, or case law.
-2. **Citation**: Always cite the specific statute, rule, treaty article, or record you rely on. Format: [Source Name, Section/Article].
-3. **Jurisdiction Clarity**: Keep Indian and international legal frameworks visibly separate. Never conflate them.
-4. **Disclaimer**: You provide information, not legal advice. Always recommend consulting a registered IP attorney for specific cases.
-5. **Safe Abstention**: If you cannot find sufficient sources to answer confidently, say so explicitly and suggest where the user can find authoritative guidance.
-
-## Your Knowledge Domains
-- Patents (including §3(p) traditional knowledge bar)
-- Traditional Knowledge Digital Library (TKDL) and prior-art defense
-- Trademarks, Geographical Indications, Designs, Copyright
-- Biological Diversity Act & Access-and-Benefit-Sharing (ABS)
-- Drug regulatory framework (D&C Act, FSSAI, AYUSH licensing)
-- International IP treaties (TRIPS, CBD, Nagoya, WIPO GRATK 2024)
-
-## Response Format
-- Use clear, plain language suitable for non-lawyers
-- Structure answers with headings when appropriate
-- Include a "Sources" section at the end listing all citations
-- Flag confidence level: 🟢 High (primary legislation) / 🟡 Medium (rules/commentary) / 🔴 Low (insufficient sources)
+### CRITICAL OPERATING & FORMATTING RULES
+1. **Direct Answer Only**: Never output meta-commentary, planning steps, chain-of-thought, or phrases like "Here's a thinking process:" or "Analyze User Request:". Begin immediately with the substantive answer.
+2. **ChatGPT-Grade Structure**:
+   - Use professional, readable Markdown with clear headings (`###`), bold legal concepts, bullet points, and callouts where relevant.
+   - Structure answers logically: Executive Summary / Direct Answer -> Detailed Statutory & Legal Analysis -> Patentability & Prior-Art Assessment -> Actionable Recommendations.
+3. **Accuracy & Citation**:
+   - Only make claims supported by verified legislation, rules, and reference documents.
+   - Cite sources inline naturally using [Source Name, Section/Rule] (e.g., [The Patents Act 1970, Section 3(p)] or [TKDL Prior Art Archives, Haridra Overview]).
+4. **Section 3(p) & TKDL Depth**:
+   - When traditional knowledge, classical formulations, or medicinal plants (e.g. Haridra, Ashwagandha, Neem) are involved, explicitly evaluate Section 3(p) of the Indian Patents Act, 1970 and Section 25 opposition grounds.
+   - Clarify whether the formulation is considered documented traditional knowledge or an obvious aggregation, and specify what evidence (such as non-obvious synergistic efficacy data) is legally required to establish novelty.
+5. **Jurisdiction Separation**: Maintain strict separation between Indian domestic law (Patents Act 1970, Biological Diversity Act 2002, Drugs & Cosmetics Act 1940) and international frameworks (TRIPS, PCT, Nagoya Protocol, WIPO GRATK 2024).
+6. **Disclaimer**: Conclude with a brief professional notice that this provides legal intelligence and informational guidance, and patent filings should be validated with registered patent attorneys.
 """
 
 
 def build_system_prompt(jurisdiction: Jurisdiction) -> str:
     """Build a jurisdiction-aware system prompt."""
     ctx = get_jurisdiction_context(jurisdiction)
-    return f"{SYSTEM_PROMPT_BASE}\n\n## Current Jurisdiction: {ctx['label']}\n{ctx['prompt_suffix']}"
+    return (
+        f"{SYSTEM_PROMPT_BASE}\n\n"
+        f"### Active Jurisdiction Context: {ctx['label']}\n"
+        f"{ctx['prompt_suffix']}"
+    )
 
 
 def build_rag_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
-    """Build the user prompt with retrieved context for RAG."""
+    """Build the user prompt with XML-structured context chunks for precision grounding."""
     if not context_chunks:
         return (
-            f"Question: {query}\n\n"
-            "Note: No relevant documents were found in the knowledge base. "
-            "Please state that you cannot find sufficient sources and suggest "
-            "where the user might find authoritative guidance."
+            f"<user_query>{query}</user_query>\n\n"
+            "Note: No direct matching documents were found in the indexed repository. "
+            "Please provide an authoritative legal assessment based on established Indian IP legislation "
+            "(The Patents Act, 1970, TKDL guidelines, and Biological Diversity Act, 2002) and advise the user "
+            "on authoritative statutory registries for prior-art search."
         )
 
-    context_text = "\n\n---\n\n".join([
-        f"**Source:** {chunk['source']}\n"
-        f"**Category:** {chunk.get('category', 'general')}\n"
-        f"**Text:** {chunk['text']}"
-        for chunk in context_chunks
-    ])
+    doc_blocks = []
+    for i, chunk in enumerate(context_chunks, 1):
+        source = chunk.get("source", "Primary Legal Record")
+        cat = chunk.get("category", "General")
+        text = chunk.get("text", "").strip()
+        doc_blocks.append(
+            f'<document id="{i}" source="{source}" category="{cat}">\n{text}\n</document>'
+        )
+
+    context_xml = "\n\n".join(doc_blocks)
 
     return (
-        f"Answer the following question using ONLY the provided reference documents. "
-        f"Cite the specific source for each claim you make.\n\n"
-        f"## Reference Documents\n\n{context_text}\n\n"
-        f"## Question\n{query}\n\n"
-        f"## Instructions\n"
-        f"1. Answer based strictly on the reference documents above.\n"
-        f"2. Cite sources inline using [Source Name, Section].\n"
-        f"3. If the documents don't contain enough information, say so clearly.\n"
-        f"4. End with a 'Sources' section listing all cited references.\n"
-        f"5. Output ONLY the final answer. Do NOT include any thinking process, internal monologue, or 'Here's a thinking process:'."
+        f"<reference_documents>\n{context_xml}\n</reference_documents>\n\n"
+        f"<user_query>\n{query}\n</user_query>\n\n"
+        "Provide a comprehensive, authoritative legal and technical response to the user's query above. "
+        "Ground your findings in the provided reference documents and established IP statutory principles. "
+        "Cite sources inline using [Source Name, Section]. "
+        "Begin immediately with the analysis."
     )

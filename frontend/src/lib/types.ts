@@ -25,6 +25,7 @@ export interface Message {
   confidence?: number;
   confidenceLevel?: ConfidenceLevel;
   timestamp?: string;
+  statutoryAlert?: { title: string; description: string } | null;
 }
 
 export interface ChatRequest {
@@ -43,6 +44,7 @@ export interface ChatResponse {
   jurisdiction: Jurisdiction;
   disclaimer: string;
   session_id?: string;
+  statutory_alert?: { title: string; description: string } | null;
 }
 
 export interface ClassifyRequest {
