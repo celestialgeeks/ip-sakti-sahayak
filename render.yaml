@@ -50,8 +50,8 @@ services:
   - type: web
     name: ipsakti-frontend
     runtime: node
-    buildCommand: cd frontend && npm install && npm run build -- --webpack
-    startCommand: cd frontend && node .next/standalone/server.js
+    buildCommand: cd frontend && npm install && npm run build -- --webpack && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
+    startCommand: cd frontend && HOSTNAME=0.0.0.0 PORT=$PORT node .next/standalone/server.js
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://ipsakti-api.onrender.com
