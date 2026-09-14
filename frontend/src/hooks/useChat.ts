@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { Message, Jurisdiction, ChatResponse } from "@/lib/types";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { getApiUrl } from "@/lib/api";
 
 /**
  * Hook for managing chat state, API communication, and Supabase session persistence.
@@ -122,22 +121,27 @@ export function useChat(initialSessionId?: string) {
         }
       } catch (e) {}
 
+      // 1. Safe Supabase lookup in isolated try-catch so auth checks never block the query
+      let session: any = null;
+      let user: any = null;
+      let supabaseClient: any = null;
       try {
         const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
+        supabaseClient = createClient();
+        const { data } = await supabaseClient.auth.getSession();
+        session = data?.session;
+        user = session?.user;
 
         // Persist session & user message to Supabase if authenticated
         if (user) {
           try {
-            await supabase.from("chat_sessions").upsert({
+            await supabaseClient.from("chat_sessions").upsert({
               id: activeSessionId,
               user_id: user.id,
               title: query.length > 55 ? query.slice(0, 52) + "..." : query,
             });
 
-            await supabase.from("chat_messages").insert({
+            await supabaseClient.from("chat_messages").insert({
               session_id: activeSessionId,
               role: "user",
               content: query,
@@ -146,10 +150,14 @@ export function useChat(initialSessionId?: string) {
             // Notify Sidebar to refresh list
             window.dispatchEvent(new Event("sessions_updated"));
           } catch (dbErr) {
-            console.warn("Supabase direct insert error (offline or RLS):", dbErr);
+            console.warn("Supabase user message persistence error:", dbErr);
           }
         }
+      } catch (authErr) {
+        console.warn("Non-fatal Supabase session error:", authErr);
+      }
 
+      try {
         const headers: Record<string, string> = { 
           "Content-Type": "application/json" 
         };
@@ -158,7 +166,8 @@ export function useChat(initialSessionId?: string) {
           headers["Authorization"] = `Bearer ${session.access_token}`;
         }
 
-        const res = await fetch(`${API_URL}/api/chat`, {
+        const apiUrl = getApiUrl();
+        const res = await fetch(`${apiUrl}/api/chat`, {
           method: "POST",
           headers,
           body: JSON.stringify({
@@ -174,7 +183,14 @@ export function useChat(initialSessionId?: string) {
         setIsWaking(false);
 
         if (!res.ok) {
-          throw new Error(`Chat API error: ${res.status}`);
+          let errorDetail = `Status ${res.status}`;
+          try {
+            const errData = await res.json();
+            if (errData?.detail) {
+              errorDetail = errData.detail;
+            }
+          } catch (e) {}
+          throw new Error(`Chat API error: ${errorDetail}`);
         }
 
         if (!res.body) throw new Error("No response body");
@@ -262,9 +278,9 @@ export function useChat(initialSessionId?: string) {
         }
 
         // Persist assistant response to Supabase after stream completes
-        if (user && currentContent) {
+        if (supabaseClient && user && currentContent) {
           try {
-            await supabase.from("chat_messages").insert({
+            await supabaseClient.from("chat_messages").insert({
               session_id: activeSessionId,
               role: "assistant",
               content: currentContent,
@@ -276,14 +292,15 @@ export function useChat(initialSessionId?: string) {
           }
         }
 
-      } catch (error) {
+      } catch (error: any) {
         clearTimeout(timeoutId);
         setIsWaking(false);
+        console.error("useChat fatal send error:", error);
         setMessages((prev) => {
           const newMsgs = [...prev];
           newMsgs[newMsgs.length - 1] = {
             role: "assistant",
-            content: "I apologize, but I'm unable to process your query at the moment. Please ensure the backend service is running and try again.",
+            content: `I apologize, but I encountered an error: ${error?.message || "unable to connect to backend service"}. Please ensure the service is online and try again.`,
             confidenceLevel: "low",
           };
           return newMsgs;

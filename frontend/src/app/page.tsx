@@ -6,6 +6,8 @@ import { Composer } from "@/components/chat/Composer";
 import { SignInModal } from "@/components/auth/SignInModal";
 import { useAuth } from "@/hooks/useAuth";
 
+import { getApiUrl } from "@/lib/api";
+
 export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -15,7 +17,7 @@ export default function HomePage() {
 
   // Wake up the backend service on load (useful for Render free tier)
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const apiUrl = getApiUrl();
     fetch(`${apiUrl}/api/health`).catch(() => {
       // Silently fail if there's an error, this is just a wake-up ping
     });

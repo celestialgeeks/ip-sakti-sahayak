@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getApiUrl } from "@/lib/api";
 
 export function StatsBar() {
   const [stats, setStats] = useState([
@@ -24,7 +25,7 @@ export function StatsBar() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/stats`);
+        const res = await fetch(`${getApiUrl()}/api/stats`);
         if (res.ok) {
           const data = await res.json();
           setStats([
