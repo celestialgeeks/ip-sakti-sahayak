@@ -145,6 +145,26 @@ Label:"""
             "id": result["id"],
         })
 
+    # Step 4b: Hybrid grounding — append curated Ayurvedic-library context so
+    # herb/formulation Q&A is anchored in the validated reference data too.
+    try:
+        from app.services.ayurveda_service import get_library
+
+        lib = get_library()
+        curated = lib.grounding_context(query, limit=3)
+        if curated:
+            context_chunks.append({
+                "text": curated,
+                "source": "IP-SAKTI Curated Ayurvedic Library",
+                "score": 0.95,
+                "jurisdiction": jurisdiction.value,
+                "category": "ayurveda_reference",
+                "confidence_tier": "high",
+                "id": "ayurveda-library",
+            })
+    except Exception as e:
+        logger.warning("Ayurveda library grounding skipped: %s", e)
+
     # Step 5: Build prompt
     system_prompt = build_system_prompt(jurisdiction)
     user_prompt = build_rag_prompt(query, context_chunks)

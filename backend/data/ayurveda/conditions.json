@@ -1,0 +1,74 @@
+{
+  "conditions": [
+    {
+      "id": "jwara",
+      "name": "Fever (acute & chronic)",
+      "sanskrit_name": "Jwara / Vishamajwara",
+      "description": "Febrile states classified by dosha involvement and periodicity; vishamajwara denotes irregular, relapsing fevers.",
+      "modern_equivalents": ["Viral fever", "Malaria-class periodic fevers", "Post-infectious low-grade fever"],
+      "related_plants": ["ocimum-sanctum", "piper-longum", "azadirachta-indica"],
+      "related_formulations": [],
+      "ip_notes": "Antipyretic uses of tulsi and neem decoctions are TKDL-documented prior art against modern therapeutic patents."
+    },
+    {
+      "id": "shwasa",
+      "name": "Breathing difficulty / Asthma-like states",
+      "sanskrit_name": "Shwasa Roga",
+      "description": "Five types of dyspnoea described in Charaka Sutrasthana 17, from exertional to critical (maha shwasa).",
+      "modern_equivalents": ["Asthma", "COPD", "Allergic bronchitis"],
+      "related_plants": ["withania-somnifera", "ocimum-sanctum", "piper-longum"],
+      "related_formulations": ["chyawanprash"],
+      "ip_notes": "Adhatoda vasika + pippali combinations for shwasa are classic TKDL citations used in USPTO rejections."
+    },
+    {
+      "id": "sandhivata",
+      "name": "Joint degeneration / Osteoarthritis",
+      "sanskrit_name": "Sandhivata (Amavata for inflammatory type)",
+      "description": "Vata-aggravation in the joints with ama involvement; distinguishes degenerative (sandhivata) vs inflammatory (amavata).",
+      "modern_equivalents": ["Osteoarthritis", "Rheumatoid arthritis (amavata)"],
+      "related_plants": ["boswellia-serrata", "terminalia-arjuna", "withania-somnifera"],
+      "related_formulations": ["triphala-guggulu"],
+      "ip_notes": "Boswellia serrata standardization patents coexist with TKDL-documented guggulu yogas for sandhivata."
+    },
+    {
+      "id": "kustha",
+      "name": "Skin disorders",
+      "sanskrit_name": "Kushtha",
+      "description": "Seven types of skin disease in classical texts, spanning dry/exudative and inherited/acquired forms.",
+      "modern_equivalents": ["Eczema", "Psoriasis", "Scabies (krimi-associated)", "Acne"],
+      "related_plants": ["azadirachta-indica", "curcuma-longa", "glycyrrhiza-glabra"],
+      "related_formulations": ["neem-taila"],
+      "ip_notes": "Turmeric's wound/skin utility was the basis of the landmark 1997 US patent revocation that created TKDL."
+    },
+    {
+      "id": "ameha",
+      "name": "Sugar-balance disorder",
+      "sanskrit_name": "Prameha / Madhumeha",
+      "description": "Twenty types of prameha; madhumeha (honey-urine) maps closest to diabetes mellitus in modern reading.",
+      "modern_equivalents": ["Type 2 diabetes", "Metabolic syndrome"],
+      "related_plants": ["trigonella-foenum-graecum", "emblica-officinalis", "azadirachta-indica"],
+      "related_formulations": [],
+      "ip_notes": "Fenugreek and gymnema glucose-management uses documented in TKDL blocked several 'novel use' patent applications at EPO/USPTO."
+    },
+    {
+      "id": "medoroga",
+      "name": "Obesity / Lipid disorders",
+      "sanskrit_name": "Medoroga / Sthaulya",
+      "description": "Disorders of meda dhatu (fat tissue), linked to kapha accumulation and mandagni (low digestive fire).",
+      "modern_equivalents": ["Obesity", "Hyperlipidemia"],
+      "related_plants": ["boswellia-serrata", "piper-longum"],
+      "related_formulations": ["triphala-guggulu"],
+      "ip_notes": "Guggulu-based lipid formulations sit at the intersection of TKDL prior art and modern phytopharmaceutical patent strategy."
+    },
+    {
+      "id": "arsha",
+      "name": "Piles / Hemorrhoids",
+      "sanskrit_name": "Arsha",
+      "description": "Four types based on predominant dosha; associated with mandagni and dviguna kapha-mala accumulation.",
+      "modern_equivalents": ["Hemorrhoids", "Anal fissure adjunct care"],
+      "related_plants": ["emblica-officinalis", "plumbago-zeylanica"],
+      "related_formulations": ["triphala-churna"],
+      "ip_notes": "Kasisadi and triphala-based arsha preparations are Schedule T classical entries with TKDL-backed composition art."
+    }
+  ]
+}

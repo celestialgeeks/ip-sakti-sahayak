@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings, validate_settings
 from app.api.middleware.rate_limit import RateLimitMiddleware
-from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats
+from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda
 
 logger = logging.getLogger("app.main")
 
@@ -29,6 +29,15 @@ async def lifespan(app: FastAPI):
         await sqlite_service.initialize()
     except Exception as e:
         logger.error("SQLite initialization failed: %s", e)
+
+    # Fail-fast load of the curated Ayurvedic library (surfaces bad data loudly).
+    try:
+        from app.services.ayurveda_service import get_library
+
+        get_library()
+    except Exception as e:
+        logger.error("Ayurvedic library failed to load: %s", e)
+        raise
 
     # Self-heal ephemeral Qdrant (free tier wipes on restart): reseed if empty.
     try:
@@ -77,3 +86,4 @@ app.include_router(sources.router, prefix="/api", tags=["Sources"])
 app.include_router(translate.router, prefix="/api", tags=["Translation"])
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(ingest.router, prefix="/api", tags=["Ingestion"])
+app.include_router(ayurveda.router, prefix="/api", tags=["Ayurvedic Library"])
