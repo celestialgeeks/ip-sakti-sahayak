@@ -2,6 +2,10 @@
 Qdrant Service — Vector database operations for RAG.
 """
 
+import logging
+
+logger = logging.getLogger("app.qdrant_service")
+
 from typing import List, Optional, Dict, Any
 import json
 
@@ -46,11 +50,11 @@ class QdrantService:
                             distance=qmodels.Distance.COSINE
                         )
                     )
-                    print(f"✅ Created collection: {collection.value}")
+                    logger.info("✅ Created collection: {collection.value}")
                 except Exception as e:
-                    print(f"⚠️ Could not create {collection.value}: {e}")
+                    logger.info("⚠️ Could not create {collection.value}: {e}")
         except Exception as e:
-            print(f"Error ensuring collections: {e}")
+            logger.info("Error ensuring collections: {e}")
 
     async def get_collection_stats(self) -> dict:
         """Get total points across all collections."""
@@ -64,7 +68,7 @@ class QdrantService:
                 except Exception:
                     pass
         except Exception as e:
-            print(f"Error fetching stats: {e}")
+            logger.info("Error fetching stats: {e}")
             
         return {
             "total_points": total_points,
@@ -209,7 +213,7 @@ class QdrantService:
                 try:
                     from app.core.seed import seed_collection
 
-                    print(f"🔄 {coll} missing, reseeding on demand...")
+                    logger.info("🔄 {coll} missing, reseeding on demand...")
                     await seed_collection(coll)
                     results = await self.search(
                         collection=coll,
@@ -219,9 +223,9 @@ class QdrantService:
                     )
                     all_results.extend(results)
                 except Exception as e:
-                    print(f"⚠️ Error searching {coll}: {e}")
+                    logger.info("⚠️ Error searching {coll}: {e}")
             except Exception as e:
-                print(f"⚠️ Error searching {coll}: {e}")
+                logger.info("⚠️ Error searching {coll}: {e}")
 
         # Sort by score descending, take top-k
         all_results.sort(key=lambda x: x["score"], reverse=True)

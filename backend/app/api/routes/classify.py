@@ -3,25 +3,31 @@ Formulation classification endpoint.
 Determines product category: Classical, Proprietary, New Drug, Phytopharmaceutical, Aahar, Cosmetic.
 """
 
-from fastapi import APIRouter
+import logging
 
+from fastapi import APIRouter, HTTPException
+
+from app.core.classifier import classify_formulation
 from app.models.schemas import ClassifyRequest, ClassifyResponse
 
+logger = logging.getLogger("app.classify")
 router = APIRouter()
 
 
-@router.post("/classify")
-async def classify_formulation(request: ClassifyRequest):
+@router.post("/classify", response_model=ClassifyResponse)
+async def classify_formulation_endpoint(request: ClassifyRequest):
     """
     Classify an Ayurvedic formulation into its regulatory category.
     Returns the category, applicable IP protections, regulatory pathway, and ABS obligations.
     """
-    # TODO: Implement classification logic
-    return ClassifyResponse(
-        category="unknown",
-        description="Classification not yet implemented.",
-        ip_protections=[],
-        regulatory_pathway="",
-        abs_obligations="",
-        tkdl_implications="",
-    )
+    try:
+        return classify_formulation(
+            formulation_name=request.formulation_name,
+            description=request.description,
+            ingredients=request.ingredients,
+            is_in_authoritative_text=request.is_in_authoritative_text,
+            intended_use=request.intended_use,
+        )
+    except Exception as e:  # pragma: no cover - defensive
+        logger.exception("Classification failed")
+        raise HTTPException(status_code=500, detail="Classification failed. Please retry.") from e

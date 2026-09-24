@@ -2,29 +2,45 @@
 IP-SAKTI Sahayak — FastAPI Application Entry Point
 """
 
+import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
+from app.config import settings, validate_settings
+from app.api.middleware.rate_limit import RateLimitMiddleware
 from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats
+
+logger = logging.getLogger("app.main")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown hooks."""
     # --- Startup ---
-    print(f"🚀 Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+    logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
+    for problem in validate_settings():
+        logger.warning("Config problem: %s", problem)
+
+    try:
+        from app.services.sqlite_service import sqlite_service
+
+        await sqlite_service.initialize()
+    except Exception as e:
+        logger.error("SQLite initialization failed: %s", e)
+
     # Self-heal ephemeral Qdrant (free tier wipes on restart): reseed if empty.
     try:
         from app.core.seed import seed_corpus_if_empty
 
         await seed_corpus_if_empty()
     except Exception as e:
-        print(f"⚠️ Boot seed failed (chat will report low confidence): {e}")
+        logger.warning("Boot seed failed (chat will report low confidence): %s", e)
+
     yield
     # --- Shutdown ---
-    print(f"👋 Shutting down {settings.APP_NAME}")
+    logger.info("Shutting down %s", settings.APP_NAME)
 
 
 app = FastAPI(
@@ -37,16 +53,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# --- CORS ---
-origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",")]
+# --- CORS (origins strictly from env config; never a wildcard with credentials) ---
+_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+assert "*" not in _origins, "CORS_ORIGINS must not contain '*' while allow_credentials=True"
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_origin_regex=r"^https:\/\/.*\.onrender\.com$|^http:\/\/localhost(:\d+)?$",
+    allow_origins=_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+# --- Rate limiting on cost-bearing endpoints ---
+app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.RATE_LIMIT_PER_MINUTE)
 
 # --- Routes ---
 app.include_router(health.router, prefix="/api", tags=["Health"])
