@@ -178,9 +178,15 @@ async def test_chat_with_auth_header(async_client: AsyncClient, mock_supabase_se
         "jurisdiction": "india",
         "session_id": "test-session-123",
     }
-    # Unsigned token payload with sub="user_456"
+    import time
     import jwt
-    token = jwt.encode({"sub": "user_456"}, "secret", algorithm="HS256")
+    from app.config import settings
+    settings.JWT_SECRET = "test-secret-key-123"
+    token = jwt.encode(
+        {"sub": "user_456", "aud": "authenticated", "exp": int(time.time()) + 3600},
+        "test-secret-key-123",
+        algorithm="HS256",
+    )
 
     response = await async_client.post(
         "/api/chat",
