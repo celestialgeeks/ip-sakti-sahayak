@@ -1,0 +1,84 @@
+[
+  {
+    "id": "rev_3_2_benchmark",
+    "title": "Synergistic Ashwagandha-Shilajit-Curcumin Compound (Rev. 3.2)",
+    "description": "Standard high-potency benchmark formulation designed to overcome Indian Patents Act Section 3(e) with proven NF-κB inhibition and BDA compliance.",
+    "target_tier": "vriddha",
+    "ingredients": [
+      { "herb_id": "ashwagandha", "ratio": 40.0, "is_locked": false },
+      { "herb_id": "shilajit", "ratio": 10.0, "is_locked": false },
+      { "herb_id": "haridra", "ratio": 30.0, "is_locked": true },
+      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
+      { "herb_id": "ghee", "ratio": 15.0, "is_locked": false }
+    ],
+    "baseline_ratios": {
+      "ashwagandha": 30.0,
+      "shilajit": 20.0,
+      "haridra": 30.0,
+      "pippali": 5.0,
+      "ghee": 15.0
+    }
+  },
+  {
+    "id": "rasayana_matrix",
+    "title": "⚡ Rejuvenative Rasayana Matrix (Ashwagandha Base)",
+    "description": "Ojas-building classical rejuvenation compound with immunomodulating adaptogens and lipid liposomal carrier.",
+    "target_tier": "siddha",
+    "ingredients": [
+      { "herb_id": "ashwagandha", "ratio": 35.0, "is_locked": false },
+      { "herb_id": "amla", "ratio": 25.0, "is_locked": false },
+      { "herb_id": "guduchi", "ratio": 15.0, "is_locked": false },
+      { "herb_id": "shilajit", "ratio": 10.0, "is_locked": false },
+      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
+      { "herb_id": "ghee", "ratio": 10.0, "is_locked": false }
+    ],
+    "baseline_ratios": {
+      "ashwagandha": 30.0,
+      "amla": 25.0,
+      "guduchi": 15.0,
+      "shilajit": 15.0,
+      "pippali": 5.0,
+      "ghee": 10.0
+    }
+  },
+  {
+    "id": "anti_inflammatory_catalyst",
+    "title": "🛡️ Anti-Inflammatory Haridra-Pippali Catalyst",
+    "description": "Targeted COX-2 and NF-κB inflammatory cascade inhibitor combining standardized Curcuminoids with Piperine bio-enhancement.",
+    "target_tier": "divya_rasayana",
+    "ingredients": [
+      { "herb_id": "haridra", "ratio": 45.0, "is_locked": false },
+      { "herb_id": "guggulu", "ratio": 25.0, "is_locked": false },
+      { "herb_id": "ashwagandha", "ratio": 15.0, "is_locked": false },
+      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
+      { "herb_id": "ghee", "ratio": 10.0, "is_locked": false }
+    ],
+    "baseline_ratios": {
+      "haridra": 40.0,
+      "guggulu": 30.0,
+      "ashwagandha": 15.0,
+      "pippali": 5.0,
+      "ghee": 10.0
+    }
+  },
+  {
+    "id": "medhya_neuro_enhancer",
+    "title": "🧠 Medhya Cognitive Neuro-Enhancer (Brahmi Base)",
+    "description": "Nootropic brain tonic designed for synaptic plasticity, memory retention, and mental fatigue mitigation.",
+    "target_tier": "siddha",
+    "ingredients": [
+      { "herb_id": "brahmi", "ratio": 40.0, "is_locked": false },
+      { "herb_id": "shankhpushpi", "ratio": 30.0, "is_locked": false },
+      { "herb_id": "ashwagandha", "ratio": 15.0, "is_locked": false },
+      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
+      { "herb_id": "ghee", "ratio": 10.0, "is_locked": false }
+    ],
+    "baseline_ratios": {
+      "brahmi": 35.0,
+      "shankhpushpi": 30.0,
+      "ashwagandha": 20.0,
+      "pippali": 5.0,
+      "ghee": 10.0
+    }
+  }
+]

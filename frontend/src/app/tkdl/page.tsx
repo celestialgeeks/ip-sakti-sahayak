@@ -155,7 +155,7 @@ export default function TKDLPage() {
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-[#00263f] tracking-tight">
-              TKDL Classical Knowledge & Ayurvedic Formulation Registry
+              Ayurvedic Library & Classical Knowledge Registry
             </h1>
 
             <p className="text-sm text-slate-600 leading-relaxed">

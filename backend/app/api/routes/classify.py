@@ -28,6 +28,6 @@ async def classify_formulation_endpoint(request: ClassifyRequest):
             is_in_authoritative_text=request.is_in_authoritative_text,
             intended_use=request.intended_use,
         )
-    except Exception as e:  # pragma: no cover - defensive
+    except Exception as e:
         logger.exception("Classification failed")
         raise HTTPException(status_code=500, detail="Classification failed. Please retry.") from e
