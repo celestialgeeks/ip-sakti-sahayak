@@ -1,7 +1,28 @@
 # Compiled and build artifacts
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+
+# OS
+.DS_Store
 
 # Environment
 .env
 .env.local
+
+# Databases & local stores
+data/
+*.db
+backend/data/qdrant/
+backend/data/qdrant/*
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Python Virtualenvs
+venv/
+backend/venv/
+.venv/
