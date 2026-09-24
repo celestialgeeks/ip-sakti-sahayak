@@ -8,6 +8,7 @@ interface GenesisOrbLandingProps {
   botanicals: BotanicalItem[];
   onSelectPreset: (preset: PresetFormulation) => void;
   onAddHerb: (herbId: string, defaultRatio?: number) => void;
+  onStartBlank?: () => void;
 }
 
 export function GenesisOrbLanding({
@@ -15,6 +16,7 @@ export function GenesisOrbLanding({
   botanicals,
   onSelectPreset,
   onAddHerb,
+  onStartBlank,
 }: GenesisOrbLandingProps) {
   return (
     <div className="w-full max-w-7xl mx-auto py-8 space-y-10">
@@ -38,21 +40,67 @@ export function GenesisOrbLanding({
             </h1>
             <p className="text-sm text-slate-600 leading-relaxed">
               Design and evaluate botanical formulations against statutory patentability barriers.
-              Simulate stoichiometric dosage variations in real time to calculate the{" "}
-              <strong className="text-slate-900 font-semibold">Chou-Talalay Combination Index (CI)</strong>, verify{" "}
-              <strong className="text-slate-900 font-semibold">Section 3(e)</strong> non-obvious synergism, and determine{" "}
-              <strong className="text-slate-900 font-semibold">National Biodiversity Authority (NBA)</strong> Access and Benefit-Sharing obligations.
+              Simulate stoichiometric dosage variations in real time to balance{" "}
+              <strong className="text-slate-900 font-semibold">Medicine Quality &amp; Clinical Efficacy</strong> against{" "}
+              <strong className="text-slate-900 font-semibold">Statutory Patentability Scope</strong>, overcoming Section 3(e) mere admixture objections and Section 3(p) traditional knowledge anticipation.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="text-right hidden sm:block">
-              <span className="text-[11px] font-mono uppercase text-slate-400 block">Simulation Engine</span>
-              <span className="text-xs font-semibold text-emerald-700 flex items-center justify-end gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                Active · 0ms Client Latency
+            {onStartBlank && (
+              <button
+                type="button"
+                onClick={onStartBlank}
+                className="px-4 py-2.5 rounded-lg bg-[#00263f] hover:bg-[#00385d] text-white text-xs font-semibold shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+              >
+                <span>＋ Start Blank Formulation</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Visual 3-Step User Flow Explainer ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200/80">
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-[#00263f] text-white text-[11px] font-bold flex items-center justify-center font-mono">
+                1
+              </span>
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Add Constituents &amp; Ratios
               </span>
             </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Start with custom botanicals or load a classical benchmark. Adjust constituent percentages to simulate compounding ratios.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-[#00263f] text-white text-[11px] font-bold flex items-center justify-center font-mono">
+                2
+              </span>
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Live Quality vs Patentability
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              The real-time engine maps Medicine Quality against Patentability Scope, tracking Chou-Talalay CI and the Golden Synergy quadrant.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-[#00263f] text-white text-[11px] font-bold flex items-center justify-center font-mono">
+                3
+              </span>
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Safety &amp; Directives
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Inspect patient clinical toxicity warnings for high constituent doses, view pros &amp; cons, and apply 1-click optimization directives.
+            </p>
           </div>
         </div>
       </div>

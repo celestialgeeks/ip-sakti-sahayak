@@ -48,7 +48,7 @@ export function DisclaimerBanner({ text }: { text: string }) {
   );
 }
 
-export function relatedHref(entry: RelatedEntry): string {
+export function relatedHref(entry: { type: string; id: string }): string {
   if (entry.type === "plant") return `/ayurveda/plants/${entry.id}`;
   if (entry.type === "formulation") return `/ayurveda/formulations/${entry.id}`;
   return `/ayurveda/conditions/${entry.id}`;

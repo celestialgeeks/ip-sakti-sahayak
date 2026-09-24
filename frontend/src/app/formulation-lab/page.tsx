@@ -13,6 +13,10 @@ import { simulateClientFormulation } from "@/lib/formulation/engine.ts";
 import { GenesisOrbLanding } from "@/components/formulation-lab/GenesisOrbLanding";
 import { RatioMatrixBoard } from "@/components/formulation-lab/RatioMatrixBoard";
 import { LivingRasaCard } from "@/components/formulation-lab/LivingRasaCard";
+import { QualityPatentabilityMatrix } from "@/components/formulation-lab/QualityPatentabilityMatrix";
+import { PatientSafetyPanel } from "@/components/formulation-lab/PatientSafetyPanel";
+import { ProsAndConsPanel } from "@/components/formulation-lab/ProsAndConsPanel";
+import { OptimizationDirectivesPanel } from "@/components/formulation-lab/OptimizationDirectivesPanel";
 import { StatutoryAccordions } from "@/components/formulation-lab/StatutoryAccordions";
 import { OptimizationToast } from "@/components/formulation-lab/OptimizationToast";
 import { PreFERModal } from "@/components/formulation-lab/PreFERModal";
@@ -63,6 +67,15 @@ export default function FormulationLabPage() {
       setToastMessage(null);
     }
   }, [simulation.suggestions]);
+
+  // Handler: Start with blank custom formulation
+  const handleStartBlank = useCallback(() => {
+    setFormulationTitle("Custom Compound Formulation (Draft)");
+    setActivePresetId("custom_draft");
+    setIngredients([]);
+    setBaselineRatios({});
+    setIsGenesisLanding(false);
+  }, []);
 
   // Handler: Select Starter Preset from Genesis or Switcher
   const handleSelectPreset = useCallback(
@@ -147,6 +160,24 @@ export default function FormulationLabPage() {
     );
   }, [baselineRatios]);
 
+  // Handler: Apply 1-click optimization directives
+  const handleApplyDirective = useCallback(
+    (
+      actionType: "add" | "increase" | "decrease" | "remove",
+      herbId: string,
+      targetRatio: number
+    ) => {
+      if (actionType === "add") {
+        handleAddHerb(herbId, targetRatio);
+      } else if (actionType === "increase" || actionType === "decrease") {
+        handleRatioChange(herbId, targetRatio);
+      } else if (actionType === "remove") {
+        handleRemoveHerb(herbId);
+      }
+    },
+    [handleAddHerb, handleRatioChange, handleRemoveHerb]
+  );
+
   // Handler: Apply Toast recommendation
   const handleApplyToastSuggestion = useCallback(() => {
     if (!toastMessage) return;
@@ -218,10 +249,8 @@ export default function FormulationLabPage() {
           abs_clearance_status: simulation.nba_form_tier,
         },
         recommended_claim_draft: [
-          `1. A synergistic Ayurvedic pharmaceutical composition comprising: ${ingredients
-            .map((i) => `${i.herb_id} (${i.ratio.toFixed(1)}% w/w)`)
-            .join(", ")}, wherein the Combination Index CI < ${(simulation.chou_talalay_ci + 0.1).toFixed(2)}.`,
-          "2. The composition as claimed in claim 1, exhibiting at least 2.5x enhanced mucosal bioavailability.",
+          `1. A synergistic pharmaceutical composition comprising standardized Withania somnifera extract, purified Asphaltum punjabianum, Curcuma longa extract, characterized in that the constituents are compounded in a stoichiometric ratio having a Chou-Talalay combination index CI < 0.75.`,
+          `2. The composition of claim 1, further comprising Piper longum (3.0% to 6.0% w/w) acting as a pharmacokinetic bio-availability enhancer.`,
         ],
       });
     } finally {
@@ -272,7 +301,7 @@ export default function FormulationLabPage() {
             {isGenesisLanding ? (
               <button
                 onClick={() => setIsGenesisLanding(false)}
-                className="px-3.5 py-2 rounded text-xs font-semibold bg-[#00263f] hover:bg-[#083b5c] text-white transition-colors"
+                className="px-3.5 py-2 rounded text-xs font-semibold bg-[#00263f] hover:bg-[#083b5c] text-white transition-colors cursor-pointer"
               >
                 Open Active Workbench →
               </button>
@@ -280,7 +309,7 @@ export default function FormulationLabPage() {
               <>
                 <button
                   onClick={() => setIsGenesisLanding(true)}
-                  className="px-3 py-1.5 rounded text-xs font-medium border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors"
+                  className="px-3 py-1.5 rounded text-xs font-medium border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
                 >
                   ← Setup Hub
                 </button>
@@ -298,6 +327,7 @@ export default function FormulationLabPage() {
                       {p.title}
                     </option>
                   ))}
+                  <option value="custom_draft">Custom Blank Compound</option>
                 </select>
               </>
             )}
@@ -311,6 +341,7 @@ export default function FormulationLabPage() {
             botanicals={botanicals}
             onSelectPreset={handleSelectPreset}
             onAddHerb={handleAddHerb}
+            onStartBlank={handleStartBlank}
           />
         ) : (
           <div className="space-y-6">
@@ -338,7 +369,10 @@ export default function FormulationLabPage() {
               </div>
             </div>
 
-            {/* 2-Column Responsive Layout: Matrix (7-cols) + Technical Dossier Card (5-cols) */}
+            {/* ── 1. Quality & Patentability Correlation Matrix (Primary Visualizer) ── */}
+            <QualityPatentabilityMatrix simulation={simulation} />
+
+            {/* ── 2. Ratio Matrix Board (Constituents) + Living Rasa Card ── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-7">
                 <RatioMatrixBoard
@@ -361,7 +395,19 @@ export default function FormulationLabPage() {
               </div>
             </div>
 
-            {/* Structured Statutory Accordions */}
+            {/* ── 3. Patient Clinical Safety & High-Quantity Toxicological Hazards ── */}
+            <PatientSafetyPanel simulation={simulation} />
+
+            {/* ── 4. Formulation Pros & Cons Breakdown ── */}
+            <ProsAndConsPanel simulation={simulation} />
+
+            {/* ── 5. Actionable Optimization Directives: How to Improve & What to Remove ── */}
+            <OptimizationDirectivesPanel
+              simulation={simulation}
+              onApplyDirective={handleApplyDirective}
+            />
+
+            {/* ── 6. Structured Statutory Accordions ── */}
             <StatutoryAccordions
               simulation={simulation}
               onRunPreFER={handleRunPreFER}

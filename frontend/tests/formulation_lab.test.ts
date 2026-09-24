@@ -49,3 +49,54 @@ test("Formulation Lab Suite: Suboptimal Mere Admixture Detection", () => {
   assert.ok(result.active_debuffs.some((d) => d.includes("Lacks Yogavāhī")));
   assert.strictEqual(result.nba_abs_royalty_percentage, 5.0, "High mineral Shilajit (35%) triggers 5% levy");
 });
+
+test("Formulation Lab Suite: Quality vs Patentability Correlation and Quadrant", () => {
+  const balancedSynergistic = [
+    { herb_id: "ashwagandha", ratio: 35.0 },
+    { herb_id: "haridra", ratio: 35.0 },
+    { herb_id: "pippali", ratio: 5.0 },
+    { herb_id: "ghee", ratio: 15.0 },
+    { herb_id: "guduchi", ratio: 10.0 },
+  ];
+
+  const res = simulateClientFormulation("Synergistic Gold", balancedSynergistic, "domestic");
+
+  // Verify Quality & Patentability metrics
+  assert.ok(res.medicine_quality_score >= 70, `Expected quality >= 70, got ${res.medicine_quality_score}`);
+  assert.ok(res.patentability_scope_score >= 70, `Expected patentability >= 70, got ${res.patentability_scope_score}`);
+  assert.strictEqual(res.quadrant, "GOLDEN_SYNERGY");
+  assert.strictEqual(res.quadrant_label, "Golden Quadrant (Novel Synergistic Formulation)");
+
+  // Verify Pros and Cons are populated
+  assert.ok(res.pros.length >= 2, "Expected at least 2 pros");
+  assert.ok(res.pros.some((p) => p.includes("Super-Additive") || p.includes("Synergy")));
+});
+
+test("Formulation Lab Suite: Patient Clinical Safety & High-Quantity Toxicological Hazards", () => {
+  // Formulation with toxic / excessive Pippali (12%) and Shilajit (25%)
+  const hazardousFormula = [
+    { herb_id: "ashwagandha", ratio: 20.0 },
+    { herb_id: "shilajit", ratio: 25.0 },
+    { herb_id: "haridra", ratio: 20.0 },
+    { herb_id: "pippali", ratio: 12.0 }, // >8% triggers CRITICAL gastric and CYP3A4 warning
+    { herb_id: "ghee", ratio: 23.0 },
+  ];
+
+  const res = simulateClientFormulation("Hazard Formula", hazardousFormula, "domestic");
+
+  assert.ok(res.patient_safety_warnings.length >= 2, "Expected safety warnings for excess Pippali and Shilajit");
+  assert.strictEqual(res.overall_safety_rating, "HIGH_TOXICITY_RISK");
+
+  const pippaliWarning = res.patient_safety_warnings.find((w) => w.herb_id === "pippali");
+  assert.ok(pippaliWarning, "Expected Pippali warning");
+  assert.strictEqual(pippaliWarning.severity, "CRITICAL");
+  assert.ok(pippaliWarning.hazard.includes("CYP3A4") || pippaliWarning.hazard.includes("Gastric"));
+  assert.ok(pippaliWarning.clinical_manifestation.length > 0);
+
+  // Verify "what to remove" identifies reducing Pippali
+  assert.ok(
+    res.what_to_remove.some((r) => r.herb_id === "pippali"),
+    "Expected directive to reduce Pippali"
+  );
+});
+

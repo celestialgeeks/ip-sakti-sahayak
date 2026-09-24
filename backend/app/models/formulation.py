@@ -77,6 +77,21 @@ class SimulationResponse(BaseModel):
     bioavailability_multiplier: float
     anti_inflammatory_suppression: float
     ojas_power_score: int
+    medicine_quality_score: int = 75
+    patentability_scope_score: int = 70
+    quality_delta: float = 0.0
+    patentability_delta: float = 0.0
+    quality_trend: str = "STABLE"
+    patentability_trend: str = "STABLE"
+    quadrant: str = "GOLDEN_SYNERGY"
+    quadrant_label: str = "Golden Quadrant (Novel Synergistic Formulation)"
+    quadrant_description: str = ""
+    pros: List[str] = Field(default_factory=list)
+    cons: List[str] = Field(default_factory=list)
+    how_to_improve: List[Dict[str, Any]] = Field(default_factory=list)
+    what_to_remove: List[Dict[str, Any]] = Field(default_factory=list)
+    patient_safety_warnings: List[Dict[str, Any]] = Field(default_factory=list)
+    overall_safety_rating: str = "EXCELLENT"
     tier: RasaTier
     tier_sanskrit: str
     tier_english: str

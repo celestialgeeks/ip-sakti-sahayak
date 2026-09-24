@@ -70,6 +70,24 @@ export interface CostWaterfallItem {
   unit: string;
 }
 
+export interface PatientSafetyHazard {
+  herb_id: string;
+  herb_name: string;
+  current_dose_percent: number;
+  severity: "CRITICAL" | "WARNING" | "INFO";
+  hazard: string;
+  clinical_manifestation: string;
+  affected_populations: string[];
+  safe_limit: string;
+}
+
+export interface OptimizationDirective {
+  text: string;
+  action_type: "add" | "increase" | "decrease" | "remove";
+  herb_id: string;
+  target_ratio: number;
+}
+
 export interface SimulationResult {
   title: string;
   total_ratio: number;
@@ -80,6 +98,21 @@ export interface SimulationResult {
   bioavailability_multiplier: number;
   anti_inflammatory_suppression: number;
   ojas_power_score: number;
+  medicine_quality_score: number;
+  patentability_scope_score: number;
+  quality_delta: number;
+  patentability_delta: number;
+  quality_trend: "SURGE" | "STABLE" | "DECLINE";
+  patentability_trend: "SURGE" | "STABLE" | "DECLINE";
+  quadrant: "GOLDEN_SYNERGY" | "CLASSICAL_TRAP" | "MERE_ADMIXTURE" | "NOVEL_DEFICIENT";
+  quadrant_label: string;
+  quadrant_description: string;
+  pros: string[];
+  cons: string[];
+  how_to_improve: OptimizationDirective[];
+  what_to_remove: OptimizationDirective[];
+  patient_safety_warnings: PatientSafetyHazard[];
+  overall_safety_rating: "EXCELLENT" | "MODERATE_CAUTION" | "HIGH_TOXICITY_RISK";
   tier: RasaTierId;
   tier_sanskrit: string;
   tier_english: string;

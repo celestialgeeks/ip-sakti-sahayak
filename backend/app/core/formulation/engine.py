@@ -318,14 +318,255 @@ def simulate_formulation(req: FormulationSimulateRequest) -> SimulationResponse:
         { "stage": "Projected Net Commercial Margin", "cost_inr": round(140.0 - (42.0 + 18.5 + 9.2 + (140.0 * (abs_royalty / 100.0))), 2), "unit": "Healthy 43% EBITDA" }
     ]
 
-    # 13. Contextual Suggestions for Toast
-    suggestions: List[str] = []
+    # 13. Patient Clinical Safety & Toxicity Hazard Evaluation
+    patient_safety_warnings: List[Dict[str, Any]] = []
+
+    if pippali > 8.0:
+        patient_safety_warnings.append({
+            "herb_id": "pippali",
+            "herb_name": "Pippali (Piper longum)",
+            "current_dose_percent": pippali,
+            "severity": "CRITICAL",
+            "hazard": "Gastric Mucosal Hyperacidity & CYP3A4 Hepatic Inhibition",
+            "clinical_manifestation": "Severe epigastric burning, reflux, and dangerous elevation of co-administered prescription drug serum levels (statins, warfarin, calcium channel blockers).",
+            "affected_populations": ["Patients with GERD or active peptic ulcers", "Patients on prescription anticoagulants/cardiac drugs"],
+            "safe_limit": "API Standard: Max 3.0% - 6.0% w/w (<= 500mg/day)"
+        })
+    elif pippali > 6.0:
+        patient_safety_warnings.append({
+            "herb_id": "pippali",
+            "herb_name": "Pippali (Piper longum)",
+            "current_dose_percent": pippali,
+            "severity": "WARNING",
+            "hazard": "Elevated Thermogenic Agni & Minor GI Irritation",
+            "clinical_manifestation": "Mild heartburn and increased Pitta dosha in susceptible individuals.",
+            "affected_populations": ["Individuals with Paittika constitution"],
+            "safe_limit": "Recommended: <= 5.0% w/w"
+        })
+
+    if ashwa > 45.0:
+        patient_safety_warnings.append({
+            "herb_id": "ashwagandha",
+            "herb_name": "Ashwagandha (Withania somnifera)",
+            "current_dose_percent": ashwa,
+            "severity": "WARNING",
+            "hazard": "Excessive CNS Sedation & Thyroid Over-Stimulation",
+            "clinical_manifestation": "Daytime lethargy, marked somnolence, elevated free T3/T4 thyroid hormone levels, and gastrointestinal cramps.",
+            "affected_populations": ["Patients with Hyperthyroidism", "Operators of heavy machinery", "Pregnant individuals (uterine spasm risk)"],
+            "safe_limit": "API Part-I: Max 30.0% - 40.0% w/w in multi-herb compounded extracts"
+        })
+
+    if shilajit > 20.0:
+        patient_safety_warnings.append({
+            "herb_id": "shilajit",
+            "herb_name": "Shilajit (Asphaltum punjabianum)",
+            "current_dose_percent": shilajit,
+            "severity": "CRITICAL",
+            "hazard": "Fulvic-Mineral Surcharge & Hyperuricemia Exacerbation",
+            "clinical_manifestation": "Elevated serum uric acid triggering acute gout attacks; renal microvascular strain from excessive mineral resin burden.",
+            "affected_populations": ["Patients with active gout / hyperuricemia", "Renal insufficiency patients", "Patients with hypotensive tendency"],
+            "safe_limit": "Ayurvedic Pharmacopoeia: Max 10.0% - 15.0% w/w (100 - 250mg per unit dose)"
+        })
+
+    if haridra > 35.0:
+        patient_safety_warnings.append({
+            "herb_id": "haridra",
+            "herb_name": "Haridra (Curcuma longa)",
+            "current_dose_percent": haridra,
+            "severity": "WARNING",
+            "hazard": "Biliary Hyper-Contraction & Antiplatelet Aggregation",
+            "clinical_manifestation": "Severe biliary colic in patients with undiagnosed gallstones; increased bleeding tendency in perioperative settings.",
+            "affected_populations": ["Patients with Cholelithiasis (gallstones)", "Patients scheduled for elective surgery (discontinue 14 days prior)"],
+            "safe_limit": "Max 25.0% - 30.0% w/w in concentrated extracts"
+        })
+
+    if guggulu > 25.0:
+        patient_safety_warnings.append({
+            "herb_id": "guggulu",
+            "herb_name": "Guggulu (Commiphora mukul)",
+            "current_dose_percent": guggulu,
+            "severity": "WARNING",
+            "hazard": "Cutaneous Allergic Dermatitis & Uterine Tone Stimulation",
+            "clinical_manifestation": "Maculopapular allergic skin eruptions, diarrhea, and mild uterine cramping.",
+            "affected_populations": ["Pregnant or lactating women", "Individuals with hypersensitive dermatological history"],
+            "safe_limit": "Max 15.0% - 20.0% w/w"
+        })
+
+    if guduchi > 25.0:
+        patient_safety_warnings.append({
+            "herb_id": "guduchi",
+            "herb_name": "Guduchi (Tinospora cordifolia)",
+            "current_dose_percent": guduchi,
+            "severity": "INFO",
+            "hazard": "Enhanced Hypoglycemic Potentiation",
+            "clinical_manifestation": "Risk of excessive blood glucose drops when administered alongside oral anti-diabetic agents or insulin.",
+            "affected_populations": ["Diabetic patients on pharmacological hypoglycemia therapies"],
+            "safe_limit": "Max 15.0% - 20.0% w/w"
+        })
+
+    if brahmi > 30.0:
+        patient_safety_warnings.append({
+            "herb_id": "brahmi",
+            "herb_name": "Brahmi (Bacopa monnieri)",
+            "current_dose_percent": brahmi,
+            "severity": "INFO",
+            "hazard": "Vagal Autonomic Activation & Bradycardia",
+            "clinical_manifestation": "Slowed resting heart rate, increased gastrointestinal secretions, occasional nausea on empty stomach.",
+            "affected_populations": ["Patients with baseline sinus bradycardia or conduction delays"],
+            "safe_limit": "Max 20.0% - 25.0% w/w"
+        })
+
+    overall_safety_rating = "EXCELLENT"
+    if any(w["severity"] == "CRITICAL" for w in patient_safety_warnings):
+        overall_safety_rating = "HIGH_TOXICITY_RISK"
+    elif any(w["severity"] == "WARNING" for w in patient_safety_warnings):
+        overall_safety_rating = "MODERATE_CAUTION"
+
+    # 14. Medicine Quality & Patentability Correlation Scores
+    quality_base = 40.0
+    quality_base += min(bio_multiplier * 14.0, 35.0)
+    quality_base += min((anti_inflam / 48.5) * 25.0, 25.0)
+    if is_balanced:
+        quality_base += 8.0
+    quality_base += len(active_buffs) * 3.0 - len(active_debuffs) * 4.0
+    if any(w["severity"] == "CRITICAL" for w in patient_safety_warnings):
+        quality_base -= 14.0
+    medicine_quality_score = max(12, min(99, int(round(quality_base))))
+
+    patent_score = 30.0
+    if ci_score < 0.75:
+        patent_score = 88.0 + (0.75 - ci_score) * 30.0
+    elif ci_score <= 0.95:
+        patent_score = 72.0 + (0.95 - ci_score) * 40.0
+    elif ci_score <= 1.05:
+        patent_score = 48.0 + (1.05 - ci_score) * 50.0
+    else:
+        patent_score = max(15.0, 38.0 - (ci_score - 1.05) * 40.0)
+    if ghee >= 8.0:
+        patent_score += 6.0
+    if 3.0 <= pippali <= 6.0:
+        patent_score += 4.0
+    patentability_scope_score = max(10, min(98, int(round(patent_score))))
+
+    quality_delta = round((medicine_quality_score - 62) * 10) / 10
+    patentability_delta = round((patentability_scope_score - 52) * 10) / 10
+    quality_trend = "SURGE" if quality_delta > 4 else "DECLINE" if quality_delta < -4 else "STABLE"
+    patentability_trend = "SURGE" if patentability_delta > 4 else "DECLINE" if patentability_delta < -4 else "STABLE"
+
+    quadrant = "MERE_ADMIXTURE"
+    quadrant_label = "Unpatentable Mere Admixture (§3(e) Bar)"
+    quadrant_description = "Linear addition of known botanicals without synergistic non-obviousness. High likelihood of statutory rejection."
+
+    if medicine_quality_score >= 70 and patentability_scope_score >= 68:
+        quadrant = "GOLDEN_SYNERGY"
+        quadrant_label = "Golden Quadrant (Novel Synergistic Formulation)"
+        quadrant_description = "Super-additive pharmacodynamics legally overcome Section 3(e) with proven clinical bioavailability and high grant probability."
+    elif medicine_quality_score >= 70 and patentability_scope_score < 68:
+        quadrant = "CLASSICAL_TRAP"
+        quadrant_label = "Classical Prior Art Trap (§3(p) Bar)"
+        quadrant_description = "High therapeutic value, but vulnerable to anticipation under Section 3(p) / Traditional Knowledge Digital Library (TKDL) citations."
+    elif medicine_quality_score < 70 and patentability_scope_score >= 68:
+        quadrant = "NOVEL_DEFICIENT"
+        quadrant_label = "Novel but Clinically Deficient"
+        quadrant_description = "Unusual ratio achieves distance from prior art, but lacks balanced botanical co-factors or optimal therapeutic synergy."
+
+    pros: List[str] = []
+    cons: List[str] = []
+
+    if ci_score < 0.75:
+        pros.append(f"Super-Additive Synergy (CI: {ci_score}): Meets strict experimental threshold of Section 3(e) Indian Patent Act.")
+    elif ci_score <= 0.95:
+        pros.append(f"Statistically Significant Synergy (CI: {ci_score}): Evidence supports non-obvious biological interaction.")
+    else:
+        cons.append(f"Section 3(e) Mere Admixture Risk: Chou-Talalay CI ({ci_score}) indicates linear or sub-additive interaction.")
+
+    if bio_multiplier >= 2.0:
+        pros.append(f"Bio-Availability Multiplier {bio_multiplier}x: Active constituents achieve elevated serum absorption via Yogavāhī dynamics.")
+    elif pippali == 0.0:
+        cons.append("Missing Yogavāhī Bio-Catalyst: Lacks Piperine or equivalent driver to maximize intestinal active absorption.")
+
+    if ghee >= 8.0:
+        pros.append("Liposomal Lipid Delivery Samskara: Protects acid-labile polyphenols against gastric enzymatic degradation.")
+    else:
+        cons.append("Lack of Lipid Carrier Vehicle: Unprotected polyphenols face high first-pass hepatic metabolism.")
+
+    if 0 < shilajit <= 15.0:
+        pros.append("Safe Mineral Resin Ratio: Fulvic acid enhances cellular ATP without triggering heavy-metal scrutiny.")
+    elif shilajit > 20.0:
+        cons.append("Excessive Mineral Resin Burden: High Shilajit concentration incurs 5% NBA ABS royalty and elevated uric acid warning.")
+
+    if ashwa > 45.0:
+        cons.append("Excess Adaptogenic Load: High Withanolide concentration may induce drowsiness and thyroid hyper-stimulation.")
+
+    if is_balanced:
+        pros.append("Stoichiometric Equilibrium: Total constituents equal 100.0% w/w with validated batch uniformity.")
+    else:
+        cons.append(f"Unbalanced Stoichiometry: Total constituent ratio is {total_ratio}% (target is exactly 100.0%).")
+
+    how_to_improve: List[Dict[str, Any]] = []
+    what_to_remove: List[Dict[str, Any]] = []
+
     if pippali == 0.0:
-        suggestions.append("Add Pippali (Piper longum) 5% → Ignites Yogavāhī bio-availability & cuts Section 3(e) CI score by -0.32.")
-    if shilajit > 20.0 and guduchi < 5.0:
-        suggestions.append("Add Guduchi (Tinospora cordifolia) 5% → Neutralizes Shilajit mineral burden & grants NBA Fast-Track tier.")
-    if ashwa > 40.0 and ghee < 10.0:
-        suggestions.append("Increase Cow Ghrita to 15% → Balances high Withanolide agni and fulfills Charaka Samhita vehicle requirement.")
+        how_to_improve.append({
+            "text": "Add 5.0% Pippali (Piper longum) to ignite 2.2x Yogavāhī bio-availability and drop CI score into Section 3(e) cleared zone.",
+            "action_type": "add",
+            "herb_id": "pippali",
+            "target_ratio": 5.0
+        })
+    elif pippali < 3.0:
+        how_to_improve.append({
+            "text": "Increase Pippali to 4.5% to reach full therapeutic bioavailability threshold for Curcuminoids.",
+            "action_type": "increase",
+            "herb_id": "pippali",
+            "target_ratio": 4.5
+        })
+    elif pippali > 7.0:
+        what_to_remove.append({
+            "text": "Reduce Pippali to 5.0% to resolve gastric mucosal irritation and prevent CYP3A4 enzyme inhibition.",
+            "action_type": "decrease",
+            "herb_id": "pippali",
+            "target_ratio": 5.0
+        })
+
+    if ghee < 8.0:
+        how_to_improve.append({
+            "text": "Increase Cow Ghrita to 10.0% to establish lipid-carrier protection against gastric degradation.",
+            "action_type": "increase",
+            "herb_id": "ghee",
+            "target_ratio": 10.0
+        })
+
+    if shilajit > 18.0:
+        what_to_remove.append({
+            "text": "Reduce Shilajit to 12.0% to eliminate high uric acid warning and downgrade NBA ABS levy from 5% to 3.5%.",
+            "action_type": "decrease",
+            "herb_id": "shilajit",
+            "target_ratio": 12.0
+        })
+
+    if ashwa > 40.0:
+        what_to_remove.append({
+            "text": "Reduce Ashwagandha to 32.0% to prevent adaptogenic receptor saturation and eliminate somnolence warnings.",
+            "action_type": "decrease",
+            "herb_id": "ashwagandha",
+            "target_ratio": 32.0
+        })
+
+    if guduchi == 0.0 and shilajit > 10.0:
+        how_to_improve.append({
+            "text": "Add 5.0% Guduchi (Tinospora cordifolia) to act as a Rasayana shield against mineral oxidation.",
+            "action_type": "add",
+            "herb_id": "guduchi",
+            "target_ratio": 5.0
+        })
+
+    suggestions: List[str] = []
+    if how_to_improve:
+        suggestions.append(how_to_improve[0]["text"])
+    if what_to_remove:
+        suggestions.append(what_to_remove[0]["text"])
+    if not suggestions:
+        suggestions.append("Formulation has attained optimal stoichiometric balance and statutory Section 3(e) clearance.")
 
     return SimulationResponse(
         title=req.title,
@@ -337,6 +578,21 @@ def simulate_formulation(req: FormulationSimulateRequest) -> SimulationResponse:
         bioavailability_multiplier=bio_multiplier,
         anti_inflammatory_suppression=anti_inflam,
         ojas_power_score=ojas_power,
+        medicine_quality_score=medicine_quality_score,
+        patentability_scope_score=patentability_scope_score,
+        quality_delta=quality_delta,
+        patentability_delta=patentability_delta,
+        quality_trend=quality_trend,
+        patentability_trend=patentability_trend,
+        quadrant=quadrant,
+        quadrant_label=quadrant_label,
+        quadrant_description=quadrant_description,
+        pros=pros,
+        cons=cons,
+        how_to_improve=how_to_improve,
+        what_to_remove=what_to_remove,
+        patient_safety_warnings=patient_safety_warnings,
+        overall_safety_rating=overall_safety_rating,
         tier=tier,
         tier_sanskrit=tier_sanskrit,
         tier_english=tier_english,
