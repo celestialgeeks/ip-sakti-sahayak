@@ -8,6 +8,7 @@ from app.services.nvidia_nim import nim_service
 from app.services.qdrant_service import qdrant_service
 from app.services.sarvam import sarvam_service
 from app.services.supabase_service import supabase_service
+from app.services.sqlite_service import sqlite_service
 from app.core.citation_engine import extract_citations
 from app.core.confidence_scorer import compute_confidence
 from app.core.jurisdiction import get_jurisdiction_context
@@ -17,7 +18,10 @@ from app.models.schemas import ChatResponse, Citation
 
 
 import json
+import logging
 import re
+
+logger = logging.getLogger("app.rag")
 
 async def run_rag_pipeline(
     query: str,
@@ -190,6 +194,18 @@ Label:"""
 
         if user_id:
             await supabase_service.save_message(session_id, "assistant", answer, citations=[c.model_dump() for c in citations])
+
+        try:
+            await sqlite_service.log_query(
+                session_id=session_id,
+                query=query,
+                jurisdiction=jurisdiction.value,
+                language=language.value,
+                confidence=confidence_score,
+                citations_count=len(citations),
+            )
+        except Exception as e:
+            logger.warning("Audit log write failed: %r", e)
 
         return ChatResponse(
             answer=answer,

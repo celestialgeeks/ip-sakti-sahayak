@@ -2,6 +2,10 @@
 Supabase Service — Relational Database and Authentication via Supabase.
 """
 
+import logging
+
+logger = logging.getLogger("app.supabase_service")
+
 from supabase import create_client, Client
 from typing import Optional, List, Dict
 import os
@@ -35,7 +39,7 @@ class SupabaseService:
                     "title": title
                 }).execute()
         except Exception as e:
-            print(f"Error saving session: {e}")
+            logger.info("Error saving session: {e}")
 
     async def save_message(self, session_id: str, role: str, content: str, citations: Optional[List[Dict]] = None):
         """Save a message to a session."""
@@ -50,6 +54,6 @@ class SupabaseService:
                 "citations": citations if citations else None
             }).execute()
         except Exception as e:
-            print(f"Error saving message: {e}")
+            logger.info("Error saving message: {e}")
 
 supabase_service = SupabaseService()

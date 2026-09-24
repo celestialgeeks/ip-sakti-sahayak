@@ -9,6 +9,10 @@ Embeddings go through NIM (no local deps). Deterministic UUID5 point
 ids make re-seeds idempotent.
 """
 
+import logging
+
+logger = logging.getLogger("app.seed")
+
 import json
 import uuid
 from pathlib import Path
@@ -103,14 +107,14 @@ async def seed_collection(collection: str) -> int:
             points=points
         )
         total += len(chunks)
-        print(f"  🌱 {fp.name}: {len(chunks)} chunks → {collection}", flush=True)
+        logger.info("  🌱 {fp.name}: {len(chunks)} chunks → {collection}")
     return total
 
 
 async def seed_corpus_if_empty() -> int:
     """Seed corpus dirs whose collection is missing/empty. Returns chunk count."""
     if not settings.NVIDIA_NIM_API_KEY:
-        print("⏭️  Seed skipped: no NVIDIA key (offline dev, Qdrant stays as-is)")
+        logger.info("⏭️  Seed skipped: no NVIDIA key (offline dev, Qdrant stays as-is)")
         return 0
     total = 0
     for subdir, collection in COLLECTION_MAP.items():
@@ -120,7 +124,7 @@ async def seed_corpus_if_empty() -> int:
             continue
         total += await seed_collection(collection)
     if total:
-        print(f"✨ Boot seed complete: {total} chunks")
+        logger.info("✨ Boot seed complete: {total} chunks")
     else:
-        print("✅ Corpus already present, seed skipped")
+        logger.info("✅ Corpus already present, seed skipped")
     return total
