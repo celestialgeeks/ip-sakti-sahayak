@@ -21,55 +21,46 @@ function SidebarSearchParamWatcher({
   return null;
 }
 
-// Navigation Tools strictly matching User Screenshot 3 & Stitch Mockups
-const navItems = [
-  {
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </svg>
-    ),
-    label: "TKDL Registry",
-    href: "/tkdl",
-  },
-  {
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 18h8" />
-        <path d="M3 22h18" />
-        <path d="M14 22a7 7 0 1 0 0-14h-1" />
-        <path d="M9 14h2" />
-        <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" />
-        <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" />
-      </svg>
-    ),
-    label: "Patent Gazette & Prior Art",
-    href: "/patents",
-  },
-  {
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-        <polyline points="10 9 9 9 8 9" />
-      </svg>
-    ),
-    label: "Latest Rules & Regulations",
-    href: "/rules",
-  },
-  {
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1zM2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1zM7 21h10M12 3v18M3 7h18" />
-      </svg>
-    ),
-    label: "Legal Advisor",
-    href: "/chat",
-  },
-];
+import { MAIN_NAV_ITEMS } from "@/config/navigation";
+
+// Navigation Tool icons matching User Screenshot 3 & Stitch Mockups
+const navIcons: Record<string, React.ReactNode> = {
+  "formulation-lab": (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
+      <path d="M8.5 2h7" />
+      <path d="M7 16h10" />
+      <circle cx="10" cy="18.5" r=".5" fill="currentColor" />
+      <circle cx="13.5" cy="18" r=".5" fill="currentColor" />
+    </svg>
+  ),
+  tkdl: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  ),
+  patents: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 18h8" />
+      <path d="M3 22h18" />
+      <path d="M14 22a7 7 0 1 0 0-14h-1" />
+      <path d="M9 14h2" />
+      <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" />
+      <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" />
+    </svg>
+  ),
+  rules: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </svg>
+  ),
+};
+
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -264,20 +255,12 @@ export function Sidebar() {
 
           {/* Feature / Tool Links strictly matching Screenshot 3 */}
           <nav className="flex flex-col gap-1 border-b pb-3 mb-3 border-slate-800/80">
-            {navItems.map((item) => {
-              // Highlight only if exact match, but for Legal Advisor (/chat) don't highlight if an active session is in view
-              const isActive = item.href === "/chat"
-                ? pathname === "/chat" && !activeSessionParam
-                : pathname === item.href;
+            {MAIN_NAV_ITEMS.map((item) => {
+              const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.label}
+                  key={item.id}
                   href={item.href}
-                  onClick={() => {
-                    if (item.href === "/chat") {
-                      setActiveSessionParam(null);
-                    }
-                  }}
                   className={`flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all no-underline font-medium text-[13px] ${
                     isActive
                       ? "bg-slate-800 text-white shadow-xs"
@@ -285,7 +268,7 @@ export function Sidebar() {
                   }`}
                   title={item.label}
                 >
-                  <div style={{ color: isActive ? "#38bdf8" : "#94a3b8" }}>{item.icon}</div>
+                  <div style={{ color: isActive ? "#38bdf8" : "#94a3b8" }}>{navIcons[item.id]}</div>
                   <span className="truncate">{item.label}</span>
                 </Link>
               );

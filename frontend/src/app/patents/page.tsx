@@ -181,7 +181,7 @@ export default function PatentsPage() {
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-[#00263f] tracking-tight">
-              Patent Gazette & Novelty Search Engine
+              Patent Database & Search Engine
             </h1>
 
             <p className="text-sm text-slate-600 leading-relaxed">

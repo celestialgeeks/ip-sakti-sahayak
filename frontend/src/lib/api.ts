@@ -2,7 +2,7 @@
  * API client for the IP-SAKTI Sahayak backend.
  */
 
-import { ChatRequest, ChatResponse, ClassifyRequest, ClassifyResponse } from "./types";
+import type { ChatRequest, ChatResponse, ClassifyRequest, ClassifyResponse } from "./types";
 
 export function getApiUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {

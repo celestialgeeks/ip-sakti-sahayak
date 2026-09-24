@@ -21,6 +21,21 @@ PRIMARY_SOURCE_REGISTRY: List[Dict[str, Any]] = [
         "default_title": "Traditional Knowledge Digital Library (TKDL)",
     },
     {
+        "patterns": [r"nagoya\s*protocol", r"convention\s*on\s*biological\s*diversity", r"\bcbd\b"],
+        "url": "https://www.cbd.int/abs/",
+        "default_title": "Nagoya Protocol on Access & Benefit-Sharing",
+    },
+    {
+        "patterns": [r"trips", r"wto"],
+        "url": "https://www.wto.org/english/tratop_e/trips_e/trips_e.htm",
+        "default_title": "WTO TRIPS Agreement",
+    },
+    {
+        "patterns": [r"wipo", r"gratk", r"genetic\s*resources"],
+        "url": "https://www.wipo.int/tk/en/",
+        "default_title": "WIPO Traditional Knowledge & Genetic Resources Treaty",
+    },
+    {
         "patterns": [r"biological\s*diversity", r"biodiversity\s*act", r"\bnba\b", r"\bsbb\b", r"access\s*and\s*benefit", r"\babs\b"],
         "url": "http://nbaindia.org",
         "default_title": "Biological Diversity Act, 2002 (National Biodiversity Authority)",
@@ -49,21 +64,6 @@ PRIMARY_SOURCE_REGISTRY: List[Dict[str, Any]] = [
         "patterns": [r"charaka", r"sushruta", r"bhavaprakasha", r"ashtanga", r"classical\s*ayurved"],
         "url": "https://www.carakasamhitaonline.com",
         "default_title": "Classical Ayurveda Formularies & Ayurvedic Pharmacopoeia",
-    },
-    {
-        "patterns": [r"trips", r"wto"],
-        "url": "https://www.wto.org/english/tratop_e/trips_e/trips_e.htm",
-        "default_title": "WTO TRIPS Agreement",
-    },
-    {
-        "patterns": [r"nagoya\s*protocol", r"convention\s*on\s*biological\s*diversity", r"\bcbd\b"],
-        "url": "https://www.cbd.int/abs/",
-        "default_title": "Nagoya Protocol on Access & Benefit-Sharing",
-    },
-    {
-        "patterns": [r"wipo", r"gratk", r"genetic\s*resources"],
-        "url": "https://www.wipo.int/tk/en/",
-        "default_title": "WIPO Traditional Knowledge & Genetic Resources Treaty",
     },
 ]
 

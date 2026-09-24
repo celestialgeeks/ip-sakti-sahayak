@@ -10,7 +10,7 @@ router = APIRouter()
 @router.get("/stats")
 async def get_stats():
     """Returns database stats for the frontend dashboard."""
-    stats = qdrant_service.get_collection_stats()
+    stats = await qdrant_service.get_collection_stats()
     
     # Format numbers nicely
     total_points = stats.get("total_points", 0)
