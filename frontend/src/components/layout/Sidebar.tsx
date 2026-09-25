@@ -22,6 +22,7 @@ function SidebarSearchParamWatcher({
 }
 
 import { MAIN_NAV_ITEMS } from "@/config/navigation";
+import { StepRail } from "@/components/wizard/StepRail";
 
 // Navigation Tool icons matching User Screenshot 3 & Stitch Mockups
 const navIcons: Record<string, React.ReactNode> = {
@@ -211,6 +212,25 @@ export function Sidebar() {
   };
 
   const { today, lastWeek, earlier } = categorizeSessions();
+
+  // On the wizard, the left panel shows the SETUP PROGRESS step-rail instead of
+  // the normal chat navigation (New session / sessions).
+  if (pathname?.startsWith("/wizard")) {
+    return (
+      <aside
+        className="fixed left-0 top-[95px] bottom-0 z-40 hidden md:flex flex-col"
+        style={{
+          width: "var(--sidebar-width)",
+          background: "#0f172a",
+          color: "#cbd5e1",
+          borderColor: "#1e293b",
+          fontSize: "13px",
+        }}
+      >
+        <StepRail />
+      </aside>
+    );
+  }
 
   return (
     <>

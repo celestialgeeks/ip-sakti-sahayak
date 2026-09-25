@@ -85,3 +85,39 @@ export async function checkHealth() {
   const res = await fetch(`${getApiUrl()}/api/health`);
   return res.json();
 }
+
+// ── Registration & Compliance Wizard ───────────────────────────────
+
+async function authHeaders(): Promise<HeadersInit> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const { data } = await createClient().auth.getSession();
+    if (data.session?.access_token) {
+      headers["Authorization"] = `Bearer ${data.session.access_token}`;
+    }
+  } catch {
+    /* no session — request will be rejected by auth-guarded route */
+  }
+  return headers;
+}
+
+/** Fetch the signed-in user's saved wizard progress. Throws if not authed. */
+export async function getWizardState() {
+  const res = await fetch(`${getApiUrl()}/api/wizard/state`, {
+    headers: await authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Wizard state error: ${res.status}`);
+  return res.json();
+}
+
+/** Persist the signed-in user's wizard progress. Throws if not authed. */
+export async function saveWizardState(payload: Record<string, unknown>) {
+  const res = await fetch(`${getApiUrl()}/api/wizard/state`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`Wizard save error: ${res.status}`);
+  return res.json();
+}

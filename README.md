@@ -193,6 +193,13 @@ Where:
 
 ![Regulatory Directives Hub](screenshots/04_rules_regulations.png)
 
+<br/>
+
+### 6. Registration & Compliance Wizard — "Get Registered" (`/wizard`)
+*Timeline-based commercialization pipeline with sequential step gating, a live progress visualizer, `/api/classify`-driven AYUSH-vs-FSSAI licence routing, Udyam MSME auto-classification with a generated application, and a printable compliance dossier.*
+
+![Registration & Compliance Wizard](screenshots/wizard/step4_licence.png)
+
 </div>
 
 ---
@@ -225,6 +232,16 @@ Where:
 ### 5. Formulation Classifier & ABS Compliance Assistant (`/api/classify`, `/api/abs-check`)
 - Classifies herbal formulations into 6 regulatory pathways: Classical Medicine, Patent/Proprietary Drug, New Drug, Phytopharmaceutical, Ayurveda-Aahar, or Cosmetic.
 - Deterministic Access and Benefit Sharing (ABS) compliance validator calculating Form 1 filing obligations, BMC register status, and foreign commercialization clearances.
+
+### 6. Registration & Compliance Wizard — "Get Registered" (`/wizard`)
+A guided, timeline-based commercialization pipeline that turns IP guidance into concrete registrations, integrating the fragmented government processes into one place. It **collects the founder's data and does part of the work**, rather than just listing requirements.
+- **Sequential gating**: steps unlock only as the previous one is completed; a persistent left-rail and a top progress visualizer (segmented stepper + completion ring) track status (Completed / In progress / Locked / Milestone) with icon + text (WCAG, never color-only).
+- **Eligibility gate**: two questions route pre-commercialization users to the Library / Patents / Chat, with a soft "continue anyway" escape hatch.
+- **Live licence routing** powered by the `/api/classify` RAG engine: an Ayurvedic drug / proprietary medicine maps to the **AYUSH Manufacturing Licence** (Schedule T, State Licensing Authority, Loan Licence), while an Ayurvedic food / supplement maps to **FSSAI's "Ayurveda Aahara"** Central Licence (₹7,500/yr, 91 approved recipes) — the two paths are shown as mutually exclusive and never overlap.
+- **Udyam (MSME) data capture**: enter Aadhaar, PAN, enterprise details, investment and turnover → the wizard **auto-classifies Micro/Small/Medium** (2020 composite criteria) and generates a **pre-filled application** to carry to the portal, surfacing CGTMSE collateral-free credit and reduced IP-fee benefits.
+- **GST milestone trigger**: evaluates the ₹40L (goods) / ₹20L (services) thresholds against the entered turnover instead of demanding it on day one.
+- **Compliance dossier**: assembles every entry into a single printable summary.
+- **Per-user persistence**: progress auto-saves to Supabase (`wizard_states`, auth-guarded) and resumes across devices; falls back to `localStorage` for anonymous users.
 
 ---
 
@@ -259,6 +276,7 @@ Where:
 │   │   │   │   ├── translate.py     # Sarvam AI translation bridge
 │   │   │   │   ├── sources.py       # Corpus registry & metadata query
 │   │   │   │   ├── stats.py         # System telemetry & collection counts
+│   │   │   │   ├── wizard.py        # Registration & Compliance Wizard state
 │   │   │   │   └── health.py        # Health & readiness probes
 │   │   ├── core/                    # Core RAG Intelligence
 │   │   │   ├── rag_pipeline.py      # Full RAG orchestrator with think-stripping
@@ -298,10 +316,12 @@ Where:
 │   │   │   ├── tkdl/page.tsx        # Classical Prior-Art & TKDL Explorer
 │   │   │   ├── patents/page.tsx     # Patent Prosecution & FTO Engine
 │   │   │   ├── rules/page.tsx       # Sovereign Regulatory Directives Hub
+│   │   │   ├── wizard/page.tsx      # Registration & Compliance Wizard ("Get Registered")
 │   │   │   ├── login/page.tsx       # Supabase Authentication Page
 │   │   │   └── layout.tsx           # Sovereign Navbar, Banner, & Footer
 │   │   ├── components/              # Modular UI Components
 │   │   │   ├── chat/                # Composer, MessageCard, CitationChips
+│   │   │   ├── wizard/              # Step rail, progress visualizer, step forms
 │   │   │   ├── cards/               # Stat cards, Jurisdiction toggle
 │   │   │   ├── auth/                # Sign-in modal & user controls
 │   │   │   └── layout/              # Header, Navigation, Footer

@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings, validate_settings
 from app.api.middleware.rate_limit import RateLimitMiddleware
-from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda, formulation_lab
+from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda, formulation_lab, wizard
 
 logger = logging.getLogger("app.main")
 
@@ -83,6 +83,7 @@ app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(classify.router, prefix="/api", tags=["Classification"])
 app.include_router(abs_check.router, prefix="/api", tags=["ABS Compliance"])
 app.include_router(formulation_lab.router, prefix="/api", tags=["Formulation Lab"])
+app.include_router(wizard.router, prefix="/api", tags=["Registration & Compliance Wizard"])
 app.include_router(ayurveda.router, prefix="/api", tags=["Ayurvedic Library"])
 app.include_router(sources.router, prefix="/api", tags=["Sources"])
 app.include_router(translate.router, prefix="/api", tags=["Translation"])
