@@ -144,6 +144,21 @@ export function Header() {
 
           {/* Utility Buttons */}
           <div className="flex items-center gap-1">
+            {/* Business Enablement entry point — beside the download button */}
+            <Link
+              href="/business"
+              title="Funding, supplier sourcing & label compliance"
+              className="mr-1 inline-flex items-center gap-1.5 rounded-md border border-[#E65100]/40 bg-[#FFF3E9] px-2.5 py-1.5 text-[12.5px] font-semibold text-[#E65100] transition-colors no-underline hover:border-[#E65100] hover:bg-[#ffe6d5]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#E65100]">
+                <path d="M3 9l1.5-5h15L21 9" />
+                <path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" />
+                <path d="M9 21v-6h6v6" />
+                <path d="M3 9h18" />
+              </svg>
+              <span className="hidden md:inline">Grow Business</span>
+            </Link>
+
             <button 
               onClick={handleDownload}
               className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#0b3c5d] transition-colors" 

@@ -1,0 +1,126 @@
+{
+  "version": "2025-26",
+  "disclaimer": "This is a curated, informational sourcing directory — not an endorsement or a transactional marketplace. Verify supplier licences (FSSAI / AYUSH manufacturing / GMP), GI authorisation, and Access & Benefit-Sharing (Nagoya Protocol / Biological Diversity Act) compliance directly before procurement. Sourcing GI-tagged or region-specific raw material legitimately ties into ABS and TKDL obligations.",
+  "suppliers": [
+    {
+      "id": "kottakkal",
+      "name": "Arya Vaidya Sala Kottakkal",
+      "region": "Malappuram, Kerala",
+      "state": "Kerala",
+      "materials": ["Classical Ayurvedic formulations", "Fresh & dried herbs", "Kashaya churna", "Medicated tailas"],
+      "gi_tags": [],
+      "certifications": ["AYUSH manufacturing licence", "GMP", "NABL-accredited lab"],
+      "website": "https://www.aryavaidyasala.com/",
+      "verified": true,
+      "abs_note": "In-house cultivated and contracted-farm botanicals; bulk drug sourcing with traceability to certified nurseries."
+    },
+    {
+      "id": "allseasonherbs",
+      "name": "All Season Herbs Pvt. Ltd.",
+      "region": "Bengaluru, Karnataka",
+      "state": "Karnataka",
+      "materials": ["Standardized herbal extracts", "Plant actives", "Ashwagandha extract", "Curcumin"],
+      "gi_tags": [],
+      "certifications": ["GMP", "ISO 22000", "FSSAI"],
+      "website": "https://allseasonherbs.com/",
+      "verified": true,
+      "abs_note": "Pharmaceutical-grade standardized extracts with CoA and marker quantification."
+    },
+    {
+      "id": "richberg",
+      "name": "Richberg Healthcare Pvt. Ltd.",
+      "region": "New Delhi / NCR",
+      "state": "Delhi",
+      "materials": ["Bulk Ayurvedic raw materials", "Botanical extracts", "Herbal powders"],
+      "gi_tags": [],
+      "certifications": ["GMP", "FSSAI"],
+      "website": "https://www.richberghealthcare.in/",
+      "verified": false,
+      "abs_note": "Bulk & custom sourcing solutions; confirm origin and benefit-sharing for wild-collected species."
+    },
+    {
+      "id": "hi-polymer",
+      "name": "Himalaya Herbals (Himalaya Wellness Co.)",
+      "region": "Bengaluru, Karnataka",
+      "state": "Karnataka",
+      "materials": ["Contract-grown botanicals", "Standardized extracts", "Raw herbs"],
+      "gi_tags": [],
+      "certifications": ["AYUSH licence", "GMP", "FSSAI"],
+      "website": "https://himalayawellness.in/",
+      "verified": true,
+      "abs_note": "Large-scale organic contract farming network; documented sustainable-harvesting protocols."
+    },
+    {
+      "id": "dabur",
+      "name": "Dabur India Ltd. — Sourcing & Grower Network",
+      "region": "Ghaziabad, Uttar Pradesh",
+      "state": "Uttar Pradesh",
+      "materials": ["Organic raw herbs", "Amla", "Ashwagandha", "Tulsi", "Herbal extracts"],
+      "gi_tags": ["Naandi Patti Amla (GI)"],
+      "certifications": ["FSSAI", "AYUSH licence", "GMP", "NPOP organic"],
+      "website": "https://www.dabur.com/",
+      "verified": true,
+      "abs_note": "Certified organic farms and farmer collectives; GI-linked amla sourcing requires authorised-user permission."
+    },
+    {
+      "id": "panchvati",
+      "name": "Panchvati Botanics",
+      "region": "Palghar, Maharashtra",
+      "state": "Maharashtra",
+      "materials": ["Essential oils", "CO2 extracts", "Carrier oils", "Botanical actives"],
+      "gi_tags": [],
+      "certifications": ["GMP", "ISO", "FSSAI"],
+      "website": "https://panchvatibotanics.com/",
+      "verified": true,
+      "abs_note": "Distillation-led supplier; verify wild-collection ABS approvals for forest-derived species."
+    },
+    {
+      "id": "nagarjuna",
+      "name": "Nagarjuna Ayurvedic Centre",
+      "region": "Bengaluru, Karnataka",
+      "state": "Karnataka",
+      "materials": ["Classical Kerala formulations", "Medicated oils", "Kashaya herbs"],
+      "gi_tags": [],
+      "certifications": ["AYUSH manufacturing licence", "GMP"],
+      "website": "https://nagarjunaayurveda.com/",
+      "verified": false,
+      "abs_note": "Kerala-tradition formulations; classical yogas may map to TKDL documented knowledge."
+    },
+    {
+      "id": "khadi-herbs",
+      "name": "Indian Herbs & Farm Produce Cluster",
+      "region": "Jammu, Jammu & Kashmir",
+      "state": "Jammu & Kashmir",
+      "materials": ["Kuth (Costus)", "Saunf", "Wild-crafted Himalayan herbs", "Aromatic plants"],
+      "gi_tags": ["Basmati (GI)", "Kashmir Saffron (GI)"],
+      "certifications": ["FSSAI", "NPOP organic"],
+      "website": "",
+      "verified": false,
+      "abs_note": "Himalayan high-value species are often forest produce — HMPP/Biodiversity Board permissions may apply."
+    },
+    {
+      "id": "modhera-herbs",
+      "name": "Madhya Pradesh Herbal Growers Collective",
+      "region": "Indore, Madhya Pradesh",
+      "state": "Madhya Pradesh",
+      "materials": ["Aloe vera", "Isabgol", "Psyllium", "Cultivated medicinal herbs"],
+      "gi_tags": [],
+      "certifications": ["FSSAI", "GMP"],
+      "website": "",
+      "verified": false,
+      "abs_note": "Cultivated (non-wild) stock reduces ABS exposure; still file NBA intimation for commercial use where required."
+    },
+    {
+      "id": "kerala-spices",
+      "name": "Spice & Turmeric Growers Association",
+      "region": "Erode, Tamil Nadu",
+      "state": "Tamil Nadu",
+      "materials": ["Turmeric (rhizome & powder)", "Spices", "Curcumin-rich Lakadong type"],
+      "gi_tags": ["Lakadong Turmeric (GI)", "Salem Turmeric (GI)", "Erode Turmeric (GI)"],
+      "certifications": ["FSSAI", "NPOP organic"],
+      "website": "",
+      "verified": false,
+      "abs_note": "GI-tagged turmeric requires registered authorised-user licensing to use the GI badge legitimately."
+    }
+  ]
+}

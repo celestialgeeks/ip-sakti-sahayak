@@ -142,3 +142,79 @@ class FeedbackRequest(BaseModel):
     message_id: str
     rating: str = Field(..., description="helpful / not_helpful / inaccurate")
     comment: Optional[str] = None
+
+
+# ─── Business Enablement: Funding / Loans ────────────────────────────
+
+class FundingMatchRequest(BaseModel):
+    """Enterprise profile used to match funding & subsidy schemes."""
+    stage: str = Field(default="new", description="idea | new | established")
+    loan_amount: float = Field(default=0, ge=0, description="Desired loan in ₹ (0 = derive from project cost)")
+    project_cost: float = Field(default=0, ge=0, description="Project / plant & machinery cost in ₹")
+    turnover: float = Field(default=0, ge=0, description="Expected annual turnover in ₹")
+    sector: str = Field(default="manufacturing", description="manufacturing | service | trading | export")
+    location: str = Field(default="urban", description="urban | rural")
+    social_category: str = Field(default="general", description="general | obc | sc | st")
+    is_woman: bool = Field(default=False, description="Woman / women-led enterprise")
+    is_greenfield: bool = Field(default=True, description="New (greenfield) enterprise")
+    wants_collateral_free: bool = Field(default=True)
+    udyam_registered: bool = Field(default=False)
+
+
+class SchemeMatch(BaseModel):
+    """One evaluated scheme with its eligibility verdict."""
+    id: str
+    name: str
+    aka: str = ""
+    ministry: str = ""
+    status: str = Field(..., description="eligible | likely | locked | not_eligible")
+    band: str = ""
+    amount_hint: str = ""
+    benefit: str = ""
+    docs: List[str] = Field(default_factory=list)
+    portal_url: str = ""
+    citation: dict = Field(default_factory=dict)
+    reasons: List[str] = Field(default_factory=list)
+
+
+class FundingMatchResponse(BaseModel):
+    """Ranked funding-scheme matches for the submitted profile."""
+    size_class: str = ""
+    locked_udyam: bool = False
+    matches: List[SchemeMatch] = Field(default_factory=list)
+    disclaimer: str = ""
+
+
+# ─── Business Enablement: Label Compliance ───────────────────────────
+
+class LabelCheckRequest(BaseModel):
+    """Draft label text screened against a statutory labeling ruleset."""
+    draft_text: str = Field(..., min_length=1, max_length=20000)
+    ruleset: Optional[str] = Field(default=None, description="ayush | fssai (auto-routed if omitted)")
+    product_name: str = Field(default="")
+
+
+class LabelFinding(BaseModel):
+    """Presence verdict for a single statutory label element."""
+    id: str
+    label: str
+    status: str = Field(..., description="present | missing | needs_review")
+    severity: str = "major"
+    matched_text: str = ""
+    guidance: str = ""
+    citation: dict = Field(default_factory=dict)
+
+
+class LabelCheckResponse(BaseModel):
+    """Label compliance result for one ruleset."""
+    ruleset: str
+    ruleset_label: str = ""
+    authority: str = ""
+    total: int = 0
+    present: int = 0
+    missing: int = 0
+    critical_missing: int = 0
+    score: int = Field(default=0, ge=0, le=100, description="Weighted presence score (0-100)")
+    findings: List[LabelFinding] = Field(default_factory=list)
+    citation: dict = Field(default_factory=dict)
+    disclaimer: str = ""

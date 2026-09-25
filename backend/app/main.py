@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings, validate_settings
 from app.api.middleware.rate_limit import RateLimitMiddleware
-from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda, formulation_lab, wizard
+from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda, formulation_lab, wizard, business
 
 logger = logging.getLogger("app.main")
 
@@ -37,6 +37,15 @@ async def lifespan(app: FastAPI):
         get_library()
     except Exception as e:
         logger.error("Ayurvedic library failed to load: %s", e)
+        raise
+
+    # Fail-fast load of Business Enablement catalogs (funding, suppliers, labeling).
+    try:
+        from app.services.business_service import preload as preload_business
+
+        preload_business()
+    except Exception as e:
+        logger.error("Business Enablement catalogs failed to load: %s", e)
         raise
 
     # Self-heal ephemeral Qdrant (free tier wipes on restart): reseed if empty.
@@ -89,3 +98,4 @@ app.include_router(sources.router, prefix="/api", tags=["Sources"])
 app.include_router(translate.router, prefix="/api", tags=["Translation"])
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(ingest.router, prefix="/api", tags=["Ingestion"])
+app.include_router(business.router, prefix="/api", tags=["Business Enablement"])
