@@ -2,8 +2,17 @@
  * API client for the IP-SAKTI Sahayak backend.
  */
 
-import type { ChatRequest, ChatResponse, ClassifyRequest, ClassifyResponse } from "./types";
-
+import type {
+  ChatRequest,
+  ChatResponse,
+  ClassifyRequest,
+  ClassifyResponse,
+  FundingMatchRequest,
+  FundingMatchResponse,
+  SuppliersResponse,
+  LabelCheckRequest,
+  LabelCheckResponse,
+} from "./types";
 export function getApiUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
@@ -119,5 +128,50 @@ export async function saveWizardState(payload: Record<string, unknown>) {
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error(`Wizard save error: ${res.status}`);
+  return res.json();
+}
+
+// ── Business Enablement ────────────────────────────────────────────
+
+/** Match funding & loan schemes to an enterprise profile. */
+export async function matchFunding(
+  request: FundingMatchRequest
+): Promise<FundingMatchResponse> {
+  const res = await fetch(`${getApiUrl()}/api/business/funding/match`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) throw new Error(`Funding match error: ${res.status}`);
+  return res.json();
+}
+
+/** Filterable raw-material supplier directory. */
+export async function fetchSuppliers(params: {
+  q?: string;
+  state?: string;
+  gi_only?: boolean;
+  certification?: string;
+} = {}): Promise<SuppliersResponse> {
+  const qs = new URLSearchParams();
+  if (params.q) qs.set("q", params.q);
+  if (params.state) qs.set("state", params.state);
+  if (params.gi_only) qs.set("gi_only", "true");
+  if (params.certification) qs.set("certification", params.certification);
+  const res = await fetch(`${getApiUrl()}/api/business/suppliers?${qs.toString()}`);
+  if (!res.ok) throw new Error(`Suppliers error: ${res.status}`);
+  return res.json();
+}
+
+/** Validate a draft label against the AYUSH / FSSAI labeling ruleset. */
+export async function checkLabel(
+  request: LabelCheckRequest
+): Promise<LabelCheckResponse> {
+  const res = await fetch(`${getApiUrl()}/api/business/label/check`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) throw new Error(`Label check error: ${res.status}`);
   return res.json();
 }

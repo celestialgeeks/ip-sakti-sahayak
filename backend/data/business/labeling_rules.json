@@ -1,0 +1,218 @@
+{
+  "version": "2025-26",
+  "disclaimer": "Deterministic label screening against statutory requirements. This is not a legal opinion or regulatory approval — always confirm the final artwork with the State Drugs Controller (AYUSH) or FSSAI and a licensed labelling consultant.",
+  "rulesets": {
+    "ayush": {
+      "label": "Ayurveda / Siddha / Unani Drug",
+      "authority": "Drugs and Cosmetics Rules, 1945 — Rule 161 & Schedule E(1)",
+      "citation": {
+        "source": "Drugs & Cosmetics Rules, 1945 (Rule 161 — labeling of ASU drugs)",
+        "url": "https://cdsco.gov.in/"
+      },
+      "requirements": [
+        {
+          "id": "ayush-name-sanskrit",
+          "label": "Name of the drug in Sanskrit/Prakrit with English transliteration",
+          "keywords": ["sanskrit", "devanagari", " transliterat", "rasa", "chyawanprash", "kashaya", "asava", "arishta", "churna", "taila", "ghrita", "vati", "bhasma"],
+          "regex": "[\\u0900-\\u097F]",
+          "severity": "critical",
+          "guidance": "Rule 161(2)(a): the label must carry the drug's name in Sanskrit/Prakrit (or the language of the authoritative text) with an English transliteration and the standard/pharmacopoeial name."
+        },
+        {
+          "id": "ayush-license-number",
+          "label": "Manufacturing licence number",
+          "keywords": ["licence", "license", "lic no", "l.no", "mfg. lic", "d.l.t", "state lic"],
+          "regex": "(licen[cs]e|lic)[\\s.:]*[no0#]*[:.-]?\\s*[A-Z0-9\\-/]{3,}",
+          "severity": "critical",
+          "guidance": "Rule 161 / Rule 65: the manufacturing licence number (Form 20/23 D&CG) must be printed on the label."
+        },
+        {
+          "id": "ayush-manufacturer-address",
+          "label": "Name and address of the manufacturer",
+          "keywords": ["manufactured by", "mfg by", "marketed by", "address", "pvt ltd", "private limited"],
+          "regex": "(manufactured|mfg|marketed|packed)[^\\n]{0,20}by",
+          "severity": "critical",
+          "guidance": "The full name and address of the manufacturer (and marketer if different) is mandatory."
+        },
+        {
+          "id": "ayush-net-contents",
+          "label": "Net quantity / contents",
+          "keywords": ["net", "net qty", "net contents", "net wt", "ml", "grams", "gm", "tablets", "capsules"],
+          "regex": "net\\s*(qty|wt|content|weight)?|\\b\\d+\\s*(ml|l|g|gm|kg|tabs?|cap)",
+          "severity": "major",
+          "guidance": "Net contents must be declared in metric units (Legal Metrology + Rule 161)."
+        },
+        {
+          "id": "ayush-batch",
+          "label": "Batch / lot number",
+          "keywords": ["batch", "lot"],
+          "regex": "(batch|lot)[\\s.:]*[no0#]*[:.-]?\\s*[A-Z0-9\\-]{2,}",
+          "severity": "major",
+          "guidance": "Batch or lot number is required for traceability and recall."
+        },
+        {
+          "id": "ayush-mfg-exp",
+          "label": "Date of manufacture and date of expiry",
+          "keywords": ["mfg", "manufactured", "exp", "expiry", "best before", "use before", "exp date"],
+          "regex": "(mfg|exp|expiry|manufactur)[ed\\s.:]*date[:.-]?\\s*\\d",
+          "severity": "critical",
+          "guidance": "Month & year of manufacture and the expiry date must both be printed."
+        },
+        {
+          "id": "ayush-ingredients",
+          "label": "List of ingredients / active constituents with proportion",
+          "keywords": ["ingredients", "constituents", "contains", "each tablet contains", "qty per"],
+          "regex": "ingredients?\\s*[:\\-]",
+          "severity": "major",
+          "guidance": "Rule 161(2): state the active ingredients and their proportions (for proprietary/combination drugs, as per Rule 161 read with the schedule)."
+        },
+        {
+          "id": "ayush-dosage",
+          "label": "Direction for use / dosage and warnings",
+          "keywords": ["dosage", "direction", "how to use", "dose", "usage", "warnings", "caution", "contraindicat"],
+          "regex": "(dosage|directions? for use|dose)[\\s.:]",
+          "severity": "major",
+          "guidance": "Dosage / direction for use and any statutory warnings must be legible."
+        },
+        {
+          "id": "ayush-class-prescription",
+          "label": "Class of drug / prescription caution (Schedule C / C1 if applicable)",
+          "keywords": ["schedule c", "class", "prescription", "not to be sold"],
+          "regex": "(class\\s+[a-c]|prescription|schedule\\s+c)",
+          "severity": "minor",
+          "guidance": "Where the preparation falls under a special class or a prescription caution, the required caution wording must appear."
+        },
+        {
+          "id": "ayush-schedule-e1",
+          "label": "Schedule E(1) poisonous-substance warning (if applicable)",
+          "keywords": ["poison", "schedule e", "e-1", "keep away from children", "toxic"],
+          "regex": "(keep this medicine out of the reach of children|schedule\\s*e\\(?1\\)?)",
+          "severity": "critical",
+          "guidance": "If the formulation contains any Schedule E(1) poisonous ASU substance, the mandatory warning and safe-keeping statement must be displayed."
+        },
+        {
+          "id": "ayush-mrp",
+          "label": "MRP with taxes",
+          "keywords": ["mrp", "maximum retail", "inclusive of all taxes", "₹", "Rs."],
+          "regex": "mrp\\s*(₹|rs\\.?|inr)?\\s*\\d+",
+          "severity": "major",
+          "guidance": "MRP (Legal Metrology) must be declared, with taxes stated."
+        }
+      ]
+    },
+    "fssai": {
+      "label": "Food / Nutraceutical / Aahar",
+      "authority": "FSS (Labelling & Display) Regulations, 2020 & FSS (Health Supplement / Nutraceutical) Regulations",
+      "citation": {
+        "source": "Food Safety & Standards (Labelling & Display) Regulations — FSSAI",
+        "url": "https://www.fssai.gov.in/"
+      },
+      "requirements": [
+        {
+          "id": "fssai-name-of-food",
+          "label": "Name / brand / common name of the food",
+          "keywords": ["name of food", "product", "juice", "drink", "supplement", "honey", "powder"],
+          "regex": "name of (the )?food",
+          "severity": "critical",
+          "guidance": "Reg. 2.4 / 3.2: the legal name (and common name) of the food must be declared."
+        },
+        {
+          "id": "fssai-licence-logo",
+          "label": "FSSAI logo with licence number",
+          "keywords": ["fssai", "fssai lic", "licence"],
+          "regex": "(fssai)[\\s.:]*(licen[cs]e|lic|no)?[:.-]?\\s*\\d{10,14}",
+          "severity": "critical",
+          "guidance": "The FSSAI logo followed by the 14-digit licence/registration number is mandatory."
+        },
+        {
+          "id": "fssai-ingredients",
+          "label": "List of ingredients (descending order)",
+          "keywords": ["ingredients", "contains"],
+          "regex": "ingredients?\\s*[:\\-]",
+          "severity": "critical",
+          "guidance": "Ingredients in descending order of weight, with specific declarations for additives, allergens, vitamins & minerals."
+        },
+        {
+          "id": "fssai-net-qty",
+          "label": "Net quantity",
+          "keywords": ["net", "net qty", "net wt", "g", "ml"],
+          "regex": "net\\s*(wt|qty|quantity|content)[\\s:]*\\d",
+          "severity": "major",
+          "guidance": "Net quantity in metric units on the principal display panel."
+        },
+        {
+          "id": "fssai-manufacturer",
+          "label": "Name & complete address of manufacturer / packer / importer",
+          "keywords": ["manufactured by", "packed by", "imported by", "address", "marketed by"],
+          "regex": "(manufactured|packed|imported|marketed)[^\\n]{0,20}by",
+          "severity": "critical",
+          "guidance": "Full name and address (with PIN) of manufacturer/packer/importer and a contact for consumer grievances."
+        },
+        {
+          "id": "fssai-veg-nonveg",
+          "label": "Vegetarian / non-vegetarian declaration mark",
+          "keywords": ["veg", "non-veg", "green dot", "brown dot", "vegetarian"],
+          "regex": "(vegetarian|non[- ]?veg)",
+          "severity": "major",
+          "guidance": "The green (veg) or brown (non-veg) dot inside a square is mandatory."
+        },
+        {
+          "id": "fssai-date",
+          "label": "Month & year of packaging/best-before (date marking)",
+          "keywords": ["best before", "use by", "packaging date", "exp", "bb", "pfd"],
+          "regex": "(best before|use by|packing|packaged)[\\s.:]*(date|upto|dd/mm|dd-mm)?",
+          "severity": "critical",
+          "guidance": "Date of manufacture/packaging and best-before/use-by must be declared (Reg. 2.4.5)."
+        },
+        {
+          "id": "fssai-lot",
+          "label": "Lot / batch / code number",
+          "keywords": ["lot", "batch"],
+          "regex": "(lot|batch)[\\s.:]*[no0#]*[:.-]?\\s*[A-Z0-9\\-/]{2,}",
+          "severity": "major",
+          "guidance": "Lot/batch/code number for traceability."
+        },
+        {
+          "id": "fssai-mrp",
+          "label": "MRP / price with taxes",
+          "keywords": ["mrp", "inclusive of all taxes", "₹", "rs."],
+          "regex": "mrp\\s*(₹|rs\\.?|inr)?\\s*\\d+",
+          "severity": "major",
+          "guidance": "MRP (inclusive of all taxes) as per Legal Metrology."
+        },
+        {
+          "id": "fssai-nutrition",
+          "label": "Nutrition / health information panel",
+          "keywords": ["nutrition", "nutritional", "energy", "protein", "carbohydrate", "fat", "per 100", "serving"],
+          "regex": "nutri(tion|tional)[\\s.:]*info",
+          "severity": "major",
+          "guidance": "Nutritional info per 100 g/ml (energy, protein, carb, sugar, fat) and any permitted health claim with the disclaimer."
+        },
+        {
+          "id": "fssai-allergen",
+          "label": "Allergen declaration",
+          "keywords": ["allergen", "contains", "may contain", "nuts", "milk", "soy", "gluten", "sulphite"],
+          "regex": "(allergen|may contain|contains)[^\\n]{0,60}(nuts|milk|soy|gluten|sulphite|egg)",
+          "severity": "critical",
+          "guidance": "The 14 declared allergens must be emphasised in the ingredients or via an advisory statement."
+        },
+        {
+          "id": "fssai-country-origin",
+          "label": "Country of origin (for imported / single-ingredient foods)",
+          "keywords": ["country of origin", "imported from", "product of"],
+          "regex": "(country of origin|product of|imported)",
+          "severity": "minor",
+          "guidance": "Mandatory for imported foods and single-ingredient products."
+        },
+        {
+          "id": "fssai-gmo-irradiation",
+          "label": "GMO / irradiation declaration (if applicable)",
+          "keywords": ["gmo", "genetically modified", "irradiated"],
+          "regex": "(contains gmo|genetically modified|irradiated)",
+          "severity": "minor",
+          "guidance": "Declaration required where genetically modified or irradiated ingredients are used."
+        }
+      ]
+    }
+  }
+}

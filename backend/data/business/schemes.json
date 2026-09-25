@@ -1,0 +1,122 @@
+{
+  "version": "2025-26",
+  "disclaimer": "Eligibility indications are informational and do not constitute a sanction, credit approval, or legal advice. Final terms, subsidy rates, and eligibility rest with the lending institution and the administering ministry. Amounts reflect the latest 2025-26 scheme revisions.",
+  "schemes": [
+    {
+      "id": "mudra",
+      "name": "Pradhan Mantri Mudra Yojana (PMMY)",
+      "aka": "Mudra Loan",
+      "ministry": "Ministry of Finance / MUDRA Ltd.",
+      "kind": "collateral_free_loan",
+      "requires_udyam": false,
+      "collateral_free": true,
+      "min_loan": 10000,
+      "max_loan": 2000000,
+      "benefit": "Collateral-free loans up to ₹20 lakh across four bands — Shishu (≤₹50k), Kishor (₹50k–5L), Tarun (₹5–10L) and Tarun Plus (₹10–20L) — for micro & small enterprises.",
+      "bands": {
+        "shishu": {"max": 50000, "label": "Shishu — up to ₹50,000"},
+        "kishor": {"max": 500000, "label": "Kishor — ₹50,000 to ₹5 lakh"},
+        "tarun": {"max": 1000000, "label": "Tarun — ₹5 lakh to ₹10 lakh"},
+        "tarun_plus": {"max": 2000000, "label": "Tarun Plus — ₹10 lakh to ₹20 lakh"}
+      },
+      "docs": [
+        "KYC (Aadhaar / PAN)",
+        "Business plan / project report",
+        "Address proof of the enterprise",
+        "Photographs & bank account details",
+        "Udyam / GST registration (where applicable)"
+      ],
+      "portal_url": "https://www.mudra.org.in/",
+      "citation": {
+        "source": "Pradhan Mantri MUDRA Yojana — Official Portal",
+        "url": "https://www.mudra.org.in/"
+      }
+    },
+    {
+      "id": "pmegp",
+      "name": "Prime Minister's Employment Generation Programme (PMEGP)",
+      "aka": "PMEGP",
+      "ministry": "Ministry of Micro, Small & Medium Enterprises (KVIB)",
+      "kind": "subsidised_loan",
+      "requires_udyam": true,
+      "collateral_free": false,
+      "min_loan": 25000,
+      "max_loan": 5000000,
+      "benefit": "Margin-money subsidy of 15–35% of project cost on bank credit of 90–95%. Maximum project cost ₹50 lakh (manufacturing) and ₹20 lakh (service / trading). New units only.",
+      "sector_caps": {
+        "manufacturing": 5000000,
+        "service": 2000000,
+        "trading": 2000000,
+        "export": 5000000
+      },
+      "subsidy_model": {
+        "special": {"urban": 0.25, "rural": 0.35},
+        "general": {"urban": 0.15, "rural": 0.25}
+      },
+      "special_categories": ["sc", "st", "obc"],
+      "docs": [
+        "Educational qualification (8th standard or above)",
+        "Project report / PPO",
+        "Caste / community certificate (if applicable)",
+        "Udyam registration",
+        "Aadhaar / PAN / bank details"
+      ],
+      "portal_url": "https://pmegp.kvib.gov.in/",
+      "citation": {
+        "source": "PMEGP — Ministry of MSME / KVIB",
+        "url": "https://pmegp.kvib.gov.in/"
+      }
+    },
+    {
+      "id": "standup",
+      "name": "Stand-Up India Scheme",
+      "aka": "Stand-Up India",
+      "ministry": "Ministry of Finance / SIDBI",
+      "kind": "collateral_free_loan",
+      "requires_udyam": false,
+      "collateral_free": true,
+      "min_loan": 100000,
+      "max_loan": 20000000,
+      "benefit": "Bank loans of ₹10 lakh to ₹1 crore (₹2 crore after the 2025 relaunch) for at least one SC/ST and one woman borrower per bank branch, for setting up a greenfield enterprise.",
+      "eligible_categories": ["sc", "st", "woman"],
+      "requires_greenfield": true,
+      "docs": [
+        "KYC of the borrower(s)",
+        "Project report for the greenfield unit",
+        "Caste certificate (SC/ST) or gender proof for women borrowers",
+        "No prior benefit / first-time entrepreneur declaration",
+        "Bank / credit proposal"
+      ],
+      "portal_url": "https://www.standupmitra.in/",
+      "citation": {
+        "source": "Stand-Up India Mitra Portal — SIDBI",
+        "url": "https://www.standupmitra.in/"
+      }
+    },
+    {
+      "id": "cgtmse",
+      "name": "Credit Guarantee Fund for Micro & Small Enterprises (CGTMSE)",
+      "aka": "CGTMSE",
+      "ministry": "Ministry of MSME / SIDBI",
+      "kind": "credit_guarantee",
+      "requires_udyam": true,
+      "collateral_free": true,
+      "min_loan": 50000,
+      "max_loan": 100000000,
+      "benefit": "Government credit guarantee enabling collateral-free loans up to ₹10 crore for micro & small enterprises, with guarantee cover of 75–90% and fees as low as 0.37% p.a. Special benefits for women entrepreneurs.",
+      "size_ceiling": {"investment": 500000000, "turnover": 5000000000},
+      "docs": [
+        "Udyam (MSME) registration certificate",
+        "Loan / credit proposal",
+        "Project report and viable business plan",
+        "KYC & financial statements (existing units)",
+        "Credit guarantee fee payment"
+      ],
+      "portal_url": "https://www.cgtmse.in/",
+      "citation": {
+        "source": "CGTMSE — Official Portal",
+        "url": "https://www.cgtmse.in/"
+      }
+    }
+  ]
+}
