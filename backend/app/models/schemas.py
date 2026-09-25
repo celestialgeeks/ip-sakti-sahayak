@@ -107,6 +107,34 @@ class TranslateResponse(BaseModel):
     target_language: Language
 
 
+# ─── Registration & Compliance Wizard ────────────────────────────────
+
+class WizardStepState(BaseModel):
+    """Status of a single wizard step for a user."""
+    id: str = Field(..., description="Stable step id (eligibility, classification, udyam, license, gmp, gst, dossier)")
+    status: str = Field(default="pending", description="pending | in_progress | completed | not_applicable | milestone")
+
+
+class WizardStateSaveRequest(BaseModel):
+    """Payload to persist a user's wizard progress."""
+    current_step: str = Field(default="eligibility")
+    product_type: Optional[str] = Field(default=None, description="AYUSH | FSSAI | COSMETIC | UNKNOWN")
+    classification: Optional[dict] = Field(default=None, description="Raw /classify response for license routing")
+    steps: List[WizardStepState] = Field(default_factory=list)
+    answers: Optional[dict] = Field(default=None, description="Free-form per-step form/checklist data")
+
+
+class WizardStateResponse(BaseModel):
+    """A user's persisted wizard progress."""
+    user_id: str
+    current_step: str = "eligibility"
+    product_type: Optional[str] = None
+    classification: Optional[dict] = None
+    steps: List[WizardStepState] = Field(default_factory=list)
+    answers: Optional[dict] = None
+    updated_at: Optional[str] = None
+
+
 # ─── Feedback ────────────────────────────────────────────────────────
 
 class FeedbackRequest(BaseModel):
