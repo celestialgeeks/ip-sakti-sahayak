@@ -2,83 +2,667 @@
   {
     "id": "rev_3_2_benchmark",
     "title": "Synergistic Ashwagandha-Shilajit-Curcumin Compound (Rev. 3.2)",
-    "description": "Standard high-potency benchmark formulation designed to overcome Indian Patents Act Section 3(e) with proven NF-κB inhibition and BDA compliance.",
-    "target_tier": "vriddha",
+    "description": "Strong medicine, but TKDL reads as §3(p) prior art — add Guduchi 6% to drop below the 90 line.",
+    "target_tier": "divya_rasayana",
     "ingredients": [
-      { "herb_id": "ashwagandha", "ratio": 40.0, "is_locked": false },
-      { "herb_id": "shilajit", "ratio": 10.0, "is_locked": false },
-      { "herb_id": "haridra", "ratio": 30.0, "is_locked": true },
-      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
-      { "herb_id": "ghee", "ratio": 15.0, "is_locked": false }
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 40.0
+      },
+      {
+        "herb_id": "shilajit",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "haridra",
+        "ratio": 30.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 15.0
+      }
     ],
     "baseline_ratios": {
-      "ashwagandha": 30.0,
-      "shilajit": 20.0,
+      "ashwagandha": 40.0,
+      "shilajit": 10.0,
       "haridra": 30.0,
       "pippali": 5.0,
       "ghee": 15.0
+    },
+    "computed": {
+      "quality": 98,
+      "ci": 0.57,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 92,
+      "tier": "divya_rasayana",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
     }
   },
   {
     "id": "rasayana_matrix",
-    "title": "⚡ Rejuvenative Rasayana Matrix (Ashwagandha Base)",
-    "description": "Ojas-building classical rejuvenation compound with immunomodulating adaptogens and lipid liposomal carrier.",
+    "title": "Rejuvenative Rasayana Matrix",
+    "description": "Complete five-layer yoga; Guduchi keeps TKDL under the §3(p) line but shilajit sits near its resin ceiling.",
     "target_tier": "siddha",
     "ingredients": [
-      { "herb_id": "ashwagandha", "ratio": 35.0, "is_locked": false },
-      { "herb_id": "amla", "ratio": 25.0, "is_locked": false },
-      { "herb_id": "guduchi", "ratio": 15.0, "is_locked": false },
-      { "herb_id": "shilajit", "ratio": 10.0, "is_locked": false },
-      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
-      { "herb_id": "ghee", "ratio": 10.0, "is_locked": false }
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 35.0
+      },
+      {
+        "herb_id": "amla",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "guduchi",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "shilajit",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      }
     ],
     "baseline_ratios": {
-      "ashwagandha": 30.0,
+      "ashwagandha": 35.0,
       "amla": 25.0,
       "guduchi": 15.0,
-      "shilajit": 15.0,
+      "shilajit": 10.0,
       "pippali": 5.0,
       "ghee": 10.0
+    },
+    "computed": {
+      "quality": 94,
+      "ci": 0.63,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 83,
+      "tier": "siddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
     }
   },
   {
     "id": "anti_inflammatory_catalyst",
-    "title": "🛡️ Anti-Inflammatory Haridra-Pippali Catalyst",
-    "description": "Targeted COX-2 and NF-κB inflammatory cascade inhibitor combining standardized Curcuminoids with Piperine bio-enhancement.",
-    "target_tier": "divya_rasayana",
+    "title": "Anti-Inflammatory Haridra-Pippali Catalyst",
+    "description": "Powerful COX-2/NF-κB yoga, but Haridra at 45% breaches the 35% safety ceiling and Guggulu pulls royalty to the 5% bracket.",
+    "target_tier": "siddha",
     "ingredients": [
-      { "herb_id": "haridra", "ratio": 45.0, "is_locked": false },
-      { "herb_id": "guggulu", "ratio": 25.0, "is_locked": false },
-      { "herb_id": "ashwagandha", "ratio": 15.0, "is_locked": false },
-      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
-      { "herb_id": "ghee", "ratio": 10.0, "is_locked": false }
+      {
+        "herb_id": "haridra",
+        "ratio": 45.0
+      },
+      {
+        "herb_id": "guggulu",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      }
     ],
     "baseline_ratios": {
-      "haridra": 40.0,
-      "guggulu": 30.0,
+      "haridra": 45.0,
+      "guggulu": 25.0,
       "ashwagandha": 15.0,
       "pippali": 5.0,
       "ghee": 10.0
+    },
+    "computed": {
+      "quality": 99,
+      "ci": 0.71,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "siddha",
+      "nba_abs_royalty_percentage": 5.0,
+      "cost_per_unit": 76.7
     }
   },
   {
     "id": "medhya_neuro_enhancer",
-    "title": "🧠 Medhya Cognitive Neuro-Enhancer (Brahmi Base)",
-    "description": "Nootropic brain tonic designed for synaptic plasticity, memory retention, and mental fatigue mitigation.",
-    "target_tier": "siddha",
+    "title": "Medhya Cognitive Neuro-Enhancer",
+    "description": "Nootropic depth, but Brahmi at 40% exceeds the 25% vagal ceiling — reduce to 25% before examination.",
+    "target_tier": "vriddha",
     "ingredients": [
-      { "herb_id": "brahmi", "ratio": 40.0, "is_locked": false },
-      { "herb_id": "shankhpushpi", "ratio": 30.0, "is_locked": false },
-      { "herb_id": "ashwagandha", "ratio": 15.0, "is_locked": false },
-      { "herb_id": "pippali", "ratio": 5.0, "is_locked": false },
-      { "herb_id": "ghee", "ratio": 10.0, "is_locked": false }
+      {
+        "herb_id": "brahmi",
+        "ratio": 40.0
+      },
+      {
+        "herb_id": "shankhpushpi",
+        "ratio": 30.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      }
     ],
     "baseline_ratios": {
-      "brahmi": 35.0,
+      "brahmi": 40.0,
       "shankhpushpi": 30.0,
-      "ashwagandha": 20.0,
+      "ashwagandha": 15.0,
       "pippali": 5.0,
       "ghee": 10.0
+    },
+    "computed": {
+      "quality": 78,
+      "ci": 0.71,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "vriddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "shwasa_cheap_kwath",
+    "title": "Svasa Respiratory Decoction (Budget Cut)",
+    "description": "Cheap to make and legal-clean, but no bio-enhancer and no hero adaptogen — the IPO reads it as a mere admixture (§3(e)).",
+    "target_tier": "bala",
+    "ingredients": [
+      {
+        "herb_id": "tulsi",
+        "ratio": 40.0
+      },
+      {
+        "herb_id": "gokshura",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "methi",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "kantakari",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      }
+    ],
+    "baseline_ratios": {
+      "tulsi": 40.0,
+      "gokshura": 15.0,
+      "methi": 15.0,
+      "kantakari": 20.0,
+      "ghee": 10.0
+    },
+    "computed": {
+      "quality": 41,
+      "ci": 1.21,
+      "sec_3e_status": "REJECTED",
+      "tkdl_concordance_score": 58,
+      "tier": "bala",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "prameha_fenugreek_quatro",
+    "title": "Prameha Sugar-Balance Quattro",
+    "description": "Cleared §3(e) at CI 0.57, but Pippali at 10% breaches the 6% gastric ceiling — a CRITICAL patient-safety objection.",
+    "target_tier": "vriddha",
+    "ingredients": [
+      {
+        "herb_id": "methi",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "guduchi",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "neem",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "tulsi",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 10.0
+      }
+    ],
+    "baseline_ratios": {
+      "methi": 25.0,
+      "guduchi": 20.0,
+      "neem": 20.0,
+      "tulsi": 15.0,
+      "ghee": 10.0,
+      "pippali": 10.0
+    },
+    "computed": {
+      "quality": 76,
+      "ci": 0.75,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "vriddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "sandhivata_shallaki_yoga",
+    "title": "Sandhivata Boswellia-Joint Yoga",
+    "description": "High 5-LOX anti-inflammatory load, but Shallaki at 35% sits above its 30% API ceiling — trim before filing.",
+    "target_tier": "divya_rasayana",
+    "ingredients": [
+      {
+        "herb_id": "shallaki",
+        "ratio": 35.0
+      },
+      {
+        "herb_id": "haridra",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "guggulu",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "guduchi",
+        "ratio": 10.0
+      }
+    ],
+    "baseline_ratios": {
+      "shallaki": 35.0,
+      "haridra": 25.0,
+      "guggulu": 20.0,
+      "ashwagandha": 15.0,
+      "pippali": 5.0,
+      "ghee": 10.0,
+      "guduchi": 10.0
+    },
+    "computed": {
+      "quality": 97,
+      "ci": 0.63,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "divya_rasayana",
+      "nba_abs_royalty_percentage": 3.5,
+      "cost_per_unit": 74.6
+    }
+  },
+  {
+    "id": "medoroga_guggulu_lean",
+    "title": "Medoroga Lipid-Control Guggulu Build",
+    "description": "Patent-strong synergy, but Guggulu at 30% is a threatened resin: 5% royalty bracket plus a dermatitis ceiling breach.",
+    "target_tier": "divya_rasayana",
+    "ingredients": [
+      {
+        "herb_id": "guggulu",
+        "ratio": 30.0
+      },
+      {
+        "herb_id": "haridra",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      }
+    ],
+    "baseline_ratios": {
+      "guggulu": 30.0,
+      "haridra": 20.0,
+      "ashwagandha": 20.0,
+      "ghee": 25.0,
+      "pippali": 5.0
+    },
+    "computed": {
+      "quality": 94,
+      "ci": 0.57,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "divya_rasayana",
+      "nba_abs_royalty_percentage": 5.0,
+      "cost_per_unit": 76.7
+    }
+  },
+  {
+    "id": "vata_vighnaka_gawandha",
+    "title": "Vata-Vighnaka Mobile-Joint Compound",
+    "description": "Clean §3(e) and legal spread, but Ashwagandha at 48% trips the 45% sedation ceiling — the flagship dose is one slider away from a warning.",
+    "target_tier": "siddha",
+    "ingredients": [
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 48.0
+      },
+      {
+        "herb_id": "shallaki",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 7.0
+      },
+      {
+        "herb_id": "vidari",
+        "ratio": 10.0
+      }
+    ],
+    "baseline_ratios": {
+      "ashwagandha": 48.0,
+      "shallaki": 15.0,
+      "ghee": 20.0,
+      "pippali": 7.0,
+      "vidari": 10.0
+    },
+    "computed": {
+      "quality": 86,
+      "ci": 0.65,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 68,
+      "tier": "siddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "arsha_kasisa_purva",
+    "title": "Arsha Astringent Pre-Kasisa Compound",
+    "description": "Triphala-anchored piles formula, but Dantaka at 10% exceeds its 8% plumbagin ceiling — one narrow-window herb blocks export.",
+    "target_tier": "vriddha",
+    "ingredients": [
+      {
+        "herb_id": "dantaka",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "guduchi",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "amla",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "haritaki",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "bibhitaki",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "musta",
+        "ratio": 10.0
+      }
+    ],
+    "baseline_ratios": {
+      "dantaka": 10.0,
+      "guduchi": 20.0,
+      "amla": 25.0,
+      "haritaki": 10.0,
+      "bibhitaki": 10.0,
+      "ghee": 10.0,
+      "pippali": 5.0,
+      "musta": 10.0
+    },
+    "computed": {
+      "quality": 76,
+      "ci": 0.81,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "vriddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "hridaya_arjuna_tonic",
+    "title": "Hridya Arjuna Cardiac Tonic",
+    "description": "Solid carrier-plus-enhancer base, but Arjuna bark at 35% overshoots the 30% API ceiling for prolonged use.",
+    "target_tier": "vriddha",
+    "ingredients": [
+      {
+        "herb_id": "arjuna",
+        "ratio": 35.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "shankhpushpi",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      }
+    ],
+    "baseline_ratios": {
+      "arjuna": 35.0,
+      "ashwagandha": 20.0,
+      "shankhpushpi": 25.0,
+      "ghee": 15.0,
+      "pippali": 5.0
+    },
+    "computed": {
+      "quality": 79,
+      "ci": 0.71,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "vriddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "bilva_sangraha_sthapana",
+    "title": "Grahani Bowel-Stabilising Bilva Build",
+    "description": "Balanced cooling bowel yoga, but Bilva at 30% is above the 25% marmin ceiling — reduce to unlock export.",
+    "target_tier": "vriddha",
+    "ingredients": [
+      {
+        "herb_id": "bilva",
+        "ratio": 30.0
+      },
+      {
+        "herb_id": "methi",
+        "ratio": 20.0
+      },
+      {
+        "herb_id": "gokshura",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "musta",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      },
+      {
+        "herb_id": "amla",
+        "ratio": 5.0
+      }
+    ],
+    "baseline_ratios": {
+      "bilva": 30.0,
+      "methi": 20.0,
+      "gokshura": 15.0,
+      "musta": 10.0,
+      "ghee": 15.0,
+      "pippali": 5.0,
+      "amla": 5.0
+    },
+    "computed": {
+      "quality": 73,
+      "ci": 0.89,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "vriddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "shukrali_vidari_balya",
+    "title": "Shukrali Vidari-Nourish Balya",
+    "description": "Three hero adaptogens with full carrier layer; the weak spot is economics — Vidari sourcing pushes procurement cost, not legality.",
+    "target_tier": "vriddha",
+    "ingredients": [
+      {
+        "herb_id": "vidari",
+        "ratio": 30.0
+      },
+      {
+        "herb_id": "shatavari",
+        "ratio": 30.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 25.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 10.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      }
+    ],
+    "baseline_ratios": {
+      "vidari": 30.0,
+      "shatavari": 30.0,
+      "ashwagandha": 25.0,
+      "ghee": 10.0,
+      "pippali": 5.0
+    },
+    "computed": {
+      "quality": 79,
+      "ci": 0.71,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "vriddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
+    }
+  },
+  {
+    "id": "chyawan_prasha_minimal",
+    "title": "Chyawanprash Minimal Base (Amla-Led)",
+    "description": "Amla-heavy classical anchor, but the actives are diffuse: quality lands NOVEL-but-DEFICIENT without a standardized hero extract.",
+    "target_tier": "siddha",
+    "ingredients": [
+      {
+        "herb_id": "amla",
+        "ratio": 42.0
+      },
+      {
+        "herb_id": "ashwagandha",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "guduchi",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "shankhpushpi",
+        "ratio": 8.0
+      },
+      {
+        "herb_id": "ghee",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "pippali",
+        "ratio": 5.0
+      }
+    ],
+    "baseline_ratios": {
+      "amla": 42.0,
+      "ashwagandha": 15.0,
+      "guduchi": 15.0,
+      "shankhpushpi": 8.0,
+      "ghee": 15.0,
+      "pippali": 5.0
+    },
+    "computed": {
+      "quality": 83,
+      "ci": 0.63,
+      "sec_3e_status": "CLEARED",
+      "tkdl_concordance_score": 75,
+      "tier": "siddha",
+      "nba_abs_royalty_percentage": 3.0,
+      "cost_per_unit": 73.9
     }
   }
 ]

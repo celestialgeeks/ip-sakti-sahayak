@@ -10,7 +10,7 @@ import {
 } from "@/lib/formulation/types.ts";
 import { DEFAULT_BOTANICALS, STARTER_PRESETS } from "@/lib/formulation/defaults.ts";
 import { simulateClientFormulation } from "@/lib/formulation/engine.ts";
-import { GenesisOrbLanding } from "@/components/formulation-lab/GenesisOrbLanding";
+import RecursiveErosionBackground from "@/components/ui/recursive-erosion";
 import { RatioMatrixBoard } from "@/components/formulation-lab/RatioMatrixBoard";
 import { LivingRasaCard } from "@/components/formulation-lab/LivingRasaCard";
 import { QualityPatentabilityMatrix } from "@/components/formulation-lab/QualityPatentabilityMatrix";
@@ -22,6 +22,13 @@ import { OptimizationToast } from "@/components/formulation-lab/OptimizationToas
 import { PreFERModal } from "@/components/formulation-lab/PreFERModal";
 import { DossierExportModal } from "@/components/formulation-lab/DossierExportModal";
 import { getApiUrl } from "@/lib/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 export default function FormulationLabPage() {
   const router = useRouter();
@@ -29,9 +36,6 @@ export default function FormulationLabPage() {
   // Botanical & Preset catalogs
   const [botanicals] = useState<BotanicalItem[]>(DEFAULT_BOTANICALS);
   const [presets] = useState<PresetFormulation[]>(STARTER_PRESETS);
-
-  // Landing vs Active Workbench mode
-  const [isGenesisLanding, setIsGenesisLanding] = useState<boolean>(true);
 
   // Active formulation state
   const [formulationTitle, setFormulationTitle] = useState<string>(
@@ -54,6 +58,11 @@ export default function FormulationLabPage() {
   // Toast recommendation state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Bottom analysis rail: which detail panel is shown
+  const [detailTab, setDetailTab] = useState<
+    "quadrant" | "safety" | "proscons" | "directives" | "statutory"
+  >("quadrant");
+
   // Instant client simulation computation (0ms reactivity)
   const simulation = useMemo(() => {
     return simulateClientFormulation(formulationTitle, ingredients, "domestic");
@@ -74,7 +83,6 @@ export default function FormulationLabPage() {
     setActivePresetId("custom_draft");
     setIngredients([]);
     setBaselineRatios({});
-    setIsGenesisLanding(false);
   }, []);
 
   // Handler: Select Starter Preset from Genesis or Switcher
@@ -84,7 +92,6 @@ export default function FormulationLabPage() {
       setActivePresetId(preset.id);
       setIngredients(preset.ingredients.map((i) => ({ ...i })));
       setBaselineRatios({ ...preset.baseline_ratios });
-      setIsGenesisLanding(false);
     },
     []
   );
@@ -99,7 +106,6 @@ export default function FormulationLabPage() {
       ...prev,
       [herbId]: prev[herbId] ?? defaultRatio,
     }));
-    setIsGenesisLanding(false);
   }, []);
 
   // Handler: Modify herb ratio
@@ -280,141 +286,196 @@ export default function FormulationLabPage() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-95px)] bg-[#F4F6F9] text-[#111c2d]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* ── Top Portal Breadcrumb & Context Bar ──────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#00263f]" />
-            <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">
-                Ministry of Ayush · SIH26045
-              </span>
-              <h2 className="text-sm font-bold text-[#00263f]">
-                Formulation Laboratory &amp; Ratio Impact Simulator
-              </h2>
+    <div className="w-full min-h-[calc(100vh-95px)] bg-background text-on-surface font-body-md">
+      <div className="max-w-[1600px] mx-auto px-space-md sm:px-gutter lg:px-margin py-4 space-y-4">
+        {/* ── Slim Command Header (current formula name) ─────────────── */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-surface-container-lowest border border-portal-border/60 rounded-xl px-4 py-3 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-tiranga-saffron via-surface-container-lowest to-tiranga-green opacity-90" />
+          <div className="flex items-center gap-3 min-w-0 pl-1">
+            <div className="w-10 h-10 rounded-lg bg-primary text-surface-container-lowest grid place-items-center shrink-0">
+              <span className="material-symbols-outlined text-[22px]">science</span>
+            </div>
+            <div className="min-w-0">
+              <input
+                type="text"
+                value={formulationTitle}
+                onChange={(e) => setFormulationTitle(e.target.value)}
+                aria-label="Active formulation title"
+                className="w-full max-w-md text-base font-bold text-portal-navy-deep font-title-lg border-b border-transparent hover:border-portal-border focus:border-primary focus:outline-none transition-colors bg-transparent"
+              />
+              <span className="text-[10px] font-label-sm uppercase tracking-wider text-outline">Active Formulation · live in silico</span>
             </div>
           </div>
 
-          {/* Action Toolbar */}
-          <div className="flex items-center gap-2.5 self-end sm:self-auto flex-wrap">
-            {isGenesisLanding ? (
-              <button
-                onClick={() => setIsGenesisLanding(false)}
-                className="px-3.5 py-2 rounded text-xs font-semibold bg-[#00263f] hover:bg-[#083b5c] text-white transition-colors cursor-pointer"
-              >
-                Open Active Workbench →
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => setIsGenesisLanding(true)}
-                  className="px-3 py-1.5 rounded text-xs font-medium border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
-                >
-                  ← Setup Hub
-                </button>
-
-                <select
-                  value={activePresetId}
-                  onChange={(e) => {
-                    const p = presets.find((pr) => pr.id === e.target.value);
-                    if (p) handleSelectPreset(p);
-                  }}
-                  className="text-xs px-3 py-1.5 rounded bg-white border border-slate-300 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00263f]"
-                >
-                  {presets.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title}
-                    </option>
-                  ))}
-                  <option value="custom_draft">Custom Blank Compound</option>
-                </select>
-              </>
-            )}
+          <div className="flex items-center gap-2 flex-wrap pl-1">
+            <span className={`hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-label-sm font-label-sm font-semibold ${simulation.sec_3e_status === "CLEARED" ? "bg-secondary-container/40 text-on-secondary-container border-secondary-container" : "bg-tertiary-fixed/50 text-on-tertiary-fixed border-emblem-gold/40"}`}>
+              <span className="material-symbols-outlined text-[16px]">verified</span>
+              {simulation.sec_3e_status === "CLEARED" ? "§3(e) Cleared" : "§3(e) In Review"}
+            </span>
+            <button
+              onClick={handleStartBlank}
+              className="px-3 py-2 rounded-lg text-label-sm font-label-sm font-semibold border border-portal-border bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant transition-colors flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+              New
+            </button>
+            <button
+              onClick={handleRunPreFER}
+              className="px-3.5 py-2 rounded-lg text-label-sm font-label-sm font-semibold bg-primary-container hover:bg-portal-navy-deep text-surface-container-lowest transition-colors flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[16px]">gavel</span>
+              Run Pre-FER
+            </button>
           </div>
         </div>
 
-        {/* ── Main Workspace Body ──────────────────────────────────────── */}
-        {isGenesisLanding ? (
-          <GenesisOrbLanding
-            presets={presets}
-            botanicals={botanicals}
-            onSelectPreset={handleSelectPreset}
-            onAddHerb={handleAddHerb}
-            onStartBlank={handleStartBlank}
-          />
-        ) : (
-          <div className="space-y-6">
-            {/* Active Formulation Title Card */}
-            <div className="bg-white rounded-lg border border-slate-200 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex-1 space-y-1">
-                <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
-                  Active Formulation Title
-                </span>
-                <input
-                  type="text"
-                  value={formulationTitle}
-                  onChange={(e) => setFormulationTitle(e.target.value)}
-                  className="w-full text-base font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-[#00263f] focus:outline-none transition-colors"
-                />
+        {/* ── Primary Workspace: core + potency (left) · metrics + ingredients (right) ── */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+          {/* LEFT: recursive-erosion animation on top, synergy potency meter below */}
+          <div className="xl:col-span-5 space-y-4">
+            <div className="relative rounded-xl overflow-hidden border border-outline-variant/30 bg-[#0a0908] h-[220px]">
+              <RecursiveErosionBackground mode="dark" className="absolute inset-0 h-full w-full" />
+              <div className="absolute top-2 left-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-portal-navy-deep/80 border border-outline-variant/30 text-surface-container-lowest text-[10px] font-mono">
+                <span className={`w-1.5 h-1.5 rounded-full ${simulation.is_balanced ? "bg-tiranga-green" : "bg-tiranga-saffron"} animate-ping`} />
+                PRĀṆA CORE
               </div>
-
-              <div className="text-right shrink-0">
-                <span className="text-[10px] font-mono text-slate-400 uppercase font-bold block">
-                  Stage Classification
-                </span>
-                <span className="text-sm font-bold text-slate-900 font-mono">
-                  {simulation.tier_sanskrit}
-                </span>
+              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-[#0a0908] via-[#0a0908]/70 to-transparent">
+                <div className="flex items-end justify-between text-surface-container-lowest">
+                  <div>
+                    <div className="text-[10px] font-label-sm uppercase text-surface-variant">Ojas Potency</div>
+                    <div className="font-headline-md text-headline-md font-bold leading-none">{simulation.ojas_power_score.toLocaleString()}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] font-label-sm uppercase text-surface-variant">CI</div>
+                    <div className={`font-title-lg text-title-lg font-bold font-mono ${simulation.sec_3e_status === "CLEARED" ? "text-tiranga-green" : "text-tiranga-saffron"}`}>{simulation.chou_talalay_ci.toFixed(2)}</div>
+                  </div>
+                </div>
               </div>
             </div>
+            <LivingRasaCard simulation={simulation} />
+          </div>
 
-            {/* ── 1. Quality & Patentability Correlation Matrix (Primary Visualizer) ── */}
-            <QualityPatentabilityMatrix simulation={simulation} />
-
-            {/* ── 2. Ratio Matrix Board (Constituents) + Living Rasa Card ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <div className="lg:col-span-7">
-                <RatioMatrixBoard
-                  ingredients={ingredients}
-                  botanicals={botanicals}
-                  baselineRatios={baselineRatios}
-                  onRatioChange={handleRatioChange}
-                  onToggleLock={handleToggleLock}
-                  onRemoveHerb={handleRemoveHerb}
-                  onAddHerb={handleAddHerb}
-                  onAutoBalance={handleAutoBalance}
-                  onResetBaseline={handleResetBaseline}
-                  totalRatio={simulation.total_ratio}
-                  isBalanced={simulation.is_balanced}
-                />
-              </div>
-
-              <div className="lg:col-span-5 sticky top-6">
-                <LivingRasaCard simulation={simulation} />
-              </div>
+          {/* RIGHT: compact metrics · preset loader · ingredients matrix */}
+          <div className="xl:col-span-7 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                { label: "Compound Total", value: `${simulation.total_ratio.toFixed(1)}%`, sub: "/ 100", chip: simulation.is_balanced ? "Balanced" : "Unbalanced", chipColor: simulation.is_balanced ? "bg-secondary-container/50 text-on-secondary-container" : "bg-error-container/60 text-on-error-container", barPct: Math.min(100, simulation.total_ratio), barColor: simulation.is_balanced ? "bg-tiranga-green" : "bg-error" },
+                { label: "Synergy Index", value: simulation.chou_talalay_ci.toFixed(2), sub: "CI", chip: simulation.sec_3e_status === "CLEARED" ? "§3(e) Cleared" : "§3(e) Risk", chipColor: simulation.sec_3e_status === "CLEARED" ? "bg-secondary-container/50 text-on-secondary-container" : "bg-error-container/60 text-on-error-container", barPct: Math.max(0, Math.min(100, (1 - simulation.chou_talalay_ci) * 100)), barColor: simulation.sec_3e_status === "CLEARED" ? "bg-tiranga-green-deep" : "bg-error" },
+                { label: "TKDL Concordance", value: `${simulation.tkdl_concordance_score}%`, sub: "canon", chip: simulation.tkdl_concordance_score >= 90 ? "Prior-Art Risk" : "Admissible", chipColor: simulation.tkdl_concordance_score >= 90 ? "bg-tertiary-fixed/60 text-on-tertiary-fixed" : "bg-secondary-container/50 text-on-secondary-container", barPct: simulation.tkdl_concordance_score, barColor: "bg-emblem-gold" },
+                { label: "NBA Benefit-Share", value: `${simulation.nba_abs_royalty_percentage.toFixed(1)}%`, sub: "ex-fty", chip: simulation.nba_form_tier, chipColor: "bg-primary-fixed text-on-primary-fixed-variant", barPct: Math.min(100, simulation.nba_abs_royalty_percentage * 10), barColor: "bg-tiranga-saffron-deep" },
+              ] as const).map((k) => (
+                <div key={k.label} className="rounded-lg border border-portal-border/60 bg-surface-container-lowest p-3 shadow-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-label-sm uppercase tracking-wider text-outline truncate">{k.label}</span>
+                    <span className={`text-[10px] font-label-sm font-bold px-1.5 py-0.5 rounded shrink-0 ${k.chipColor}`}>{k.chip}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="font-title-lg text-title-lg font-bold text-portal-navy-deep font-mono">{k.value}</span>
+                    <span className="text-[10px] text-outline">{k.sub}</span>
+                  </div>
+                  <div className="w-full bg-surface-container rounded-full h-1 mt-2 overflow-hidden">
+                    <div className={`${k.barColor} h-full rounded-full transition-all duration-300`} style={{ width: `${Math.max(0, Math.min(100, k.barPct))}%` }} />
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* ── 3. Patient Clinical Safety & High-Quantity Toxicological Hazards ── */}
-            <PatientSafetyPanel simulation={simulation} />
+            {/* Preset loader */}
+            <div className="flex items-center gap-2 rounded-lg border border-portal-border/60 bg-surface-container-lowest px-3 py-2 shadow-xs">
+              <span className="text-[10px] font-label-sm uppercase tracking-wider text-outline shrink-0">Load preset</span>
+              <Select
+                value={activePresetId}
+                onValueChange={(v) => {
+                  const p = presets.find((pr) => pr.id === v);
+                  if (p) handleSelectPreset(p);
+                }}
+              >
+                <SelectTrigger
+                  aria-label="Switch active formulation preset"
+                  className="flex-1 min-w-0 rounded-lg border-portal-border bg-surface-container-lowest px-3 text-label-sm text-on-surface shadow-none data-[size=default]:h-[34px] data-[state=open]:border-tiranga-saffron"
+                >
+                  <SelectValue placeholder="Select a preset" />
+                </SelectTrigger>
+                <SelectContent className="[&_[data-slot=select-item]]:text-label-sm">
+                  {presets.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom_draft">Custom Blank Compound</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            {/* ── 4. Formulation Pros & Cons Breakdown ── */}
-            <ProsAndConsPanel simulation={simulation} />
-
-            {/* ── 5. Actionable Optimization Directives: How to Improve & What to Remove ── */}
-            <OptimizationDirectivesPanel
-              simulation={simulation}
-              onApplyDirective={handleApplyDirective}
-            />
-
-            {/* ── 6. Structured Statutory Accordions ── */}
-            <StatutoryAccordions
-              simulation={simulation}
-              onRunPreFER={handleRunPreFER}
-              onExportDossier={() => setIsDossierOpen(true)}
-              onOpenChatWithFormulation={handleOpenChatWithFormulation}
+            <RatioMatrixBoard
+              ingredients={ingredients}
+              botanicals={botanicals}
+              baselineRatios={baselineRatios}
+              onRatioChange={handleRatioChange}
+              onToggleLock={handleToggleLock}
+              onRemoveHerb={handleRemoveHerb}
+              onAddHerb={handleAddHerb}
+              onAutoBalance={handleAutoBalance}
+              onResetBaseline={handleResetBaseline}
+              totalRatio={simulation.total_ratio}
+              isBalanced={simulation.is_balanced}
             />
           </div>
+        </div>
+
+        {/* ── Analysis rail (tabbed so nothing bleeds below the fold) ── */}
+        <div className="flex flex-wrap items-center gap-1 p-1.5 bg-surface-container-lowest border border-portal-border/60 rounded-xl shadow-sm">
+          {([
+            { id: "quadrant", label: "Quality × Patentability", icon: "scatter_plot" },
+            { id: "safety", label: "Patient Safety", icon: "medical_services" },
+            { id: "proscons", label: "Pros & Cons", icon: "balance" },
+            { id: "directives", label: "Directives", icon: "auto_fix_high" },
+            { id: "statutory", label: "Statutory Dossier", icon: "gavel" },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setDetailTab(t.id)}
+              className={`px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-semibold flex items-center gap-1.5 transition-colors ${
+                detailTab === t.id
+                  ? "bg-primary-container text-surface-container-lowest shadow-xs"
+                  : "text-on-surface-variant hover:bg-surface-container hover:text-primary"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => setIsDossierOpen(true)}
+              className="px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-semibold border border-portal-border bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant transition-colors flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[16px]">description</span>
+              Export Dossier
+            </button>
+            <button
+              onClick={handleOpenChatWithFormulation}
+              className="px-3 py-1.5 rounded-lg text-label-sm font-label-sm font-semibold border border-primary bg-portal-surface-subtle hover:bg-surface-container text-primary transition-colors flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[16px]">smart_toy</span>
+              Consult Legal Assistant
+            </button>
+          </div>
+        </div>
+
+        {detailTab === "quadrant" && <QualityPatentabilityMatrix simulation={simulation} />}
+        {detailTab === "safety" && <PatientSafetyPanel simulation={simulation} />}
+        {detailTab === "proscons" && <ProsAndConsPanel simulation={simulation} />}
+        {detailTab === "directives" && (
+          <OptimizationDirectivesPanel simulation={simulation} onApplyDirective={handleApplyDirective} />
+        )}
+        {detailTab === "statutory" && (
+          <StatutoryAccordions
+            simulation={simulation}
+            onRunPreFER={handleRunPreFER}
+            onExportDossier={() => setIsDossierOpen(true)}
+            onOpenChatWithFormulation={handleOpenChatWithFormulation}
+          />
         )}
 
         {/* ── Modals & Notification Widgets ────────────────────────────── */}
@@ -444,3 +505,4 @@ export default function FormulationLabPage() {
     </div>
   );
 }
+

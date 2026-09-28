@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>IP-SAKTI Sahayak 2.0 | Ministry of Ayush, Government of India</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "emblem-gold": "#B8860B",
+          "on-tertiary-fixed": "#380d00",
+          "on-tertiary-container": "#ff7d49",
+          "on-secondary-container": "#307231",
+          "ashoka-navy": "#000080",
+          "on-surface-variant": "#42474e",
+          "secondary-fixed-dim": "#91d78a",
+          "on-primary": "#ffffff",
+          "portal-border": "#D2D9E2",
+          "surface-container-high": "#dee8ff",
+          "on-primary-fixed-variant": "#1f4a6c",
+          "inverse-surface": "#263143",
+          "on-secondary-fixed": "#002203",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#ffb59a",
+          "portal-navy-deep": "#002855",
+          "on-tertiary-fixed-variant": "#802a00",
+          "on-secondary": "#ffffff",
+          "on-surface": "#111c2d",
+          "surface-variant": "#d8e3fb",
+          "on-error": "#ffffff",
+          "surface": "#f9f9ff",
+          "surface-container-lowest": "#ffffff",
+          "secondary-container": "#acf4a4",
+          "portal-surface-subtle": "#EEF3F8",
+          "portal-surface-slate": "#F4F6F9",
+          "surface-tint": "#396285",
+          "background": "#f9f9ff",
+          "on-primary-container": "#7fa7cd",
+          "tiranga-saffron-deep": "#E65100",
+          "secondary-fixed": "#acf4a4",
+          "inverse-on-surface": "#ecf1ff",
+          "tiranga-saffron": "#FF9933",
+          "on-background": "#111c2d",
+          "on-secondary-fixed-variant": "#0c5216",
+          "surface-container-low": "#f0f3ff",
+          "surface-container-highest": "#d8e3fb",
+          "tertiary-container": "#692100",
+          "surface-bright": "#f9f9ff",
+          "primary-container": "#0b3c5d",
+          "secondary": "#2a6b2c",
+          "surface-dim": "#cfdaf2",
+          "primary-fixed": "#cee5ff",
+          "tertiary": "#451300",
+          "surface-container": "#e7eeff",
+          "tiranga-green": "#138808",
+          "error": "#ba1a1a",
+          "inverse-primary": "#a3cbf2",
+          "on-tertiary": "#ffffff",
+          "outline-variant": "#c2c7ce",
+          "error-container": "#ffdad6",
+          "tertiary-fixed": "#ffdbcf",
+          "tiranga-green-deep": "#1B5E20",
+          "outline": "#72777e",
+          "on-primary-fixed": "#001d32",
+          "primary": "#00263f",
+          "primary-fixed-dim": "#a3cbf2"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "margin": "2rem",
+          "space-xl": "2.5rem",
+          "gutter-mobile": "1rem",
+          "gutter": "1.5rem",
+          "margin-mobile": "1rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-md": "1rem",
+          "space-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "body-md": ["Inter"],
+          "title-md": ["Noto Sans"],
+          "headline-md": ["Noto Sans"],
+          "label-md": ["Public Sans"],
+          "headline-xl": ["Noto Sans"],
+          "body-sm": ["Inter"],
+          "headline-lg-mobile": ["Noto Sans"],
+          "headline-xl-mobile": ["Noto Sans"],
+          "label-sm": ["Public Sans"],
+          "label-lg": ["Public Sans"],
+          "body-lg": ["Inter"],
+          "headline-sm": ["Noto Sans"],
+          "headline-lg": ["Noto Sans"],
+          "title-lg": ["Noto Sans"]
+        },
+        "fontSize": {
+          "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+          "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+          "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+          "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+          "headline-xl": ["40px", { "lineHeight": "48px", "fontWeight": "700" }],
+          "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+          "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+          "headline-xl-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+          "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "700" }],
+          "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+          "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+          "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+          "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+          "title-lg": ["18px", { "lineHeight": "26px", "fontWeight": "600" }]
+        }
+      }
+    }
+  };
+</script>
+<style>
+  @layer base {
+    html, body { margin: 0; padding: 0; }
+    body { overscroll-behavior: none; }
+  }
+  ::-webkit-scrollbar { display: none; }
+  .tricolor-stripe {
+    background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+  }
+</style>
+<meta content="web_dashboard" name="shell-type"/>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased">
+<!-- Top Institutional Bar & Main Gov Header (Total Height: 27px top strip + 64px main header = ~91px, h-[91px]) -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-portal-border shadow-xs">
+<!-- National Tricolor Strip -->
+<div class="h-[3px] w-full tricolor-stripe"></div>
+<!-- Accessibility & Official Apex Bar -->
+<div class="bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm px-gutter-mobile sm:px-gutter py-1 flex items-center justify-between border-b border-outline-variant/30">
+<div class="flex items-center gap-space-md">
+<span class="font-semibold text-surface-container-lowest tracking-wider flex items-center gap-1.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-tiranga-saffron"></span>
+        भारत सरकार | GOVERNMENT OF INDIA
+      </span>
+<span class="hidden md:inline-block text-outline">•</span>
+<span class="hidden md:inline text-outline-variant">आयुष मंत्रालय | Ministry of Ayush</span>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Accessibility Font Controls -->
+<div class="flex items-center gap-1 border-r border-outline-variant/40 pr-3">
+<span class="text-outline-variant mr-1 text-[10px] uppercase font-label-sm">Font:</span>
+<button class="px-1 py-0.5 rounded hover:bg-surface-variant hover:text-on-surface transition-colors" title="Decrease Font">A-</button>
+<button class="px-1 py-0.5 rounded bg-surface-variant text-on-surface font-bold" title="Standard Font">A</button>
+<button class="px-1 py-0.5 rounded hover:bg-surface-variant hover:text-on-surface transition-colors" title="Increase Font">A+</button>
+</div>
+<!-- Language Switcher -->
+<div class="flex items-center gap-1 font-semibold text-inverse-on-surface">
+<span class="text-surface-container-lowest hover:underline cursor-pointer">English</span>
+<span class="text-outline-variant">|</span>
+<span class="text-outline-variant hover:text-surface-container-lowest hover:underline cursor-pointer font-normal">हिन्दी</span>
+</div>
+</div>
+</div>
+<!-- Primary Nav Header with Official Seals & Status Badges -->
+<div class="h-16 px-gutter-mobile sm:px-gutter flex items-center justify-between">
+<!-- Ayush & Lion Emblem Title -->
+<div class="flex items-center gap-3.5">
+<div class="flex items-center gap-3">
+<img alt="State Emblem of India" class="h-11 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRRLbJAeuvaAbipe1qusQWrdyjYbkPpSRTQjTFXKDFGTK2VASQpi2mYI-njar5O2de332KW2YXGlfYE--ZP_o2nmp9nWZwxH09PW7GOZ-bZRsXfshvXvCXQuSyZpF8qpxgrxh4hG644v4ntLctywctQRnC2MULsjROmIEo-dPIhwt-ry0sWWDg-fEG1UMencs_sIB5GrlPRkv-6qy8wlB9kzvmUJ5SxPyK5PqOtaLeSJh2DJOcOfaglH6vt16C31DPQQ"/>
+<div class="flex flex-col justify-center">
+<div class="font-headline-sm text-[13px] font-semibold tracking-tight text-on-surface-variant leading-tight">भारत सरकार</div>
+<div class="font-headline-md text-title-lg font-bold tracking-tight text-portal-navy-deep leading-tight">आयुष मंत्रालय</div>
+<div class="font-label-md text-body-sm text-outline font-medium leading-tight mt-0.5">Ministry of Ayush <span class="text-outline-variant">|</span> IP-SAKTI Sahayak</div>
+</div>
+</div>
+</div>
+<!-- Right Header Indicators & Actions -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-space-md mr-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Export Dossier" type="button">
+<span class="material-symbols-outlined text-[22px]">download</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Help &amp; Documentation" type="button">
+<span class="material-symbols-outlined text-[22px]">help_outline</span>
+</button>
+<a class="font-label-lg text-body-md font-semibold text-primary hover:text-primary-container ml-2 border border-portal-border rounded px-3 py-1 bg-portal-surface-subtle hover:bg-surface-container transition-colors" data-path="login" href="/login">Sign In</a>
+</div>
+</div>
+</div>
+</header>
+<!-- Left Official Nav Sidebar -->
+<aside class="fixed left-0 top-[91px] bottom-0 w-64 bg-inverse-surface text-inverse-on-surface border-r border-outline-variant/30 z-40 flex flex-col justify-between overflow-y-auto text-[13px]">
+<div class="flex flex-col flex-1 p-3">
+<button class="flex items-center justify-between w-full px-3 py-2 rounded bg-surface-container-high/10 text-surface-container-lowest hover:bg-surface-container-high/20 transition-colors group mb-3" type="button">
+<div class="flex items-center gap-2 font-label-md text-body-sm text-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="">New Session</span>
+</div>
+<div class="flex items-center gap-0.5 text-[11px] text-outline font-mono">
+<span class="px-1 py-0.2 rounded border border-outline-variant/30 bg-surface-container-low/10">⌘</span>
+<span class="px-1 py-0.2 rounded border border-outline-variant/30 bg-surface-container-low/10">N</span>
+</div>
+</button>
+<!-- Core Registries Header -->
+<div class="flex items-center gap-1.5 px-2 mb-2 mt-1">
+</div>
+<!-- Core Registries Navigation -->
+<nav class="flex flex-col gap-1 pb-3 mb-2 border-b border-outline-variant/20" data-active-classes="bg-surface-container-high/25 text-surface-container-lowest font-semibold border-l-2 border-tiranga-saffron pl-2">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px]" data-path="tkdl-registry" href="/tkdl" title="TKDL Registry">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">menu_book</span>
+<span class="">Ayurveda Library</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px]" data-path="patent-gazette-prior-art" href="/patents" title="Patent Gazette &amp; Prior Art">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">gavel</span>
+<span class="">Patent Gazette &amp; Prior Art</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px] bg-surface-container-high/25 text-surface-container-lowest font-semibold" data-path="formulation-lab" href="/formulation-lab" title="Formulation Lab">
+<span class="material-symbols-outlined text-[18px] text-tiranga-saffron">science</span>
+<span class="">Formulation Lab</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px]" data-path="latest-rules-regulations" href="/rules" title="Latest Rules &amp; Regulations">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">history_edu</span>
+<span class="">Latest Rules &amp; Regulations</span>
+</a>
+</nav>
+<!-- Sessions Search Filter -->
+<div class="relative mb-3 mt-1">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-outline pointer-events-none">search</span>
+<input class="w-full bg-surface-container-high/10 border border-outline-variant/30 rounded pl-8 pr-3 py-1.5 text-body-sm text-surface-container-lowest placeholder:text-outline focus:outline-none focus:border-tiranga-saffron text-[12px]" placeholder="Search sessions..." type="text"/>
+</div>
+<!-- Past Sessions List Heading -->
+<div class="flex items-center gap-2 px-1 mb-2">
+<span class="material-symbols-outlined text-[14px] text-outline">schedule</span>
+<span class="font-label-sm text-[10px] font-bold text-outline-variant uppercase tracking-wider">Recent Sessions</span>
+</div>
+<div class="flex flex-col items-center justify-center text-center px-2 py-6 mt-1">
+<p class="text-[12px] text-outline font-medium">No past sessions recorded.</p>
+<p class="text-[11px] text-outline-variant mt-0.5">Formulations &amp; queries will appear here.</p>
+</div>
+</div>
+<!-- User Status / Login Strip -->
+<div class="p-3 border-t border-outline-variant/30 bg-inverse-surface/80">
+<a class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded bg-primary-container hover:bg-surface-tint text-surface-container-lowest text-label-md font-semibold transition-colors shadow-xs" data-path="login" href="/login">
+<span class="material-symbols-outlined text-[18px]">login</span>
+<span class="">Login / Register</span>
+</a>
+</div>
+</aside>
+<!-- Main Body Content Area with Left Sidebar Offset -->
+<div class="flex-1 flex flex-col pl-64 min-h-screen">
+<main class="pt-[91px] pb-16 flex-1 relative flex flex-col items-center w-full"><div class="flex flex-col w-full">
+<!-- Interactive Alchemical Genesis Canvas Area -->
+<div class="w-full max-w-7xl mx-auto px-margin-mobile sm:px-margin pt-6 pb-12 flex flex-col gap-8">
+<!-- Breadcrumb & Ministerial Apex Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 bg-surface-container-lowest border border-portal-border/60 px-5 py-3 rounded-xl shadow-xs"><div class="flex items-center gap-2.5 text-label-sm font-label-sm"><span class="inline-flex items-center gap-2 text-portal-navy-deep font-bold tracking-wider uppercase bg-portal-surface-subtle px-2.5 py-1 rounded-md border border-portal-border/40"><span class="w-2 h-2 rounded-full bg-tiranga-saffron animate-pulse"></span>National AYUSH IP Engine</span><span class="text-outline-variant">/</span><span class="text-on-surface-variant font-medium hover:text-primary cursor-pointer transition-colors">Formulation Lab</span><span class="text-outline-variant">/</span><span class="px-2.5 py-1 rounded-md bg-secondary-container/30 text-on-secondary-container font-bold flex items-center gap-1.5 border border-tiranga-green/20"><span class="w-1.5 h-1.5 rounded-full bg-tiranga-green"></span>Stage 1: Genesis Crucible &amp; Herbarium</span></div><div class="flex items-center gap-2"><div class="flex items-center bg-portal-surface-subtle p-0.5 rounded-lg border border-portal-border/50 text-label-sm font-label-md"><button class="px-3 py-1 rounded bg-surface-container-lowest text-primary font-bold shadow-xs flex items-center gap-1.5" type="button"><span class="material-symbols-outlined text-[16px] text-tiranga-saffron">science</span>Crucible 3D</button><button class="px-3 py-1 rounded text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5" type="button"><span class="material-symbols-outlined text-[16px]">schema</span>Stoichiometry</button><button class="px-3 py-1 rounded text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5" type="button"><span class="material-symbols-outlined text-[16px]">verified</span>IP Audit</button></div><span class="h-4 w-px bg-portal-border"></span><span class="inline-flex items-center gap-1 text-[11px] font-mono text-outline font-semibold px-2 py-1 rounded bg-portal-surface-slate border border-portal-border"><span class="w-1.5 h-1.5 rounded-full bg-tiranga-green animate-ping"></span>AYUSH API v2.4</span></div></div>
+<!-- Editorial Header Section: Master Typography & Intent -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-2"><div class="space-y-2.5 max-w-3xl"><div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high/60 border border-portal-border/50 text-portal-navy-deep text-label-sm font-label-sm font-bold tracking-wide shadow-xs"><span class="material-symbols-outlined text-[16px] text-emblem-gold animate-pulse" style="font-variation-settings: 'FILL' 1;">auto_awesome</span><span>BRAHMĀṆḌA COMPUTATIONAL SYNTHESIS CORE</span><span class="text-[10px] text-primary-container px-1.5 py-0.2 rounded bg-surface-container-lowest font-mono uppercase">Real-Time In Silico</span></div><h1 class="font-headline-xl text-headline-xl text-primary tracking-tight leading-none flex items-center gap-3">Ayurvedic Alchemical Formulation Engine</h1><p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Synthesizing Classical Rigvedic &amp; Charaka Samhita Pharmacopeia with Modern Combinatorial IP Prior-Art Analysis. Awaken the dormant matrix to initiate multi-herb synergy calibration.</p></div><div class="flex items-center gap-3 self-start lg:self-end"><div class="px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-portal-border/70 shadow-xs flex flex-col hover:border-primary/40 transition-colors"><div class="flex items-center justify-between gap-3"><span class="text-label-sm font-label-sm text-outline uppercase font-semibold">Classical Concordance</span><span class="material-symbols-outlined text-secondary text-[16px]">menu_book</span></div><span class="font-title-md text-title-md text-primary font-bold mt-0.5">100% Sūtra Ref</span></div><div class="px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-portal-border/70 shadow-xs flex flex-col hover:border-tiranga-saffron/40 transition-colors"><div class="flex items-center justify-between gap-3"><span class="text-label-sm font-label-sm text-outline uppercase font-semibold">IP Non-Obviousness</span><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span></div><span class="font-title-md text-title-md text-secondary font-bold mt-0.5">Unchecked</span></div></div></div>
+<!-- Main Genesis Workspace Grid: 12-Column Responsive Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Left Column: Botanical Herbarium Quick-Picker (3 cols) -->
+<div class="lg:col-span-3 flex flex-col gap-4"><div class="bg-surface-container-lowest border border-portal-border/70 rounded-2xl p-5 shadow-sm space-y-4"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-tiranga-saffron/15 text-tiranga-saffron flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">spa</span></span><span class="font-title-md text-title-md text-primary font-bold">Mūla Botanicals</span></div><span class="text-label-sm font-label-sm px-2.5 py-0.5 rounded-full bg-surface-container text-portal-navy-deep font-semibold border border-portal-border/40">Top 5 Dravya</span></div><p class="font-body-sm text-body-sm text-on-surface-variant">Inject foundational Dravya into the sacred seed core to catalyze elemental doshic interactions.</p><div class="flex items-center gap-1.5 p-1 bg-portal-surface-subtle rounded-lg text-[11px] font-label-sm"><button class="flex-1 py-1 rounded bg-surface-container-lowest text-primary font-bold text-center shadow-xs" type="button">Rasāyana</button><button class="flex-1 py-1 rounded text-on-surface-variant hover:text-primary text-center transition-colors" type="button">Dīpana</button><button class="flex-1 py-1 rounded text-on-surface-variant hover:text-primary text-center transition-colors" type="button">Vīrya</button></div><div class="flex flex-col gap-2.5 pt-1" id="herb-selector-container"><button class="group relative flex items-center justify-between p-3 rounded-xl bg-surface-container-low/70 hover:bg-surface-container-lowest border border-portal-border/60 hover:border-tiranga-saffron/50 transition-all text-left shadow-xs hover:shadow-md cursor-pointer" onclick="igniteOrb('Withania somnifera (Ashwagandha)', '720', 'Rasayana Matrix', 'Vata-Kapha Shamaka')" type="button"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-portal-navy-deep group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors shadow-xs"><span class="material-symbols-outlined text-[18px]">energy_savings_leaf</span></div><div><div class="font-title-md text-body-md text-primary font-bold leading-tight group-hover:text-tiranga-saffron-deep transition-colors">Ashwagandha</div><div class="font-body-sm text-label-sm text-outline font-mono">Withania somnifera • 30%</div></div></div><span class="px-2.5 py-1 rounded-lg bg-surface-container-lowest border border-portal-border group-hover:border-tiranga-saffron group-hover:bg-tiranga-saffron-deep group-hover:text-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-xs transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">add</span>Add</span></button><button class="group relative flex items-center justify-between p-3 rounded-xl bg-surface-container-low/70 hover:bg-surface-container-lowest border border-portal-border/60 hover:border-tiranga-saffron/50 transition-all text-left shadow-xs hover:shadow-md cursor-pointer" onclick="igniteOrb('Curcuma longa (Haridra)', '580', 'Vishahara Matrix', 'Tridosha Balancing')" type="button"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-portal-navy-deep group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors shadow-xs"><span class="material-symbols-outlined text-[18px]">nest_eco_leaf</span></div><div><div class="font-title-md text-body-md text-primary font-bold leading-tight group-hover:text-tiranga-saffron-deep transition-colors">Haridra (Curcumin)</div><div class="font-body-sm text-label-sm text-outline font-mono">Curcuma longa • 25%</div></div></div><span class="px-2.5 py-1 rounded-lg bg-surface-container-lowest border border-portal-border group-hover:border-tiranga-saffron group-hover:bg-tiranga-saffron-deep group-hover:text-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-xs transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">add</span>Add</span></button><button class="group relative flex items-center justify-between p-3 rounded-xl bg-surface-container-low/70 hover:bg-surface-container-lowest border border-portal-border/60 hover:border-tiranga-saffron/50 transition-all text-left shadow-xs hover:shadow-md cursor-pointer" onclick="igniteOrb('Tinospora cordifolia (Guduchi)', '640', 'Amrita Matrix', 'Pittahara Rasayana')" type="button"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-portal-navy-deep group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors shadow-xs"><span class="material-symbols-outlined text-[18px]">healing</span></div><div><div class="font-title-md text-body-md text-primary font-bold leading-tight group-hover:text-tiranga-saffron-deep transition-colors">Guduchi (Giloy)</div><div class="font-body-sm text-label-sm text-outline font-mono">Tinospora cordifolia • 20%</div></div></div><span class="px-2.5 py-1 rounded-lg bg-surface-container-lowest border border-portal-border group-hover:border-tiranga-saffron group-hover:bg-tiranga-saffron-deep group-hover:text-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-xs transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">add</span>Add</span></button><button class="group relative flex items-center justify-between p-3 rounded-xl bg-surface-container-low/70 hover:bg-surface-container-lowest border border-portal-border/60 hover:border-tiranga-saffron/50 transition-all text-left shadow-xs hover:shadow-md cursor-pointer" onclick="igniteOrb('Asphaltum punjabianum (Shilajit)', '910', 'Balyam Matrix', 'Rasayana Vajikarana')" type="button"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-portal-navy-deep group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors shadow-xs"><span class="material-symbols-outlined text-[18px]">diamond</span></div><div><div class="font-title-md text-body-md text-primary font-bold leading-tight group-hover:text-tiranga-saffron-deep transition-colors">Shuddha Shilajit</div><div class="font-body-sm text-label-sm text-outline font-mono">Mineral Exudate • 15%</div></div></div><span class="px-2.5 py-1 rounded-lg bg-surface-container-lowest border border-portal-border group-hover:border-tiranga-saffron group-hover:bg-tiranga-saffron-deep group-hover:text-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-xs transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">add</span>Add</span></button><button class="group relative flex items-center justify-between p-3 rounded-xl bg-surface-container-low/70 hover:bg-surface-container-lowest border border-portal-border/60 hover:border-tiranga-saffron/50 transition-all text-left shadow-xs hover:shadow-md cursor-pointer" onclick="igniteOrb('Piper longum (Pippali)', '430', 'Dipana Catalyst', 'Yogavahi Bioenhancer')" type="button"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-portal-navy-deep group-hover:bg-primary group-hover:text-surface-container-lowest transition-colors shadow-xs"><span class="material-symbols-outlined text-[18px]">bolt</span></div><div><div class="font-title-md text-body-md text-primary font-bold leading-tight group-hover:text-tiranga-saffron-deep transition-colors">Pippali Catalyst</div><div class="font-body-sm text-label-sm text-outline font-mono">Piper longum • 5%</div></div></div><span class="px-2.5 py-1 rounded-lg bg-surface-container-lowest border border-portal-border group-hover:border-tiranga-saffron group-hover:bg-tiranga-saffron-deep group-hover:text-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-xs transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">add</span>Add</span></button></div></div><div class="p-4 rounded-2xl bg-surface-container-high/20 border border-portal-border/60 shadow-xs flex items-start gap-3"><span class="material-symbols-outlined text-ashoka-navy text-[20px] mt-0.5">menu_book</span><div class="text-body-sm font-body-sm text-on-surface"><span class="font-semibold text-primary">Ayurvedic Pharmacopoeia (API):</span> All selected single herbs trigger automated screening against Chapter 4 of the Indian Medicine Central Council Act, 1970.</div></div></div>
+<!-- Center Column: The Celestial Alchemical Core (Genesis Orb) (5 cols) -->
+<div class="lg:col-span-5 flex flex-col items-center gap-6"><div class="relative w-full aspect-square max-w-[460px] rounded-2xl bg-gradient-to-b from-primary via-primary-container to-portal-navy-deep p-6 shadow-xl border border-outline-variant/30 overflow-hidden flex flex-col items-center justify-between text-center"><div class="relative z-20 flex items-center justify-between w-full px-2"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-portal-navy-deep/80 border border-outline-variant/30 text-surface-container-lowest text-[11px] font-mono"><span class="w-1.5 h-1.5 rounded-full bg-tiranga-green animate-ping"></span><span id="core-status-label">CRUCIBLE IDLE</span></div><div class="flex items-center gap-1 bg-portal-navy-deep/70 p-0.5 rounded-lg border border-outline-variant/20"><button class="px-2 py-0.5 rounded bg-surface-container-highest/20 text-surface-container-lowest text-[11px] font-medium font-mono hover:bg-surface-container-highest/30 transition-colors" type="button">3D</button><button class="px-2 py-0.5 rounded text-outline-variant hover:text-surface-container-lowest text-[11px] font-medium font-mono transition-colors" type="button">Spectral</button><button class="px-2 py-0.5 rounded text-outline-variant hover:text-surface-container-lowest text-[11px] font-medium font-mono transition-colors" type="button">Prāna</button></div></div><div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30"><svg class="w-full h-full animate-[spin_120s_linear_infinite]" fill="none" stroke="currentColor" viewbox="0 0 500 500"><defs><filter height="140%" id="glow" width="140%" x="-20%" y="-20%"><fegaussianblur result="blur" stddeviation="2"></fegaussianblur><fecomposite in="SourceGraphic" in2="blur" operator="over"></fecomposite></filter></defs><g opacity="0.7" stroke="#FF9933" stroke-width="0.8"><circle cx="250" cy="250" r="230" stroke-dasharray="4 6"></circle><circle cx="250" cy="250" r="220" stroke-width="1"></circle><circle cx="250" cy="250" r="205" stroke-dasharray="2 4"></circle></g><g opacity="0.85" stroke="#B8860B" stroke-width="0.9"><circle cx="250" cy="250" r="185"></circle><path d="M250,65 Q265,100 250,135 Q235,100 250,65 M380,120 Q365,155 330,170 Q345,135 380,120 M435,250 Q400,265 365,250 Q400,235 435,250 M380,380 Q345,365 330,330 Q365,345 380,380 M250,435 Q235,400 250,365 Q265,400 250,435 M120,380 Q135,345 170,330 Q155,365 120,380 M65,250 Q100,235 135,250 Q100,265 65,250 M120,120 Q155,135 170,170 Q135,155 120,120" fill="none"></path><circle cx="250" cy="250" r="150" stroke-dasharray="6 4"></circle></g><g opacity="0.9" stroke="#FF9933" stroke-width="0.75"><polygon points="250,105 375,322 125,322"></polygon><polygon points="250,395 125,178 375,178"></polygon><circle cx="250" cy="250" r="115" stroke-dasharray="3 3"></circle></g><g opacity="0.75" stroke="#138808" stroke-width="0.7"><circle cx="250" cy="250" r="85"></circle><path d="M250,165 C260,195 275,210 305,220 C275,230 260,245 250,275 C240,245 225,230 195,220 C225,210 240,195 250,165 Z" fill="none"></path></g><circle cx="250" cy="250" r="55" stroke="#B8860B" stroke-dasharray="1 3" stroke-width="1"></circle></svg></div><div class="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-tiranga-saffron/25 via-emblem-gold/20 to-tiranga-green/20 blur-3xl -z-0 pointer-events-none animate-pulse opacity-40"></div><div class="relative z-10 w-52 h-52 sm:w-60 sm:h-60 flex items-center justify-center cursor-pointer group my-auto" onclick="triggerGenesisPulse()" title="Click to trigger Prana resonance wave"><div class="absolute inset-0 rounded-full flex items-center justify-center pointer-events-none animate-[spin_38s_linear_infinite]"><svg class="w-full h-full" fill="none" viewbox="0 0 300 300"><circle cx="150" cy="150" opacity="0.55" r="144" stroke="#B8860B" stroke-dasharray="3 5" stroke-width="1.2"></circle><circle cx="150" cy="150" opacity="0.4" r="136" stroke="#FF9933" stroke-width="0.8"></circle><g opacity="0.65" stroke="#B8860B" stroke-width="0.9"><path d="M150,8 Q158,26 150,44 Q142,26 150,8 Z" fill="rgba(184,134,11,0.08)"></path><path d="M250,50 Q242,68 224,60 Q232,42 250,50 Z" fill="rgba(184,134,11,0.08)"></path><path d="M292,150 Q274,158 256,150 Q274,142 292,150 Z" fill="rgba(184,134,11,0.08)"></path><path d="M250,250 Q232,242 224,260 Q242,268 250,250 Z" fill="rgba(184,134,11,0.08)"></path><path d="M150,292 Q142,274 150,256 Q158,274 150,292 Z" fill="rgba(184,134,11,0.08)"></path><path d="M50,250 Q68,242 76,260 Q58,268 50,250 Z" fill="rgba(184,134,11,0.08)"></path><path d="M8,150 Q26,142 44,150 Q26,158 8,150 Z" fill="rgba(184,134,11,0.08)"></path><path d="M50,50 Q68,58 76,40 Q58,32 50,50 Z" fill="rgba(184,134,11,0.08)"></path></g></svg></div><div class="absolute inset-2 rounded-full flex items-center justify-center pointer-events-none animate-[spin_24s_linear_infinite_reverse]"><svg class="w-full h-full" fill="none" viewbox="0 0 280 280"><circle cx="140" cy="140" opacity="0.6" r="132" stroke="#FF9933" stroke-dasharray="6 6" stroke-width="1.2"></circle><circle cx="140" cy="140" opacity="0.5" r="122" stroke="#B8860B" stroke-dasharray="2 3" stroke-width="0.8"></circle></svg></div><div class="absolute -top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-portal-navy-deep/95 border border-emblem-gold/40 text-emblem-gold text-[10px] font-mono font-bold shadow-md tracking-wider">रस • RASA</div><div class="absolute bottom-1 right-2 px-2.5 py-0.5 rounded-full bg-portal-navy-deep/95 border border-tiranga-green/40 text-tiranga-green-deep text-[10px] font-mono font-bold shadow-md tracking-wider">वीर्य • VĪRYA</div><div class="absolute bottom-1 left-2 px-2.5 py-0.5 rounded-full bg-portal-navy-deep/95 border border-tiranga-saffron/40 text-tiranga-saffron text-[10px] font-mono font-bold shadow-md tracking-wider">ओजस् • OJAS</div><div class="relative w-40 h-40 sm:w-44 sm:h-44 rounded-full overflow-hidden p-1 bg-gradient-to-br from-tiranga-saffron via-emblem-gold to-ashoka-navy shadow-[0_0_50px_rgba(255,153,51,0.45)] flex items-center justify-center transition-all duration-700 transform group-hover:scale-105" id="genesis-orb-core"><div class="relative w-full h-full rounded-full overflow-hidden border-2 border-emblem-gold/60 flex items-center justify-center bg-portal-navy-deep"><img alt="Ayurvedic 7-Chakras Energy System" class="w-full h-full object-cover rounded-full drop-shadow-md transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm9mVSGYL7-l4cNxi7xfG23U5Udr98T95jKDNJMDOYHyyVWaZm3vBFcNg8uBfo89pZtiO5QSfnJXLeTRAuBP1ngDyaAw1vuaCAqA6pg-_1MdNpW_9s9pCs9B9U_8iwVvwQp-JXHybyqzhMvKLcn300t0HEFYhZC6PE4c_Hqkgisu9-ir-vkt0O9kGQ833yUPMtm2OQFqx5eeIEsTT17JY6FfkliMo09rbVdD6F_MpW_h9HlUXSOT0leiE4WjLzPvkPAg"/><div class="absolute inset-0 bg-gradient-to-t from-portal-navy-deep/80 via-transparent to-transparent pointer-events-none"></div></div><svg class="absolute inset-0 w-full h-full pointer-events-none animate-[spin_8s_linear_infinite]" viewbox="0 0 100 100"><circle class="drop-shadow-[0_0_6px_#FF9933]" cx="50" cy="4" fill="#FFFFFF" r="2.5"></circle><circle class="drop-shadow-[0_0_4px_#FF9933]" cx="94" cy="50" fill="#FF9933" r="1.8"></circle><circle class="drop-shadow-[0_0_5px_#138808]" cx="50" cy="96" fill="#138808" r="2.2"></circle></svg></div></div><div class="relative z-10 space-y-1 pb-1"><h3 class="font-title-md text-title-md text-surface-container-lowest font-bold" id="invitation-heading">Awaken the Rasa Card</h3><p class="font-body-sm text-body-sm text-surface-variant max-w-xs mx-auto" id="invitation-subtext">Select any herb or template prompt below to inject foundational prana and unlock stoichiometric CI scoring.</p></div><div class="absolute bottom-0 left-0 right-0 h-1 tricolor-stripe"></div></div><div class="w-full space-y-2.5"><div class="flex items-center justify-between px-1"><span class="font-label-sm text-label-sm text-outline uppercase font-bold tracking-wider">Classical Templates</span><span class="text-body-sm font-body-sm text-primary-container font-semibold flex items-center gap-1 cursor-pointer hover:underline"><span class="material-symbols-outlined text-[16px]">bolt</span>1-Click Genesis</span></div><div class="grid grid-cols-1 gap-2.5"><button class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-portal-border/70 hover:border-tiranga-saffron/60 hover:shadow-md transition-all text-left shadow-xs group cursor-pointer" onclick="loadTemplate('Rasayana', 'Ashwagandha (35%), Shilajit (20%), Amalaki (25%), Pippali (10%), Guduchi (10%)', '8,420', 'Ojas Enhancement &amp; Cellular Longevity')" type="button"><div class="flex items-center gap-3.5"><div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-headline-sm shadow-xs">⚡</div><div><div class="font-title-md text-body-md text-primary font-bold group-hover:text-tiranga-saffron-deep transition-colors">Rejuvenative Rasayana Matrix</div><div class="font-body-sm text-label-sm text-on-surface-variant">Ashwagandha + Amalaki + Shilajit • Longevity</div></div></div><span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-0.5 transition-all text-[20px]">arrow_forward</span></button><button class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-portal-border/70 hover:border-tiranga-saffron/60 hover:shadow-md transition-all text-left shadow-xs group cursor-pointer" onclick="loadTemplate('Vishahara', 'Haridra (40%), Pippali (15%), Shunthi (20%), Maricha (15%), Manjistha (10%)', '7,950', 'Systemic Anti-Inflammatory &amp; Deep Detox')" type="button"><div class="flex items-center gap-3.5"><div class="w-9 h-9 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center font-bold text-headline-sm shadow-xs">🛡️</div><div><div class="font-title-md text-body-md text-primary font-bold group-hover:text-tiranga-saffron-deep transition-colors">Anti-Inflammatory Catalyst</div><div class="font-body-sm text-label-sm text-on-surface-variant">Haridra + Trikatu Bio-enhancer Matrix</div></div></div><span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-0.5 transition-all text-[20px]">arrow_forward</span></button><button class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-portal-border/70 hover:border-tiranga-saffron/60 hover:shadow-md transition-all text-left shadow-xs group cursor-pointer" onclick="loadTemplate('Medhya', 'Brahmi (45%), Shankhpushpi (25%), Mandukaparni (15%), Jyotishmati (15%)', '8,890', 'Neuro-Cognitive Acuity &amp; Smriti Vardhana')" type="button"><div class="flex items-center gap-3.5"><div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-headline-sm shadow-xs">🧠</div><div><div class="font-title-md text-body-md text-primary font-bold group-hover:text-tiranga-saffron-deep transition-colors">Medhya Cognitive Neuro-Enhancer</div><div class="font-body-sm text-label-sm text-on-surface-variant">Bacopa monnieri Base • Brain Faculty Synergy</div></div></div><span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-0.5 transition-all text-[20px]">arrow_forward</span></button></div></div></div>
+<!-- Right Column: Nascent Dormant Rasa Card Frame (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-4"><div class="relative rounded-2xl bg-surface-container-lowest border border-portal-border/80 p-6 shadow-md hover:shadow-lg transition-all duration-500 overflow-hidden flex flex-col justify-between min-h-[480px]" id="dormant-card-frame"><div class="absolute top-0 left-0 bottom-0 w-1.5 bg-outline-variant transition-colors duration-500" id="card-status-spine"></div><div class="space-y-4"><div class="flex items-start justify-between pl-2"><div><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container text-outline-variant text-[11px] font-mono font-bold tracking-wider uppercase border border-portal-border/50" id="tier-badge"><span class="w-1.5 h-1.5 rounded-full bg-outline"></span>TIER 0 • DORMANT SEED (बीज - BĪJA)</div><h2 class="font-headline-md text-title-lg text-primary font-bold mt-2" id="card-formula-name">Awaiting Botanical Ignition</h2><p class="font-body-sm text-label-sm text-on-surface-variant italic" id="card-formula-sanskrit">Prathama Sthāna • No ingredients bound</p></div><div class="w-10 h-10 rounded-xl bg-surface-container-low border border-portal-border/40 flex items-center justify-center text-outline transition-colors shadow-xs" id="card-state-icon"><span class="material-symbols-outlined text-[22px]">hourglass_empty</span></div></div><div class="space-y-1.5 pl-2"><div class="flex justify-between text-label-sm font-label-sm"><span class="text-outline font-medium">Alchemical Power Capacity</span><span class="font-mono font-bold text-on-surface" id="power-metric-text">0 / 9,999 PTS</span></div><div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full w-0 bg-gradient-to-r from-tiranga-saffron to-emblem-gold transition-all duration-700" id="power-progress-bar"></div></div></div><div class="p-4 rounded-xl bg-surface-container-low/70 border border-portal-border/40 space-y-2.5 ml-2" id="ingredients-ledger"><span class="text-label-sm font-label-sm text-outline uppercase font-semibold block">Active Herb Composition</span><div class="flex flex-col items-center justify-center py-6 text-center space-y-1" id="ledger-content"><span class="material-symbols-outlined text-outline-variant text-[28px]">biotech</span><span class="text-body-sm font-body-sm text-outline font-medium">0 active dravya compounds</span><span class="text-label-sm font-label-sm text-outline-variant">Inject herbs to measure Bhavana potency</span></div></div></div><div class="space-y-3 pt-4 pl-2"><span class="text-label-sm font-label-sm text-outline uppercase font-bold tracking-wider block">Real-time Concordance Diagnostics</span><div class="grid grid-cols-3 gap-2"><div class="p-2.5 rounded-xl bg-surface-container-low/80 border border-portal-border/40 text-center flex flex-col items-center"><span class="text-label-sm font-label-sm text-outline uppercase text-[10px]">Synergy CI</span><span class="font-title-md text-title-md font-mono font-bold text-on-surface-variant mt-0.5" id="metric-ci">--</span><span class="text-label-sm font-label-sm text-outline text-[10px]">Threshold &gt;0.75</span></div><div class="p-2.5 rounded-xl bg-surface-container-low/80 border border-portal-border/40 text-center flex flex-col items-center"><span class="text-label-sm font-label-sm text-outline uppercase text-[10px]">TKDL Match</span><span class="font-title-md text-title-md font-mono font-bold text-on-surface-variant mt-0.5" id="metric-tkdl">--</span><span class="text-label-sm font-label-sm text-outline text-[10px]">Prior-Art Risk</span></div><div class="p-2.5 rounded-xl bg-surface-container-low/80 border border-portal-border/40 text-center flex flex-col items-center"><span class="text-label-sm font-label-sm text-outline uppercase text-[10px]">NBA Levy</span><span class="font-title-md text-title-md font-mono font-bold text-on-surface-variant mt-0.5" id="metric-nba">--</span><span class="text-label-sm font-label-sm text-outline text-[10px]">Biodiversity Act</span></div></div><button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-high text-outline font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 cursor-not-allowed transition-all mt-2 shadow-xs" disabled="" id="lock-dossier-btn" type="button"><span class="material-symbols-outlined text-[18px]">lock</span><span>Dossier Generation Locked</span></button></div></div><div class="p-4 rounded-2xl bg-surface-container-lowest border border-portal-border/70 shadow-sm flex items-center gap-3.5"><div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-xs"><span class="material-symbols-outlined text-[20px]">lightbulb</span></div><div class="text-body-sm font-body-sm text-on-surface-variant"><strong>Pro Tip:</strong> Pairing <em class="text-primary font-medium">Haridra</em> with 5% <em class="text-primary font-medium">Pippali</em> triggers Yogavahi piperine action, reducing NBA regulatory flags.</div></div></div>
+</div>
+<!-- Bottom Institutional Prior-Art Benchmarking Bar -->
+<div class="w-full bg-surface-container-lowest border border-portal-border/80 rounded-2xl p-6 shadow-sm space-y-5"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><h4 class="font-title-md text-title-md text-primary font-bold flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">database</span></span>Integrated TKDL &amp; CSIR Prior-Art Gateway Status</h4><p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Directly bridged with 360,000+ formulations from classical texts (Ayurveda, Unani, Siddha, and Sowa-Rigpa).</p></div><div class="flex items-center gap-2"><span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-secondary-container/40 text-on-secondary-container font-label-sm text-label-sm font-bold border border-secondary-container"><span class="w-2 h-2 rounded-full bg-tiranga-green animate-pulse"></span>TKDL Live Sync: Active</span><span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-portal-surface-subtle text-on-surface-variant font-label-sm text-label-sm font-bold border border-portal-border"><span class="material-symbols-outlined text-[16px] text-primary">language</span>WIPO IPC Matcher: Online</span></div></div><div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-1"><div class="p-4 rounded-xl bg-surface-container-low/70 border border-portal-border/50 hover:border-portal-border hover:shadow-xs transition-all flex flex-col gap-1"><span class="font-label-sm text-label-sm text-outline uppercase font-semibold">Charaka Samhita DB</span><span class="font-title-md text-title-md text-primary font-bold">8,412 Sutras</span><span class="font-body-sm text-body-sm text-secondary font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>Verified &amp; Indexed</span></div><div class="p-4 rounded-xl bg-surface-container-low/70 border border-portal-border/50 hover:border-portal-border hover:shadow-xs transition-all flex flex-col gap-1"><span class="font-label-sm text-label-sm text-outline uppercase font-semibold">Sushruta Samhita DB</span><span class="font-title-md text-title-md text-primary font-bold">4,198 Formulations</span><span class="font-body-sm text-body-sm text-secondary font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>Cross-Referenced</span></div><div class="p-4 rounded-xl bg-surface-container-low/70 border border-portal-border/50 hover:border-portal-border hover:shadow-xs transition-all flex flex-col gap-1"><span class="font-label-sm text-label-sm text-outline uppercase font-semibold">Indian Patent Office (IPO)</span><span class="font-title-md text-title-md text-primary font-bold">48,910 Ayush Filings</span><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">search</span>Section 3(p) Scanned</span></div><div class="p-4 rounded-xl bg-surface-container-low/70 border border-portal-border/50 hover:border-portal-border hover:shadow-xs transition-all flex flex-col gap-1"><span class="font-label-sm text-label-sm text-outline uppercase font-semibold">National Biodiversity Auth</span><span class="font-title-md text-title-md text-primary font-bold">Form I / Rule 14</span><span class="font-body-sm text-body-sm text-secondary font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">check_circle</span>Levy Calculation Ready</span></div></div></div>
+</div>
+</div>
+<script>
+  function igniteOrb(herbName, powerScore, matrixType, doshaBalance) {
+    const orbCore = document.getElementById('genesis-orb-core');
+    const statusLabel = document.getElementById('core-status-label');
+    const invHeading = document.getElementById('invitation-heading');
+    const invSubtext = document.getElementById('invitation-subtext');
+    
+    // Card elements
+    const tierBadge = document.getElementById('tier-badge');
+    const formulaName = document.getElementById('card-formula-name');
+    const formulaSanskrit = document.getElementById('card-formula-sanskrit');
+    const powerText = document.getElementById('power-metric-text');
+    const progressBar = document.getElementById('power-progress-bar');
+    const ledger = document.getElementById('ledger-content');
+    const spine = document.getElementById('card-status-spine');
+    const stateIcon = document.getElementById('card-state-icon');
+    
+    // Metrics
+    const metricCi = document.getElementById('metric-ci');
+    const metricTkdl = document.getElementById('metric-tkdl');
+    const metricNba = document.getElementById('metric-nba');
+    const dossierBtn = document.getElementById('lock-dossier-btn');
+
+    // Orb visual shift
+    orbCore.classList.remove('from-tiranga-saffron', 'via-emblem-gold', 'to-ashoka-navy');
+    orbCore.classList.add('from-tiranga-saffron-deep', 'via-emblem-gold', 'to-tiranga-green-deep', 'scale-105');
+    statusLabel.innerText = "PRĀṆA ACTIVE";
+    
+    invHeading.innerText = "Catalyst Engaged: " + matrixType;
+    invSubtext.innerText = "Foundation set to " + herbName + ". Doshic trajectory calibrated for " + doshaBalance + ".";
+
+    // Card visual shift
+    tierBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-tiranga-saffron"></span> TIER 1 • AWAKENED SEED (प्ररोह - PRAROHA)';
+    tierBadge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-highest text-tiranga-saffron-deep text-label-sm font-label-sm font-bold tracking-wider uppercase';
+    
+    spine.className = 'absolute top-0 left-0 bottom-0 w-1.5 bg-tiranga-saffron transition-colors duration-500';
+    stateIcon.className = 'w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-tiranga-saffron-deep transition-colors';
+    stateIcon.innerHTML = '<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: \'FILL\' 1;">auto_fix_high</span>';
+
+    formulaName.innerText = matrixType + " (" + herbName.split(' ')[0] + ")";
+    formulaSanskrit.innerText = "Dosha Alignment: " + doshaBalance;
+
+    powerText.innerText = powerScore + " / 9,999 PTS";
+    progressBar.style.width = ((parseInt(powerScore) / 9999) * 100) + "%";
+
+    ledger.innerHTML = `
+      <div class="flex items-center justify-between w-full p-2 bg-surface-container-lowest rounded-lg shadow-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-tiranga-green"></span>
+          <span class="font-title-md text-body-md text-primary font-bold">${herbName}</span>
+        </div>
+        <span class="text-label-sm font-label-sm font-mono text-secondary font-bold">100% Core</span>
+      </div>
+      <p class="text-[11px] text-on-surface-variant font-medium mt-1">Ready for secondary dravya adjunction (Anupana/Sahapana).</p>
+    `;
+
+    metricCi.innerText = "0.79";
+    metricCi.className = "font-title-md text-title-md font-mono font-bold text-tiranga-green-deep mt-0.5";
+
+    metricTkdl.innerText = "12 Ref";
+    metricTkdl.className = "font-title-md text-title-md font-mono font-bold text-ashoka-navy mt-0.5";
+
+    metricNba.innerText = "Exempt";
+    metricNba.className = "font-title-md text-title-md font-mono font-bold text-secondary mt-0.5";
+
+    // Enable Dossier CTA
+    dossierBtn.disabled = false;
+    dossierBtn.className = "w-full py-2.5 px-4 rounded-lg bg-primary-container hover:bg-portal-navy-deep text-surface-container-lowest font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 cursor-pointer transition-all mt-2 shadow-sm";
+    dossierBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">verified</span><span>Calibrate &amp; Generate Dossier</span>';
+  }
+
+  function loadTemplate(name, herbs, power, outcome) {
+    igniteOrb(herbs, power, name + " Archetype", outcome);
+  }
+
+  function triggerGenesisPulse() {
+    const orb = document.getElementById('genesis-orb-core');
+    orb.classList.add('scale-110');
+    setTimeout(() => {
+      orb.classList.remove('scale-110');
+    }, 300);
+  }
+</script></main>
+</div>
+<script>
+  (function() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('nav[data-active-classes] a[data-path]');
+    if (navLinks.length > 0) {
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath || (currentPath === '/' && link.getAttribute('data-path') === 'formulation-lab')) {
+          link.classList.add('bg-surface-container-high/25', 'text-surface-container-lowest', 'font-semibold', 'border-l-2', 'border-tiranga-saffron');
+        }
+      });
+    }
+  })();
+</script>
+</body></html>

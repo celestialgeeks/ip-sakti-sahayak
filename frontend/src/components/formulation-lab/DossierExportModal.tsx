@@ -59,78 +59,57 @@ export function DossierExportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="relative w-full max-w-4xl max-h-[92vh] bg-white border border-slate-300 rounded-lg shadow-xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-inverse-surface/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-4xl max-h-[92vh] bg-surface-container-lowest border border-portal-border rounded-xl shadow-xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div className="p-6 border-b border-surface-container flex items-center justify-between bg-portal-surface-subtle">
           <div>
-            <span className="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded bg-blue-50 text-[#00263f] border border-blue-200">
-              Government Regulatory Dossier
-            </span>
-            <h3 className="text-base font-bold text-slate-900 mt-1">
-              Ministry of Ayush · ASU Drug &amp; Patent Submission Dossier
-            </h3>
+            <span className="text-[10px] uppercase font-label-sm font-bold px-2 py-0.5 rounded bg-primary-container text-surface-container-lowest">Government Regulatory Dossier</span>
+            <h3 className="font-title-lg text-title-lg text-portal-navy-deep font-bold mt-1">Ministry of Ayush · ASU Drug &amp; Patent Submission Dossier</h3>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-          >
-            ✕
+          <button onClick={onClose} className="w-8 h-8 rounded-lg border border-portal-border flex items-center justify-center text-outline hover:text-portal-navy-deep hover:bg-surface-container transition-colors">
+            <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Printable Document Body */}
-        <div className="p-8 overflow-y-auto space-y-6 text-xs text-slate-800 font-sans print:p-0">
+        <div className="p-8 overflow-y-auto space-y-6 text-xs text-on-surface font-body-md print:p-0">
           {/* Official Header */}
-          <div className="text-center border-b pb-5 border-slate-200 space-y-1">
-            <h2 className="text-sm font-black uppercase tracking-widest text-[#00263f]">
-              GOVERNMENT OF INDIA · MINISTRY OF AYUSH
-            </h2>
-            <h3 className="text-xs font-semibold text-slate-500">
-              Traditional Knowledge Digital Library &amp; ASU Drug Clearance Division
-            </h3>
-            <div className="text-[11px] font-mono text-slate-400 mt-2">
-              Dossier Ref: AYUSH/FL/{Date.now().toString().slice(-8)} · Form 158-B Format
-            </div>
+          <div className="text-center border-b pb-5 border-portal-border space-y-1">
+            <h2 className="text-sm font-black uppercase tracking-widest text-portal-navy-deep">Government of India · Ministry of Ayush</h2>
+            <h3 className="text-xs font-semibold text-on-surface-variant">Traditional Knowledge Digital Library &amp; ASU Drug Clearance Division</h3>
+            <div className="text-[11px] font-mono text-outline mt-2">Dossier Ref: AYUSH/FL/{Date.now().toString().slice(-8)} · Form 158-B Format</div>
           </div>
 
-          {/* Section 1: Product Identification */}
+          {/* Section 1 */}
           <div className="space-y-2">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-              1. Product Identification &amp; Statutory Classification
-            </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded border border-slate-200 bg-slate-50/60">
+            <h4 className="font-bold text-xs uppercase tracking-wider text-outline font-label-sm">1. Product Identification &amp; Statutory Classification</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-lg border border-portal-border/60 bg-surface-container-low/70">
               <div>
-                <span className="text-[10px] text-slate-400 block font-mono">Formulation Title:</span>
-                <span className="font-bold text-slate-900">{simulation.title}</span>
+                <span className="text-[10px] text-outline block font-label-sm">Formulation Title:</span>
+                <span className="font-bold text-portal-navy-deep">{simulation.title}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block font-mono">Stage Category:</span>
-                <span className="font-bold text-slate-900 font-mono">
-                  {simulation.tier_sanskrit}
-                </span>
+                <span className="text-[10px] text-outline block font-label-sm">Stage Category:</span>
+                <span className="font-bold text-portal-navy-deep font-title-md">{simulation.tier_sanskrit}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block font-mono">Combination Index:</span>
-                <span className="font-mono font-bold text-slate-900">{simulation.chou_talalay_ci.toFixed(2)}</span>
+                <span className="text-[10px] text-outline block font-label-sm">Combination Index:</span>
+                <span className="font-mono font-bold text-portal-navy-deep">{simulation.chou_talalay_ci.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block font-mono">NBA Royalty Status:</span>
-                <span className="font-mono font-bold text-slate-900">
-                  {simulation.nba_abs_royalty_percentage.toFixed(1)}% Ex-Factory
-                </span>
+                <span className="text-[10px] text-outline block font-label-sm">NBA Royalty Status:</span>
+                <span className="font-mono font-bold text-portal-navy-deep">{simulation.nba_abs_royalty_percentage.toFixed(1)}% Ex-Factory</span>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Stoichiometric Botanical Composition */}
+          {/* Section 2 */}
           <div className="space-y-2">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-              2. Stoichiometric Formula &amp; Standardized Markers
-            </h4>
-            <table className="w-full text-left text-xs border border-slate-200 border-collapse rounded overflow-hidden">
+            <h4 className="font-bold text-xs uppercase tracking-wider text-outline font-label-sm">2. Stoichiometric Formula &amp; Standardized Markers</h4>
+            <table className="w-full text-left text-xs border border-portal-border/60 border-collapse rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-[10px] uppercase">
+                <tr className="bg-portal-surface-subtle border-b border-portal-border text-outline text-[10px] uppercase font-label-sm">
                   <th className="p-2.5 font-semibold">Botanical / Common Name</th>
                   <th className="p-2.5 font-semibold">Latin Binomial</th>
                   <th className="p-2.5 font-semibold">Part Used</th>
@@ -138,18 +117,16 @@ export function DossierExportModal({
                   <th className="p-2.5 font-semibold text-right">Ratio (% w/w)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-portal-border/40">
                 {ingredients.map((ing) => {
                   const herb = botanicalsMap.get(ing.herb_id);
                   return (
-                    <tr key={ing.herb_id} className="hover:bg-slate-50/50">
-                      <td className="p-2.5 font-bold text-slate-900">{herb?.common_name || ing.herb_id}</td>
-                      <td className="p-2.5 italic text-slate-500">{herb?.botanical_name}</td>
-                      <td className="p-2.5 text-slate-600">{herb?.part_used}</td>
-                      <td className="p-2.5 text-slate-700 font-mono text-[11px]">
-                        {herb?.marker_compound}
-                      </td>
-                      <td className="p-2.5 font-mono font-bold text-right text-slate-900">{ing.ratio.toFixed(1)}%</td>
+                    <tr key={ing.herb_id} className="hover:bg-surface-container-low/50">
+                      <td className="p-2.5 font-bold text-portal-navy-deep">{herb?.common_name || ing.herb_id}</td>
+                      <td className="p-2.5 italic text-on-surface-variant">{herb?.botanical_name}</td>
+                      <td className="p-2.5 text-on-surface-variant">{herb?.part_used}</td>
+                      <td className="p-2.5 text-on-surface font-mono text-[11px]">{herb?.marker_compound}</td>
+                      <td className="p-2.5 font-mono font-bold text-right text-portal-navy-deep">{ing.ratio.toFixed(1)}%</td>
                     </tr>
                   );
                 })}
@@ -157,45 +134,31 @@ export function DossierExportModal({
             </table>
           </div>
 
-          {/* Section 3: Statutory Legal Certifications */}
+          {/* Section 3 */}
           <div className="space-y-2">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-              3. Statutory Legal Certifications
-            </h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-outline font-label-sm">3. Statutory Legal Certifications</h4>
             <div className="space-y-2 text-xs">
-              <div className="p-3.5 rounded border border-slate-200 bg-slate-50 text-slate-700 leading-relaxed">
-                <strong>Indian Patents Act 1970 §3(e):</strong> Combination index of {simulation.chou_talalay_ci.toFixed(2)}{" "}
-                substantiates non-obvious synergistic enhancement. Mere admixture rejection successfully overcome.
+              <div className="p-3.5 rounded-lg border border-portal-border/60 bg-surface-container-low/70 text-on-surface leading-relaxed">
+                <strong className="text-portal-navy-deep">Indian Patents Act 1970 §3(e):</strong> Combination index of {simulation.chou_talalay_ci.toFixed(2)} substantiates non-obvious synergistic enhancement. Mere admixture rejection successfully overcome.
               </div>
-              <div className="p-3.5 rounded border border-slate-200 bg-slate-50 text-slate-700 leading-relaxed">
-                <strong>Biological Diversity Act 2024:</strong> Classified as{" "}
-                {simulation.nba_form_tier} with an ex-factory commercial return rate of{" "}
-                {simulation.nba_abs_royalty_percentage.toFixed(1)}%.
+              <div className="p-3.5 rounded-lg border border-portal-border/60 bg-surface-container-low/70 text-on-surface leading-relaxed">
+                <strong className="text-portal-navy-deep">Biological Diversity Act 2024:</strong> Classified as {simulation.nba_form_tier} with an ex-factory commercial return rate of {simulation.nba_abs_royalty_percentage.toFixed(1)}%.
               </div>
-              <div className="p-3.5 rounded border border-slate-200 bg-slate-50 text-slate-700 leading-relaxed">
-                <strong>TKDL Canonical Treatise Concordance:</strong> {simulation.tkdl_concordance_score}% adherence to{" "}
-                <em>{simulation.tkdl_shloka_match}</em>.
+              <div className="p-3.5 rounded-lg border border-portal-border/60 bg-surface-container-low/70 text-on-surface leading-relaxed">
+                <strong className="text-portal-navy-deep">TKDL Canonical Treatise Concordance:</strong> {simulation.tkdl_concordance_score}% adherence to <em>{simulation.tkdl_shloka_match}</em>.
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-          <span className="text-[11px] font-mono text-slate-400">
-            Formulation Lab · IP-SAKTI Sahayak
-          </span>
+        <div className="p-4 border-t border-surface-container bg-portal-surface-subtle flex items-center justify-between">
+          <span className="text-[11px] font-mono text-outline">Formulation Lab · IP-SAKTI Sahayak</span>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              className="px-3.5 py-2 rounded text-xs font-semibold border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors"
-            >
+            <button onClick={handlePrint} className="px-3.5 py-2 rounded-lg text-label-sm font-label-sm font-semibold border border-portal-border bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant transition-colors">
               Print / Save PDF
             </button>
-            <button
-              onClick={handleDownloadJSON}
-              className="px-3.5 py-2 rounded text-xs font-semibold bg-[#00263f] hover:bg-[#083b5c] text-white transition-colors"
-            >
+            <button onClick={handleDownloadJSON} className="px-3.5 py-2 rounded-lg text-label-sm font-label-sm font-semibold bg-primary-container hover:bg-portal-navy-deep text-surface-container-lowest transition-colors">
               Download JSON Package
             </button>
           </div>

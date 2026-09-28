@@ -257,7 +257,7 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 | **Vector Database** | **Qdrant (Local / Cloud Cluster)** | Sub-millisecond HNSW vector search, payload filtering across 7 partitioned collections, and gRPC acceleration. |
 | **Multilingual AI** | **Sarvam AI API** | Industry-leading translation BLEU scores for Indic languages, preserving legal nuance and statutory definitions. |
 | **Database & Auth** | **Supabase (PostgreSQL + Auth)** | Serverless user authentication, persistent chat sessions, and audit logging. |
-| **Containerization** | **Docker & Docker Compose** | Microservice containerization linking FastAPI, Next.js, and Qdrant with persistent volumes. |
+| **Containerization** | **Docker & Docker Compose** | Compose orchestrates FastAPI + Qdrant with persistent volumes; the Next.js frontend runs via its dev server locally and deploys through Render's node buildpack. |
 | **Testing & CI** | **Pytest + Node Test Runner** | Multi-layer test automation validating APIs, citation extraction, jurisdiction isolation, and TypeScript typings. |
 
 ---
@@ -330,7 +330,7 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 │   ├── tests/                       # Node & TypeScript Integration Tests
 │   ├── package.json                 # Next.js 16 dependencies
 │   └── tsconfig.json                # Strict TypeScript configuration
-├── docker-compose.yml               # Multi-service local orchestrator (Qdrant + API + Web)
+├── docker-compose.yml               # Local orchestrator for Qdrant + FastAPI backend (frontend runs via npm run dev)
 ├── render.yaml                      # Production infrastructure blueprint for Render
 ├── run_tests.sh                     # Automated quality gate & test runner
 └── README.md                        # Project documentation
@@ -342,8 +342,8 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 
 ### Prerequisites
 - **Python**: 3.11+
-- **Node.js**: 18.x or 20.x
-- **Docker & Docker Compose**: Installed and running (for Qdrant & full stack)
+- **Node.js**: 18.x or 20.x (required for the frontend dev server in both options below)
+- **Docker & Docker Compose**: Installed and running (for Qdrant & backend)
 - **API Keys**:
   - NVIDIA NIM API Key ([NVIDIA Build](https://build.nvidia.com/))
   - Sarvam AI API Key (Optional, for Indic translation: [Sarvam AI](https://sarvam.ai/))
@@ -365,13 +365,22 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
    ```
    Edit `.env` and provide your `NVIDIA_NIM_API_KEY`.
 
-3. **Start all services with Docker Compose:**
+3. **Start backend + Qdrant with Docker Compose:**
    ```bash
    docker compose up --build
    ```
-   - **Frontend**: `http://localhost:3000`
    - **FastAPI Docs**: `http://localhost:8000/docs`
    - **Qdrant Dashboard**: `http://localhost:6333/dashboard`
+
+4. **Run the Next.js frontend** in a second terminal (it is not a compose service — there is no `frontend/Dockerfile` in this repo):
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   - **Frontend**: `http://localhost:3000`
+
+   The API client defaults to `http://localhost:8000` when `NEXT_PUBLIC_API_URL` is unset, which matches the backend published by the compose stack above.
 
 ---
 

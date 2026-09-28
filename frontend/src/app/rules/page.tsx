@@ -2,6 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 // ── Icons (Custom inline SVGs for zero layout shift & zero external CDN lag) ─
 function CheckVerifiedIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -46,14 +53,6 @@ function BankIcon({ className = "w-4 h-4" }: { className?: string }) {
       <line x1="14" y1="10" x2="14" y2="16" />
       <line x1="18" y1="10" x2="18" y2="16" />
       <polygon points="12 2 2 7 22 7 12 2" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
@@ -490,20 +489,26 @@ export default function RulesPage() {
             </div>
 
             {/* Jurisdiction Dropdown */}
-            <div className="md:col-span-4 relative flex items-center">
-              <BankIcon className="w-4 h-4 absolute left-3.5 text-slate-400 pointer-events-none" />
-              <select
+            <div className="md:col-span-4 flex items-center">
+              <Select
                 value={selectedJurisdiction}
-                onChange={(e) => setSelectedJurisdiction(e.target.value as JurisdictionType)}
-                className="w-full pl-10 pr-9 py-2.5 bg-[#F4F6F9] text-[#111c2d] text-sm rounded-lg border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f] appearance-none cursor-pointer"
+                onValueChange={(v) => setSelectedJurisdiction(v as JurisdictionType)}
               >
-                <option value="all">Jurisdiction: All (IPO, WIPO & Ayush)</option>
-                <option value="ipo">Indian Patent Office (IPO / CGPDTM)</option>
-                <option value="ayush">Ministry of Ayush Regulatory Board</option>
-                <option value="nba">National Biodiversity Authority (NBA)</option>
-                <option value="pct">WIPO / Patent Cooperation Treaty (PCT)</option>
-              </select>
-              <ChevronDownIcon className="w-4 h-4 absolute right-3 text-slate-400 pointer-events-none" />
+                <SelectTrigger
+                  aria-label="Filter by jurisdiction"
+                  className="w-full gap-2.5 rounded-lg border-slate-200 bg-[#F4F6F9] px-3.5 text-sm text-[#111c2d] data-[size=default]:h-[42px] data-[state=open]:bg-white"
+                >
+                  <BankIcon className="w-4 h-4 shrink-0 text-slate-400" />
+                  <SelectValue className="flex-1 text-left" placeholder="Jurisdiction" />
+                </SelectTrigger>
+                <SelectContent className="[&_[data-slot=select-item]]:text-sm">
+                  <SelectItem value="all">Jurisdiction: All (IPO, WIPO &amp; Ayush)</SelectItem>
+                  <SelectItem value="ipo">Indian Patent Office (IPO / CGPDTM)</SelectItem>
+                  <SelectItem value="ayush">Ministry of Ayush Regulatory Board</SelectItem>
+                  <SelectItem value="nba">National Biodiversity Authority (NBA)</SelectItem>
+                  <SelectItem value="pct">WIPO / Patent Cooperation Treaty (PCT)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Reset Filters */}

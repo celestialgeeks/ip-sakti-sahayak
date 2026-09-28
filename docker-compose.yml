@@ -30,21 +30,11 @@ services:
       - ./backend/data/ayurveda:/app/data/ayurveda:ro
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # ─── Next.js Frontend ─────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run dev
+  # The Next.js frontend is intentionally not a compose service: there is no
+  # frontend/Dockerfile in this repo (Render deploys it via its node buildpack,
+  # see render.yaml). Run it on the host with `npm install && npm run dev` —
+  # see README "Quick Start Option A". It defaults to http://localhost:8000
+  # for the API, which is exactly where the backend service above publishes.
 
 volumes:
   qdrant_storage:

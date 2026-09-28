@@ -26,3 +26,6 @@ out/
 venv/
 backend/venv/
 .venv/
+
+# Tooling / IDE
+.qoder/

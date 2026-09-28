@@ -107,6 +107,27 @@ class TranslateResponse(BaseModel):
     target_language: Language
 
 
+# ─── Voice ───────────────────────────────────────────────────────────
+
+class STTResponse(BaseModel):
+    """Speech-to-text transcription result."""
+    transcript: str
+    detected_language: Optional[str] = Field(
+        default=None, description="BCP-47 locale reported by the STT model, if any"
+    )
+
+
+class TTSRequest(BaseModel):
+    """Text-to-speech synthesis request."""
+    text: str = Field(..., min_length=1, max_length=6000)
+    language: Language = Field(default=Language.ENGLISH)
+    speaker: Optional[str] = Field(default=None, description="Bulbul voice id override")
+    strip_markdown: bool = Field(
+        default=True,
+        description="Convert chat markdown + inline [Source…] cites into speakable prose",
+    )
+
+
 # ─── Registration & Compliance Wizard ────────────────────────────────
 
 class WizardStepState(BaseModel):

@@ -1,6 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 interface ComposerProps {
   onSend: (message: string) => void;
@@ -30,21 +37,9 @@ export function Composer({
   disabled = false,
 }: ComposerProps) {
   const [message, setMessage] = useState("");
-  const [listening, setListening] = useState(false);
-  const [voiceReady, setVoiceReady] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const recognitionRef = useRef<any>(null);
 
-  // Native browser speech recognition (Chrome / Edge / Safari). No dependency.
-  // Detected after mount so server/client markup stays identical (no hydration
-  // mismatch); the mic reveals itself only when the API is actually available.
-  useEffect(() => {
-    const SpeechRec =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    setVoiceReady(Boolean(SpeechRec));
-  }, []);
-
-  // Keep the textarea height in sync with its content (and voice transcripts).
+  // Keep the textarea height in sync with its content.
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -52,16 +47,9 @@ export function Composer({
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   }, [message]);
 
-  // Stop any active recognition when the bar unmounts.
-  useEffect(() => {
-    return () => recognitionRef.current?.stop();
-  }, []);
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim() || disabled) return;
-    recognitionRef.current?.stop();
-    setListening(false);
     onSend(message.trim());
     setMessage("");
   };
@@ -71,33 +59,6 @@ export function Composer({
       e.preventDefault();
       handleSubmit(e);
     }
-  };
-
-  const toggleVoice = () => {
-    const SpeechRec =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRec || disabled) return;
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
-      return;
-    }
-    const rec = new SpeechRec();
-    rec.lang = "en-IN";
-    rec.interimResults = true;
-    rec.continuous = false;
-    rec.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((r: any) => r[0].transcript)
-        .join("");
-      setMessage((prev) => (prev ? `${prev.replace(/\s+$/, "")} ${transcript}` : transcript));
-    };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
-    recognitionRef.current = rec;
-    rec.start();
-    setListening(true);
-    textareaRef.current?.focus();
   };
 
   const hasText = message.trim().length > 0;
@@ -188,16 +149,22 @@ export function Composer({
           </button>
 
           {/* Jurisdiction selector */}
-          <select
+          <Select
             value={jurisdiction}
-            onChange={(e) => onJurisdictionChange(e.target.value)}
+            onValueChange={onJurisdictionChange}
             disabled={disabled}
-            title="Select Jurisdiction"
-            className="self-center shrink-0 bg-transparent border-none text-[12px] font-semibold text-slate-500 uppercase cursor-pointer hover:text-[#0b3c5d] focus:outline-none"
           >
-            <option value="india">National (India)</option>
-            <option value="international">International</option>
-          </select>
+            <SelectTrigger
+              aria-label="Select Jurisdiction"
+              className="w-auto shrink-0 gap-1.5 self-center border-none bg-transparent px-2 text-[12px] font-semibold uppercase text-slate-500 shadow-none hover:text-[#0b3c5d] data-[size=default]:h-8"
+            >
+              <SelectValue placeholder="Jurisdiction" />
+            </SelectTrigger>
+            <SelectContent className="[&_[data-slot=select-item]]:text-xs">
+              <SelectItem value="india">National (India)</SelectItem>
+              <SelectItem value="international">International</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Input */}
           <textarea
@@ -205,36 +172,12 @@ export function Composer({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={listening ? "Listening…" : "Describe the formulation, query TKDL accession, or paste patent claims…"}
+            placeholder="Describe the formulation, query TKDL accession, or paste patent claims…"
             className="flex-1 min-w-0 max-h-[200px] min-h-[40px] bg-transparent border-none outline-none resize-none py-2.5 text-[15px] leading-relaxed text-slate-800 placeholder:text-slate-400 font-sans"
             rows={1}
             disabled={disabled}
             aria-label="Message"
           />
-
-          {/* Voice input */}
-          {voiceReady && (
-            <button
-              type="button"
-              onClick={toggleVoice}
-              disabled={disabled}
-              title={listening ? "Stop listening" : "Voice input"}
-              aria-label={listening ? "Stop voice input" : "Start voice input"}
-              aria-pressed={listening}
-              className={
-                "p-2.5 shrink-0 rounded-full transition-all disabled:opacity-50 " +
-                (listening
-                  ? "text-white bg-[var(--color-tiranga-saffron-deep)] animate-pulse"
-                  : "text-slate-400 hover:text-[#0b3c5d] hover:bg-slate-100/70")
-              }
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" x2="12" y1="19" y2="22" />
-              </svg>
-            </button>
-          )}
 
           {/* Send */}
           <button

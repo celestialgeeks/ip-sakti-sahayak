@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings, validate_settings
 from app.api.middleware.rate_limit import RateLimitMiddleware
+from app.api.middleware.disclaimer import DisclaimerMiddleware
+from app.api.middleware.audit import AuditMiddleware
 from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda, formulation_lab, wizard, business
 
 logger = logging.getLogger("app.main")
@@ -80,10 +82,15 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
+    expose_headers=["X-Legal-Disclaimer", "X-Speak-Disclaimer"],
 )
 
 # --- Rate limiting on cost-bearing endpoints ---
 app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.RATE_LIMIT_PER_MINUTE)
+
+# --- Standing legal disclaimer header + audit logging on every /api response ---
+app.add_middleware(DisclaimerMiddleware)
+app.add_middleware(AuditMiddleware)
 
 # --- Routes ---
 app.include_router(health.router, prefix="/api", tags=["Health"])
