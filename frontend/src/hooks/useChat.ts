@@ -18,6 +18,7 @@ import {
   type ChatPhase,
   type ReasoningTracker,
 } from "@/lib/reasoning";
+import { createSSEParser, SSE_DONE } from "@/lib/sse";
 
 /** Cold-start hedge: past this many ms with no bytes, say so on the trace. */
 const SLOW_START_MS = 25000;
@@ -294,149 +295,175 @@ export function useChat(initialSessionId?: string) {
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
+        const parser = createSSEParser();
         let done = false;
+        let sawDone = false;
         let currentContent = "";
         let finalMetadata: any = null;
 
-        while (!done) {
+        // Applied to one whole SSE frame at a time. The parser only releases a
+        // frame once its blank terminator line has arrived, so a frame cut in
+        // half by a read boundary is reassembled and handled here intact —
+        // instead of both halves being thrown away, which is what left the
+        // screen blank after the thinking animation.
+        const handleFrame = (data: string) => {
+          if (data === SSE_DONE) {
+            sawDone = true;
+            return;
+          }
+          try {
+            const parsed = JSON.parse(data);
+            if (typeof parsed.chunk === "string") {
+              // An empty event is not a content chunk. Treating it as one would
+              // end the thinking state while there is still nothing to read.
+              if (parsed.chunk.length === 0) return;
+              currentContent += parsed.chunk;
+              const wasThinking = tracker.phase === "waiting";
+              const previousDraft = tracker.modelThinking;
+              tracker = receiveChunk(tracker, Date.now(), parsed.chunk);
+
+              // Sanitize any residual thinking process on the client, and
+              // salvage it into the trace rather than dropping it unseen.
+              let displayContent = currentContent;
+              const draft = extractModelThinking(currentContent);
+              if (draft) {
+                tracker = recordModelThinking(tracker, draft);
+              }
+              if (displayContent.includes("Here's a thinking process:") || displayContent.includes("<think>")) {
+                displayContent = displayContent
+                  .replace(/<think>[\s\S]*?<\/think>/gi, "")
+                  .replace(/^Here's a thinking process:[\s\S]*?(?=\n\n(?:###|[A-Z]|\d+\.\s+\*\*)|$)/i, "")
+                  .replace(/^\s*1\.\s+\*\*Analyze User Request:\*\*[\s\S]*?(?=\n\n(?:###|[A-Z])|$)/i, "")
+                  .trimStart();
+              }
+
+              // Safely update the assistant message in state
+              setMessages((prev) => {
+                const newMsgs = [...prev];
+                if (newMsgs.length === 0) {
+                  return [{ role: "assistant", content: displayContent, timestamp: new Date().toISOString() }];
+                }
+                const lastIndex = newMsgs.length - 1;
+                const lastMsg = newMsgs[lastIndex];
+
+                if (lastMsg.role === "assistant") {
+                  newMsgs[lastIndex] = {
+                    ...lastMsg,
+                    content: displayContent,
+                  };
+                } else {
+                  // Crucial safety check: if last message is a user message, NEVER overwrite it! Append!
+                  newMsgs.push({
+                    role: "assistant",
+                    content: displayContent,
+                    timestamp: new Date().toISOString(),
+                  });
+                }
+                return newMsgs;
+              });
+
+              // Milestones only: the phase flip that hides the indicator, or
+              // new chain-of-thought text. Ordinary tokens skip this write.
+              if (wasThinking || tracker.modelThinking !== previousDraft) {
+                setPhase(tracker.phase);
+                attachReasoning(tracker);
+              }
+            } else if (parsed.reasoning || parsed.stage) {
+              // Forward-compatible milestone: when the pipeline reports its own
+              // stages over SSE they join the same log, flagged `server` so the
+              // UI can tell a reported fact from a locally measured one.
+              const payload = parsed.reasoning ?? parsed.stage;
+              const label = typeof payload === "string" ? payload : payload?.label;
+              if (label) {
+                tracker = addServerStage(
+                  tracker,
+                  { label, detail: typeof payload === "string" ? undefined : payload?.detail },
+                  Date.now(),
+                );
+                attachReasoning(tracker);
+              }
+            } else if (parsed.metadata) {
+              finalMetadata = parsed.metadata;
+              const returnedSessionId = parsed.metadata.session_id || activeSessionId;
+              setSessionId(returnedSessionId);
+
+              // Save to history list for the sidebar fallback
+              try {
+                const historyStr = localStorage.getItem("chat_sessions_history");
+                const history = historyStr ? JSON.parse(historyStr) : [];
+                if (!history.find((s: any) => s.id === returnedSessionId)) {
+                  history.unshift({
+                    id: returnedSessionId,
+                    title: query,
+                    timestamp: new Date().toISOString()
+                  });
+                  localStorage.setItem("chat_sessions_history", JSON.stringify(history));
+                }
+                window.dispatchEvent(new Event("sessions_updated"));
+              } catch (e) {}
+
+              setMessages((prev) => {
+                const newMsgs = [...prev];
+                if (newMsgs.length === 0) return newMsgs;
+                const lastIndex = newMsgs.length - 1;
+                const lastMsg = newMsgs[lastIndex];
+
+                if (lastMsg.role === "assistant") {
+                  newMsgs[lastIndex] = {
+                    ...lastMsg,
+                    citations: parsed.metadata.citations,
+                    confidence: parsed.metadata.confidence,
+                    confidenceLevel: parsed.metadata.confidence_level,
+                    statutoryAlert: parsed.metadata.statutory_alert,
+                  };
+                } else {
+                  newMsgs.push({
+                    role: "assistant",
+                    content: currentContent,
+                    citations: parsed.metadata.citations,
+                    confidence: parsed.metadata.confidence,
+                    confidenceLevel: parsed.metadata.confidence_level,
+                    statutoryAlert: parsed.metadata.statutory_alert,
+                    timestamp: new Date().toISOString(),
+                  });
+                }
+                return newMsgs;
+              });
+
+              // Verification is a real milestone with real numbers, so the
+              // trace ends with what the answer was actually grounded in.
+              tracker = applyGrounding(tracker, parsed.metadata, Date.now());
+              attachReasoning(tracker);
+            }
+          } catch (err) {
+            // Only complete frames reach this function, so unparseable data is a
+            // real contract break. Name it instead of repeating the old silent
+            // `// Incomplete chunk, ignore`, which is exactly what hid this bug.
+            console.warn("Discarding malformed SSE frame:", err, data.slice(0, 120));
+          }
+        };
+
+        while (!done && !sawDone) {
           const { value, done: readerDone } = await reader.read();
           done = readerDone;
           if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n\n");
-            
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = line.slice(6);
-                if (data === "[DONE]") {
-                  break;
-                }
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.chunk) {
-                    currentContent += parsed.chunk;
-                    const wasThinking = tracker.phase === "waiting";
-                    const previousDraft = tracker.modelThinking;
-                    tracker = receiveChunk(tracker, Date.now(), parsed.chunk);
-
-                    // Sanitize any residual thinking process on the client, and
-                    // salvage it into the trace rather than dropping it unseen.
-                    let displayContent = currentContent;
-                    const draft = extractModelThinking(currentContent);
-                    if (draft) {
-                      tracker = recordModelThinking(tracker, draft);
-                    }
-                    if (displayContent.includes("Here's a thinking process:") || displayContent.includes("<think>")) {
-                      displayContent = displayContent
-                        .replace(/<think>[\s\S]*?<\/think>/gi, "")
-                        .replace(/^Here's a thinking process:[\s\S]*?(?=\n\n(?:###|[A-Z]|\d+\.\s+\*\*)|$)/i, "")
-                        .replace(/^\s*1\.\s+\*\*Analyze User Request:\*\*[\s\S]*?(?=\n\n(?:###|[A-Z])|$)/i, "")
-                        .trimStart();
-                    }
-
-                    // Safely update the assistant message in state
-                    setMessages((prev) => {
-                      const newMsgs = [...prev];
-                      if (newMsgs.length === 0) {
-                        return [{ role: "assistant", content: displayContent, timestamp: new Date().toISOString() }];
-                      }
-                      const lastIndex = newMsgs.length - 1;
-                      const lastMsg = newMsgs[lastIndex];
-
-                      if (lastMsg.role === "assistant") {
-                        newMsgs[lastIndex] = {
-                          ...lastMsg,
-                          content: displayContent,
-                        };
-                      } else {
-                        // Crucial safety check: if last message is a user message, NEVER overwrite it! Append!
-                        newMsgs.push({
-                          role: "assistant",
-                          content: displayContent,
-                          timestamp: new Date().toISOString(),
-                        });
-                      }
-                      return newMsgs;
-                    });
-
-                    // Milestones only: the phase flip that hides the indicator, or
-                    // new chain-of-thought text. Ordinary tokens skip this write.
-                    if (wasThinking || tracker.modelThinking !== previousDraft) {
-                      setPhase(tracker.phase);
-                      attachReasoning(tracker);
-                    }
-                  } else if (parsed.reasoning || parsed.stage) {
-                    // Forward-compatible milestone: when the pipeline reports its own
-                    // stages over SSE they join the same log, flagged `server` so the
-                    // UI can tell a reported fact from a locally measured one.
-                    const payload = parsed.reasoning ?? parsed.stage;
-                    const label = typeof payload === "string" ? payload : payload?.label;
-                    if (label) {
-                      tracker = addServerStage(
-                        tracker,
-                        { label, detail: typeof payload === "string" ? undefined : payload?.detail },
-                        Date.now(),
-                      );
-                      attachReasoning(tracker);
-                    }
-                  } else if (parsed.metadata) {
-                    finalMetadata = parsed.metadata;
-                    const returnedSessionId = parsed.metadata.session_id || activeSessionId;
-                    setSessionId(returnedSessionId);
-                    
-                    // Save to history list for the sidebar fallback
-                    try {
-                      const historyStr = localStorage.getItem("chat_sessions_history");
-                      const history = historyStr ? JSON.parse(historyStr) : [];
-                      if (!history.find((s: any) => s.id === returnedSessionId)) {
-                        history.unshift({
-                          id: returnedSessionId,
-                          title: query,
-                          timestamp: new Date().toISOString()
-                        });
-                        localStorage.setItem("chat_sessions_history", JSON.stringify(history));
-                      }
-                      window.dispatchEvent(new Event("sessions_updated"));
-                    } catch (e) {}
-
-                    setMessages((prev) => {
-                      const newMsgs = [...prev];
-                      if (newMsgs.length === 0) return newMsgs;
-                      const lastIndex = newMsgs.length - 1;
-                      const lastMsg = newMsgs[lastIndex];
-
-                      if (lastMsg.role === "assistant") {
-                        newMsgs[lastIndex] = {
-                          ...lastMsg,
-                          citations: parsed.metadata.citations,
-                          confidence: parsed.metadata.confidence,
-                          confidenceLevel: parsed.metadata.confidence_level,
-                          statutoryAlert: parsed.metadata.statutory_alert,
-                        };
-                      } else {
-                        newMsgs.push({
-                          role: "assistant",
-                          content: currentContent,
-                          citations: parsed.metadata.citations,
-                          confidence: parsed.metadata.confidence,
-                          confidenceLevel: parsed.metadata.confidence_level,
-                          statutoryAlert: parsed.metadata.statutory_alert,
-                          timestamp: new Date().toISOString(),
-                        });
-                      }
-                      return newMsgs;
-                    });
-
-                    // Verification is a real milestone with real numbers, so the
-                    // trace ends with what the answer was actually grounded in.
-                    tracker = applyGrounding(tracker, parsed.metadata, Date.now());
-                    attachReasoning(tracker);
-                  }
-                } catch (e) {
-                  // Incomplete chunk, ignore
-                }
-              }
+            // `stream: true` holds the tail of a split multi-byte character (any
+            // Devanagari answer) until its remaining bytes land.
+            for (const frame of parser.feed(decoder.decode(value, { stream: true }))) {
+              handleFrame(frame);
+              if (sawDone) break;
             }
+          }
+        }
+
+        // A stream that ends without the [DONE] marker — a proxy timeout, an
+        // aborted connection, or a server that simply closes — still owes us the
+        // last frame its bytes completed. Reading it is the difference between a
+        // truncated answer and a missing one.
+        if (!sawDone) {
+          for (const frame of parser.end()) {
+            handleFrame(frame);
+            if (sawDone) break;
           }
         }
 
