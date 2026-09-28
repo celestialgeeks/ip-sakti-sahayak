@@ -19,7 +19,8 @@ async def test_translate_endpoint(async_client: AsyncClient):
         "source_language": "en",
         "target_language": "hi",
     }
-    with patch("app.api.routes.translate.sarvam_service.translate", new_callable=AsyncMock) as mock_translate:
+    with patch("app.api.routes.translate.sarvam_service.translate", new_callable=AsyncMock) as mock_translate, \
+         patch("app.api.routes.translate.settings.SARVAM_API_KEY", "test-key"):
         mock_translate.return_value = "आयुर्वेदिक हर्बल फॉर्मूलेशन पेटेंट करने के नियम क्या हैं?"
         response = await async_client.post("/api/translate", json=payload)
     assert response.status_code == 200
@@ -67,7 +68,11 @@ async def test_ingest_document(async_client: AsyncClient):
             "category": "regulatory",
             "source_citation": "Official Gazette Notification 2024",
         }
-        response = await async_client.post("/api/ingest", data=data, files=files)
+        with patch("app.api.routes.ingest.settings.NVIDIA_NIM_API_KEY", "test-key"), \
+             patch("app.api.routes.ingest.nim_service.embed", new_callable=AsyncMock) as mock_embed, \
+             patch("app.api.routes.ingest.qdrant_service.upsert_documents", new_callable=AsyncMock):
+            mock_embed.return_value = [[0.05] * 2048]
+            response = await async_client.post("/api/ingest", data=data, files=files)
         assert response.status_code == 200
         res_data = response.json()
         assert res_data["status"] == "ingested"
