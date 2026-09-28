@@ -23,6 +23,44 @@ import re
 
 logger = logging.getLogger("app.rag")
 
+def response_to_sse(response: ChatResponse) -> AsyncGenerator[str, None]:
+    """
+    Wrap a fully-generated ChatResponse in the SSE event contract the client parses.
+
+    Used when the pipeline had to generate in one shot (translation) but the
+    caller asked for a stream, so the endpoint never receives a bare model.
+    """
+    async def generator() -> AsyncGenerator[str, None]:
+        yield f"data: {json.dumps({'chunk': response.answer})}\n\n"
+        metadata = {
+            "citations": [c.model_dump() for c in response.citations],
+            "confidence": response.confidence,
+            "confidence_level": response.confidence_level.value,
+            "session_id": response.session_id,
+            "statutory_alert": response.statutory_alert,
+        }
+        yield f"data: {json.dumps({'metadata': metadata})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return generator()
+
+
+async def translate_or_passthrough(text: str, source: Language, target: Language) -> str:
+    """
+    Translate, falling back to the original text when the provider is unavailable.
+
+    A translation outage must not cost the user the answer — an English reply beats
+    a failed request.
+    """
+    if source == target:
+        return text
+    try:
+        return await sarvam_service.translate(text, source, target)
+    except Exception as e:
+        logger.warning("Translation to %s failed; serving untranslated text: %r", target.value, e)
+        return text
+
+
 async def run_rag_pipeline(
     query: str,
     jurisdiction: Jurisdiction = Jurisdiction.INDIA,
@@ -34,7 +72,10 @@ async def run_rag_pipeline(
     """
     Full RAG pipeline with optional streaming.
     """
-    # If translation is needed, we cannot stream because we must translate the full response
+    # Translation needs the complete answer, so non-English queries generate in one
+    # shot. The caller's stream contract is still honoured via `response_to_sse`,
+    # otherwise the endpoint wraps a ChatResponse in a StreamingResponse and 500s.
+    stream_requested = stream
     if language != Language.ENGLISH:
         stream = False
 
@@ -50,7 +91,7 @@ async def run_rag_pipeline(
     original_query = query
     detected_lang = await sarvam_service.detect_language(query)
     if detected_lang != Language.ENGLISH:
-        query = await sarvam_service.translate(query, detected_lang, Language.ENGLISH)
+        query = await translate_or_passthrough(query, detected_lang, Language.ENGLISH)
 
     # Step 1.5: Intent Classification & Dynamic Routing
     # Stage 1: Fast keyword pre-filter (no LLM cost)
@@ -99,11 +140,11 @@ Label:"""
             fast_answer = "I am IP-SAKTI Sahayak — I can only assist with Ayurveda Intellectual Property, Patents, Traditional Knowledge, and related legal matters. I cannot answer other queries."
             
         if language != Language.ENGLISH:
-            fast_answer = await sarvam_service.translate(fast_answer, Language.ENGLISH, language)
+            fast_answer = await translate_or_passthrough(fast_answer, Language.ENGLISH, language)
         if user_id:
             await supabase_service.save_message(session_id, "assistant", fast_answer, citations=[])
             
-        if not stream:
+        if not stream_requested:
             return ChatResponse(
                 answer=fast_answer, citations=[], confidence=1.0,
                 confidence_level=ConfidenceLevel.HIGH, jurisdiction=jurisdiction,
@@ -111,7 +152,7 @@ Label:"""
             )
         async def stream_generator_fast():
             yield f"data: {json.dumps({'chunk': fast_answer})}\n\n"
-            metadata = {"citations": [], "confidence": 1.0, "confidence_level": "high", "session_id": session_id}
+            metadata = {"citations": [], "confidence": 1.0, "confidence_level": "high", "session_id": session_id, "statutory_alert": None}
             yield f"data: {json.dumps({'metadata': metadata})}\n\n"
             yield "data: [DONE]\n\n"
         return stream_generator_fast()
@@ -120,9 +161,10 @@ Label:"""
     # Step 2: Generate query embedding
     query_embedding = await nim_service.embed_single(query)
     if not query_embedding:
-        import logging as _log
-        _log.getLogger("uvicorn.error").warning(
-            "Query embedding is empty — Qdrant search skipped."
+        # Degraded path: no vector → no retrieval. Logged on the pipeline's own
+        # logger so it carries the request correlation id like every other line.
+        logger.warning(
+            "Query embedding is empty — Qdrant search skipped (session_id=%s).", session_id
         )
 
     # Step 3: Search Qdrant
@@ -210,7 +252,7 @@ Label:"""
         statutory_alert = detect_statutory_alert(answer)
 
         if language != Language.ENGLISH:
-            answer = await sarvam_service.translate(answer, Language.ENGLISH, language)
+            answer = await translate_or_passthrough(answer, Language.ENGLISH, language)
 
         if user_id:
             await supabase_service.save_message(session_id, "assistant", answer, citations=[c.model_dump() for c in citations])
@@ -227,7 +269,7 @@ Label:"""
         except Exception as e:
             logger.warning("Audit log write failed: %r", e)
 
-        return ChatResponse(
+        response = ChatResponse(
             answer=answer,
             citations=citations,
             confidence=confidence_score,
@@ -237,6 +279,12 @@ Label:"""
             session_id=session_id,
             statutory_alert=statutory_alert,
         )
+
+        # A one-shot generation (translated answer) still owes a streaming
+        # caller the SSE contract.
+        if stream_requested:
+            return response_to_sse(response)
+        return response
 
     # Streaming path with smart preamble buffering
     async def stream_generator() -> AsyncGenerator[str, None]:

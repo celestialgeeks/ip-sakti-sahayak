@@ -12,6 +12,11 @@ from app.config import settings, validate_settings
 from app.api.middleware.rate_limit import RateLimitMiddleware
 from app.api.middleware.disclaimer import DisclaimerMiddleware
 from app.api.middleware.audit import AuditMiddleware
+from app.api.middleware.request_context import (
+    REQUEST_ID_HEADER,
+    RequestIdMiddleware,
+    install_request_id_logging,
+)
 from app.api.routes import chat, classify, abs_check, sources, translate, feedback, ingest, health, stats, ayurveda, formulation_lab, wizard, business
 
 logger = logging.getLogger("app.main")
@@ -81,8 +86,8 @@ app.add_middleware(
     allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
-    allow_headers=["Authorization", "Content-Type"],
-    expose_headers=["X-Legal-Disclaimer", "X-Speak-Disclaimer"],
+    allow_headers=["Authorization", "Content-Type", REQUEST_ID_HEADER],
+    expose_headers=["X-Legal-Disclaimer", "X-Speak-Disclaimer", REQUEST_ID_HEADER],
 )
 
 # --- Rate limiting on cost-bearing endpoints ---
@@ -91,6 +96,13 @@ app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.RATE_LIMIT_
 # --- Standing legal disclaimer header + audit logging on every /api response ---
 app.add_middleware(DisclaimerMiddleware)
 app.add_middleware(AuditMiddleware)
+
+# --- Correlation id: added last so it wraps every other middleware and route ---
+app.add_middleware(RequestIdMiddleware)
+
+# Stamp that id onto every app/audit log line. Runs after the route, core and
+# service modules above have been imported, so their module loggers exist.
+install_request_id_logging()
 
 # --- Routes ---
 app.include_router(health.router, prefix="/api", tags=["Health"])

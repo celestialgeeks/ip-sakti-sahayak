@@ -4,234 +4,232 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { formatDuration, type ReasoningStep } from "@/lib/reasoning";
 
-const SCROLL_CONFIG = {
-  SPEED: 5,
-  INITIAL_DELAY: 100,
-} as const;
+/** Resolution of the live elapsed clock — 100ms reads as a stopwatch, 1s looks stalled. */
+const TICK_MS = 100;
+/** The log scrolls to the newest milestone instead of pretending to. */
+const LOG_MAX_HEIGHT = "168px";
 
-const TIMER_CONFIG = {
-  INTERVAL: 1000,
-} as const;
-
-const DIMENSIONS = {
-  CARD_HEIGHT: "150px",
-  FADE_HEIGHT: "80px",
-} as const;
-
-export const SHIMMER_CONFIG = {
-  DURATION: "5s",
-  GRADIENT:
-    "linear-gradient(110deg, #404040 35%, #fff 50%, #404040 75%, #404040)",
-  BACKGROUND_SIZE: "200% 100%",
-} as const;
-
-const DEFAULT_IP_SAKTI_THINKING = `Analyzing inquiry through IP-SAKTI Sahayak intelligence framework...
-
-1. Examining jurisdiction and legal context under the Indian Patents Act, 1970 and Patent Rules.
-2. Cross-referencing Traditional Knowledge Digital Library (TKDL) and classical texts:
-   - Charaka Samhita (Sutra & Chikitsa Sthana)
-   - Sushruta Samhita
-   - Ashtanga Hridaya
-3. Checking statutory patentability exclusions:
-   - Section 3(p): Traditional knowledge exclusion analysis
-   - Section 3(d): Discovery of a new form of known substance without enhanced therapeutic efficacy
-   - Section 3(e): Admixture resulting only in aggregation of properties
-4. Inspecting prior art claims and international classification (IPC A61K 36/00, A61P):
-   - Identifying published Indian patent applications and granted patents
-   - Comparing compositional ranges, extraction methods, and pharmacokinetic enhancers
-5. Assessing non-obviousness, synergistic ratio evidence, and experimental enablement.
-6. Synthesizing recommendations, statutory cautions, and pre-FER advisory notes for the user.`;
-
-function useTimer() {
-  const [timer, setTimer] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+/**
+ * Elapsed time anchored to the moment the query was actually sent.
+ *
+ * The previous block started its counter when the component mounted, so the
+ * number was a property of the render, not of the request. This one is derived
+ * from the send timestamp carried by the reasoning tracker, and reads `null`
+ * until the first tick lands — a stopwatch that has to say "unknown" for a
+ * frame is still honest, unlike one that starts from zero and lies by a second.
+ */
+export function useElapsedMs(anchor?: number): number | null {
+  const [elapsed, setElapsed] = useState<number | null>(null);
 
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setTimer((prev) => prev + 1);
-    }, TIMER_CONFIG.INTERVAL);
+    if (anchor === undefined) return;
+    const id = setInterval(() => setElapsed(Math.max(0, Date.now() - anchor)), TICK_MS);
+    return () => clearInterval(id);
+  }, [anchor]);
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
-
-  return timer;
+  return elapsed;
 }
 
-function useAutoScroll(contentRef: React.RefObject<HTMLDivElement | null>) {
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (!contentRef.current || typeof window === "undefined") return;
-
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches) return;
-
-    const initializeScroll = () => {
-      if (!contentRef.current) return;
-
-      const { scrollHeight, clientHeight } = contentRef.current;
-      const maxScroll = scrollHeight - clientHeight;
-
-      if (maxScroll <= 0) return;
-
-      intervalRef.current = setInterval(() => {
-        setScrollPosition((prev) => {
-          const newPosition = prev + 1;
-          return newPosition >= maxScroll ? 0 : newPosition;
-        });
-      }, SCROLL_CONFIG.SPEED);
-    };
-
-    const timeoutId = setTimeout(initializeScroll, SCROLL_CONFIG.INITIAL_DELAY);
-
-    return () => {
-      clearTimeout(timeoutId);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [contentRef]);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.scrollTop = scrollPosition;
-    }
-  }, [scrollPosition, contentRef]);
-
-  return scrollPosition;
+export interface ThinkingStepRowProps {
+  step: ReasoningStep;
+  /** The newest milestone while the request is still in flight. */
+  active?: boolean;
 }
 
-interface ThinkingHeaderProps {
-  timer: number;
-  title?: string;
-}
-
-function ThinkingHeader({ timer, title = "IP Sakti is thinking..." }: ThinkingHeaderProps) {
+/**
+ * One measured milestone.
+ *
+ * The duration is the gap since the previous step, so a slow stage is legible at
+ * a glance instead of hiding inside an undifferentiated spinner.
+ */
+export function ThinkingStepRow({ step, active = false }: ThinkingStepRowProps) {
   return (
-    <div className="flex items-center gap-2">
-      <Spinner aria-hidden="true" className="size-4 text-primary" />
-      <span className="relative inline-block animate-pulse text-sm font-medium text-foreground">
-        {title}
+    <li className="flex items-start gap-2.5">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "mt-1.5 size-1.5 shrink-0 rounded-full",
+          active && "animate-ping",
+        )}
+        style={{
+          background: active
+            ? "var(--saffron)"
+            : step.origin === "server"
+              ? "var(--emerald)"
+              : "var(--border-hairline)",
+        }}
+      />
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span
+            className="text-[12.5px] font-medium leading-snug"
+            style={{ color: "var(--ink-primary)" }}
+          >
+            {step.label}
+          </span>
+          {step.origin === "server" && (
+            // Provenance badge: the backend reported this stage itself, rather
+            // than the browser inferring it from a byte boundary.
+            <span
+              className="rounded px-1 py-px font-mono text-[9px] uppercase tracking-wide"
+              style={{ background: "var(--saffron-light)", color: "var(--emerald)" }}
+            >
+              backend
+            </span>
+          )}
+        </span>
+        {step.detail && (
+          <span
+            className="block font-mono text-[11px] leading-snug"
+            style={{ color: "var(--ink-muted)" }}
+          >
+            {step.detail}
+          </span>
+        )}
       </span>
       <span
-        aria-label={`${timer} seconds elapsed`}
-        className="text-muted-foreground text-sm font-mono"
+        className="shrink-0 pt-0.5 font-mono text-[11px] tabular-nums"
+        style={{ color: "var(--ink-muted)" }}
       >
-        {timer}s
+        +{formatDuration(step.ms ?? 0)}
       </span>
-    </div>
+    </li>
   );
 }
 
-interface FadeOverlayProps {
-  position: "top" | "bottom";
+export interface ThinkingLogProps {
+  steps: ReasoningStep[];
+  /** Render the last row as in-progress (only while the request is open). */
+  live?: boolean;
+  className?: string;
 }
 
-function FadeOverlay({ position }: FadeOverlayProps) {
-  const isTop = position === "top";
-  const gradientClass = isTop
-    ? "bg-gradient-to-b from-background from-30% to-transparent"
-    : "bg-gradient-to-t from-background from-30% to-transparent";
+/**
+ * The reasoning trace as a log.
+ *
+ * Follows the newest milestone the way a terminal does — a real scroll that
+ * stops at the bottom of the content, replacing the old loop that scrolled
+ * invented copy forever to look busy.
+ */
+export function ThinkingLog({ steps, live = false, className }: ThinkingLogProps) {
+  const boxRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 z-10 ${gradientClass}`}
-      style={{
-        [isTop ? "top" : "bottom"]: 0,
-        height: DIMENSIONS.FADE_HEIGHT,
-      }}
-    />
-  );
-}
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    box.scrollTo({ top: box.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" });
+  }, [steps.length]);
 
-interface ThinkingContentProps {
-  contentRef: React.RefObject<HTMLDivElement | null>;
-  content: string;
-}
+  // Nothing measured yet, so nothing to show — an empty frame would be filler.
+  if (steps.length === 0) return null;
 
-function ThinkingContent({ contentRef, content }: ThinkingContentProps) {
-  return (
-    <div
-      aria-label="AI thinking process"
-      aria-live="polite"
-      className="h-full overflow-hidden p-4 text-foreground/80"
-      ref={contentRef}
-      role="log"
-      style={{ scrollBehavior: "auto" }}
-    >
-      <p className="whitespace-pre-wrap text-sm leading-relaxed font-mono text-xs">{content}</p>
-    </div>
-  );
-}
-
-interface ContentCardProps {
-  contentRef: React.RefObject<HTMLDivElement | null>;
-  content: string;
-}
-
-function ContentCard({ contentRef, content }: ContentCardProps) {
   return (
     <Card
-      className="relative overflow-hidden rounded-xl border border-border bg-card p-2 shadow-xs"
-      style={{ height: DIMENSIONS.CARD_HEIGHT }}
+      className={cn(
+        "rounded-xl border border-border bg-card p-3 shadow-xs",
+        className,
+      )}
     >
-      <FadeOverlay position="top" />
-      <FadeOverlay position="bottom" />
-      <ThinkingContent content={content} contentRef={contentRef} />
+      <div
+        ref={boxRef}
+        aria-label="Reasoning steps"
+        aria-live="polite"
+        className="overflow-y-auto"
+        role="log"
+        style={{ maxHeight: LOG_MAX_HEIGHT }}
+      >
+        <ol className="space-y-2.5">
+          {steps.map((step, index) => (
+            <ThinkingStepRow
+              key={step.id}
+              step={step}
+              active={live && index === steps.length - 1}
+            />
+          ))}
+        </ol>
+      </div>
     </Card>
   );
 }
 
-function ShimmerStyles() {
+/**
+ * The model's own planning text, when it reaches the client at all.
+ *
+ * Previously this was scrubbed from the answer and lost. Salvaging it is honest
+ * only because it is the model's output verbatim — nothing here is generated to
+ * fill the panel when the model goes straight to the answer.
+ */
+export function ModelThinkingBlock({ text, className }: { text: string; className?: string }) {
   return (
-    <style>{`
-      @keyframes shimmer {
-        0% {
-          background-position: 200% 0;
-        }
-        100% {
-          background-position: -200% 0;
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        [style*="shimmer"] {
-          animation: none;
-        }
-      }
-    `}</style>
+    <details
+      className={cn(
+        "rounded-xl border px-3 py-2 text-[11.5px] leading-relaxed",
+        className,
+      )}
+      style={{ borderColor: "var(--border-hairline)", background: "var(--surface)" }}
+    >
+      <summary
+        className="cursor-pointer font-mono text-[10px] uppercase tracking-wide"
+        style={{ color: "var(--ink-muted)" }}
+      >
+        Model reasoning draft
+      </summary>
+      <p className="mt-2 whitespace-pre-wrap font-mono" style={{ color: "var(--ink-secondary)" }}>
+        {text}
+      </p>
+    </details>
   );
 }
 
 export interface AIThinkingProps {
   className?: string;
-  title?: string;
-  content?: string;
+  /** Milestones measured so far, in arrival order. */
+  steps: ReasoningStep[];
+  /** Timestamp of the send, so the elapsed clock reflects the request. */
+  anchor?: number;
+  /** Chain-of-thought text recovered from the stream, when the model emitted any. */
+  modelThinking?: string;
 }
 
+/**
+ * The live thinking state: what the assistant is doing while there is nothing to
+ * read yet. It is rendered only for that window, and only with real milestones.
+ */
 export default function AIThinking({
   className,
-  title = "IP Sakti is thinking...",
-  content = DEFAULT_IP_SAKTI_THINKING,
+  steps,
+  anchor,
+  modelThinking,
 }: AIThinkingProps) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const timer = useTimer();
-  useAutoScroll(contentRef);
+  const elapsed = useElapsedMs(anchor);
 
   return (
-    <div className={cn("flex max-w-xl flex-col gap-4", className)}>
-      <ThinkingHeader timer={timer} title={title} />
-      <ContentCard content={content} contentRef={contentRef} />
-      <ShimmerStyles />
+    <div className={cn("flex max-w-xl flex-col gap-2.5", className)}>
+      <div className="flex items-center gap-2">
+        <Spinner aria-hidden="true" className="size-4 text-primary" />
+        <span
+          className="animate-pulse text-sm font-medium"
+          style={{ color: "var(--ink-primary)" }}
+        >
+          Thinking — awaiting the first token
+        </span>
+        {elapsed !== null && (
+          <span
+            aria-label={`elapsed ${formatDuration(elapsed)}`}
+            className="font-mono text-sm tabular-nums"
+            style={{ color: "var(--ink-muted)" }}
+          >
+            {formatDuration(elapsed)}
+          </span>
+        )}
+      </div>
+      <ThinkingLog steps={steps} live />
+      {modelThinking ? <ModelThinkingBlock text={modelThinking} /> : null}
     </div>
   );
 }
 
-export { AIThinking, DEFAULT_IP_SAKTI_THINKING };
+export { AIThinking };

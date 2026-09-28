@@ -1,21 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Citation, ConfidenceLevel } from "@/lib/types";
+import { Message } from "@/lib/types";
 import { submitFeedback } from "@/lib/api";
 import AISources, { AISource } from "@/components/ui/ai-sources";
+import { ReasoningTrace } from "./ReasoningTrace";
 import { BookOpen, Leaf, Scale } from "lucide-react";
 
 interface MessageBubbleProps {
-  message: {
-    role: "user" | "assistant";
-    content: string;
-    citations?: Citation[];
-    confidence?: number;
-    confidenceLevel?: ConfidenceLevel;
-    timestamp?: string;
-    statutoryAlert?: { title: string; description: string } | null;
-  };
+  /**
+   * The turn to render. The assistant shape carries the measured reasoning trace,
+   * so a finished answer keeps its log for later review instead of losing it.
+   */
+  message: Message;
+  /** This bubble is the one currently being streamed. */
+  live?: boolean;
 }
 
 /**
@@ -127,8 +126,8 @@ function cleanDisplayContent(text: string): string {
     .trimStart();
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
-  const { role, content, citations = [], confidenceLevel, timestamp, statutoryAlert } = message;
+export function MessageBubble({ message, live = false }: MessageBubbleProps) {
+  const { role, content, citations = [], confidenceLevel, timestamp, statutoryAlert, reasoning } = message;
   const isUser = role === "user";
   const [feedbackSent, setFeedbackSent] = useState(false);
 
@@ -204,18 +203,18 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
         )}
 
+        {/* Reasoning trace: measured milestones, kept above the answer for review */}
+        {!isUser && sanitizedContent && reasoning && reasoning.steps.length > 0 && (
+          <ReasoningTrace live={live} record={reasoning} />
+        )}
+
         {/* Content Body with Rich Markdown */}
         <div>
-          {!isUser && !sanitizedContent ? (
-            <div className="flex items-center gap-1.5 py-1 text-xs" style={{ color: "var(--ink-muted)" }}>
-              <span className="w-2 h-2 rounded-full animate-ping" style={{ background: "var(--saffron)" }}></span>
-              <span>Analyzing statutory databases & prior-art records...</span>
-            </div>
-          ) : isUser ? (
+          {isUser ? (
             <div className="body-md whitespace-pre-wrap">{content}</div>
-          ) : (
+          ) : sanitizedContent ? (
             <MarkdownContent content={sanitizedContent} />
-          )}
+          ) : null}
         </div>
 
         {/* Confidence Badge (assistant only) */}

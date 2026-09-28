@@ -12,13 +12,16 @@ import { Jurisdiction } from "@/lib/types";
 function ChatPageContent() {
   const searchParams = useSearchParams();
   const sessionParam = searchParams.get("session") || undefined;
-  const { messages, isLoading, send, loadSession } = useChat(sessionParam);
+  const { messages, isLoading, isThinking, send, loadSession } = useChat(sessionParam);
   const { isAuthenticated } = useAuth();
 
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction>("india");
-  const [initialSent, setInitialSent] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const pendingMessageRef = useRef<string | null>(null);
+  // A ref, not state: the guard has to be visible to the second effect run of the
+  // same commit, otherwise React's dev double-invoke posts the question twice and
+  // the two streams overwrite each other's turn.
+  const initialSentRef = useRef(false);
 
   // Load session if URL changes to a different session and no active query is being sent
   useEffect(() => {
@@ -30,11 +33,11 @@ function ChatPageContent() {
 
   // Handle initial query from URL parameters
   useEffect(() => {
-    if (initialSent) return;
+    if (initialSentRef.current) return;
     const q = searchParams.get("q");
     const j = searchParams.get("j") as Jurisdiction | null;
     if (q) {
-      setInitialSent(true);
+      initialSentRef.current = true;
       if (j) setJurisdiction(j);
       send(q, j || "india");
       const currentSession = searchParams.get("session");
@@ -42,7 +45,7 @@ function ChatPageContent() {
         window.history.replaceState(null, "", `/chat?session=${currentSession}`);
       }
     }
-  }, [searchParams, send, initialSent]);
+  }, [searchParams, send]);
 
   const handleSend = (message: string) => {
     if (!isAuthenticated) {
@@ -159,7 +162,7 @@ function ChatPageContent() {
             </div>
           </div>
         ) : (
-          <ChatCanvas messages={messages} isLoading={isLoading} />
+          <ChatCanvas isThinking={isThinking} isLoading={isLoading} messages={messages} />
         )}
 
         <Composer

@@ -3,16 +3,58 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Message, Jurisdiction, ChatResponse } from "@/lib/types";
 import { getApiUrl } from "@/lib/api";
+import {
+  addServerStage,
+  applyGrounding,
+  extractModelThinking,
+  failReasoning,
+  finishReasoning,
+  noteSlowStart,
+  openStream,
+  receiveChunk,
+  recordModelThinking,
+  startReasoning,
+  toRecord,
+  type ChatPhase,
+  type ReasoningTracker,
+} from "@/lib/reasoning";
+
+/** Cold-start hedge: past this many ms with no bytes, say so on the trace. */
+const SLOW_START_MS = 25000;
 
 /**
  * Hook for managing chat state, API communication, and Supabase session persistence.
+ *
+ * Exposes two distinct loading signals, because the UI used to conflate them:
+ * `isLoading` is "a request is in flight" (keeps the composer locked), while
+ * `isThinking` is "no content token has arrived yet" and is the ONLY window in
+ * which a thinking animation may be visible.
  */
 export function useChat(initialSessionId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isWaking, setIsWaking] = useState(false);
+  const [phase, setPhase] = useState<ChatPhase>("idle");
   const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
   const isStreamingRef = useRef(false);
+  const isThinking = phase === "waiting";
+
+  /**
+   * Write the measured trace onto the assistant message that is currently being
+   * produced. Called at milestones, never per token, so the log grows without
+   * adding a render to every chunk of the answer.
+   */
+  const attachReasoning = useCallback((tracker: ReasoningTracker) => {
+    const record = toRecord(tracker);
+    setMessages((prev) => {
+      if (prev.length === 0) return prev;
+      const lastIndex = prev.length - 1;
+      if (prev[lastIndex].role !== "assistant") return prev;
+      const next = [...prev];
+      next[lastIndex] = { ...next[lastIndex], reasoning: record };
+      return next;
+    });
+  }, []);
 
   // Load session messages either from Supabase (if authenticated) or localStorage
   const loadSession = useCallback(async (targetSessionId: string) => {
@@ -109,6 +151,7 @@ export function useChat(initialSessionId?: string) {
   const send = useCallback(
     async (query: string, jurisdiction: Jurisdiction = "india") => {
       isStreamingRef.current = true;
+      const language = localStorage.getItem("app_language") || "en";
       const userMessage: Message = { 
         role: "user", 
         content: query,
@@ -125,9 +168,17 @@ export function useChat(initialSessionId?: string) {
       setIsLoading(true);
       setIsWaking(false);
 
+      // The trace starts before the request leaves, so every later step is a
+      // measured delta from a real send time rather than a mount animation.
+      let tracker = startReasoning(Date.now(), { jurisdiction, language });
+      setPhase(tracker.phase);
+      attachReasoning(tracker);
+
       const timeoutId = setTimeout(() => {
         setIsWaking(true);
-      }, 25000);
+        tracker = noteSlowStart(tracker, Date.now(), SLOW_START_MS);
+        attachReasoning(tracker);
+      }, SLOW_START_MS);
 
       // Generate or retrieve session ID
       const activeSessionId = sessionId || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `session_${Date.now()}`);
@@ -213,7 +264,7 @@ export function useChat(initialSessionId?: string) {
           body: JSON.stringify({
             query,
             jurisdiction,
-            language: localStorage.getItem("app_language") || "en",
+            language,
             session_id: activeSessionId,
             stream: true,
           }),
@@ -232,6 +283,12 @@ export function useChat(initialSessionId?: string) {
           } catch (e) {}
           throw new Error(`Chat API error: ${errorDetail}`);
         }
+
+        // Headers are back but no content yet: the gap from here to the first
+        // chunk is the backend's language detect → classify → embed → search →
+        // prompt assembly window, which is exactly what the trace should show.
+        tracker = openStream(tracker, Date.now(), res.status);
+        attachReasoning(tracker);
 
         if (!res.body) throw new Error("No response body");
 
@@ -258,8 +315,17 @@ export function useChat(initialSessionId?: string) {
                   const parsed = JSON.parse(data);
                   if (parsed.chunk) {
                     currentContent += parsed.chunk;
-                    // Sanitize any residual thinking process on the client
+                    const wasThinking = tracker.phase === "waiting";
+                    const previousDraft = tracker.modelThinking;
+                    tracker = receiveChunk(tracker, Date.now(), parsed.chunk);
+
+                    // Sanitize any residual thinking process on the client, and
+                    // salvage it into the trace rather than dropping it unseen.
                     let displayContent = currentContent;
+                    const draft = extractModelThinking(currentContent);
+                    if (draft) {
+                      tracker = recordModelThinking(tracker, draft);
+                    }
                     if (displayContent.includes("Here's a thinking process:") || displayContent.includes("<think>")) {
                       displayContent = displayContent
                         .replace(/<think>[\s\S]*?<\/think>/gi, "")
@@ -292,6 +358,27 @@ export function useChat(initialSessionId?: string) {
                       }
                       return newMsgs;
                     });
+
+                    // Milestones only: the phase flip that hides the indicator, or
+                    // new chain-of-thought text. Ordinary tokens skip this write.
+                    if (wasThinking || tracker.modelThinking !== previousDraft) {
+                      setPhase(tracker.phase);
+                      attachReasoning(tracker);
+                    }
+                  } else if (parsed.reasoning || parsed.stage) {
+                    // Forward-compatible milestone: when the pipeline reports its own
+                    // stages over SSE they join the same log, flagged `server` so the
+                    // UI can tell a reported fact from a locally measured one.
+                    const payload = parsed.reasoning ?? parsed.stage;
+                    const label = typeof payload === "string" ? payload : payload?.label;
+                    if (label) {
+                      tracker = addServerStage(
+                        tracker,
+                        { label, detail: typeof payload === "string" ? undefined : payload?.detail },
+                        Date.now(),
+                      );
+                      attachReasoning(tracker);
+                    }
                   } else if (parsed.metadata) {
                     finalMetadata = parsed.metadata;
                     const returnedSessionId = parsed.metadata.session_id || activeSessionId;
@@ -339,6 +426,11 @@ export function useChat(initialSessionId?: string) {
                       }
                       return newMsgs;
                     });
+
+                    // Verification is a real milestone with real numbers, so the
+                    // trace ends with what the answer was actually grounded in.
+                    tracker = applyGrounding(tracker, parsed.metadata, Date.now());
+                    attachReasoning(tracker);
                   }
                 } catch (e) {
                   // Incomplete chunk, ignore
@@ -347,6 +439,12 @@ export function useChat(initialSessionId?: string) {
             }
           }
         }
+
+        // Close the log before persistence, so the stored trace ends with a
+        // measured total rather than the last chunk it happened to see.
+        tracker = finishReasoning(tracker, Date.now());
+        setPhase(tracker.phase);
+        attachReasoning(tracker);
 
         // Persist assistant response to Supabase after stream completes
         if (supabaseClient && user && currentContent) {
@@ -383,20 +481,25 @@ export function useChat(initialSessionId?: string) {
           }
           return newMsgs;
         });
+        // A failed stream still gets a truthful last line: where it stopped and why.
+        tracker = failReasoning(tracker, Date.now(), error?.message || "unable to connect to backend service");
+        setPhase(tracker.phase);
+        attachReasoning(tracker);
       } finally {
         isStreamingRef.current = false;
         setIsLoading(false);
       }
     },
-    [sessionId]
+    [sessionId, attachReasoning]
   );
 
   const clear = useCallback(() => {
     setMessages([]);
     setSessionId(undefined);
+    setPhase("idle");
     localStorage.removeItem("chat_messages");
     localStorage.removeItem("chat_session");
   }, []);
 
-  return { messages, isLoading, isWaking, send, clear, sessionId, loadSession };
+  return { messages, isLoading, isWaking, isThinking, phase, send, clear, sessionId, loadSession };
 }

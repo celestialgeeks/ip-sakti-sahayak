@@ -1,11 +1,12 @@
 """
 Comprehensive tests for the /api/chat RAG endpoint.
 Tests fast-path intent routing, full RAG generation, statutory alerts, streaming SSE,
-and input validation.
+input validation, and correlation-id traceability on degraded retrieval.
 """
 
 import pytest
 import json
+import logging
 from httpx import AsyncClient
 from unittest.mock import AsyncMock
 
@@ -151,6 +152,107 @@ async def test_chat_streaming_sse(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_chat_streaming_multilingual_returns_sse(async_client: AsyncClient):
+    """
+    Regression: a non-English query must still answer a streaming request with SSE.
+
+    Translation needs the whole answer, so the pipeline generates in one shot; if it
+    hands the bare ChatResponse back, the endpoint wraps a non-iterable in
+    StreamingResponse and the request 500s — the UI then shows the thinking
+    animation forever and never renders an answer.
+    """
+    payload = {
+        "query": "Section 3(p) ke under traditional knowledge patentable hai?",
+        "jurisdiction": "india",
+        "language": "hi",
+        "stream": True,
+    }
+    response = await async_client.post("/api/chat", json=payload)
+    assert response.status_code == 200
+    assert "text/event-stream" in response.headers.get("content-type", "")
+
+    events, metadata_event, has_done = [], None, False
+    for line in response.text.split("\n\n"):
+        line = line.strip()
+        if not line.startswith("data:"):
+            continue
+        data_str = line[len("data:"):].strip()
+        if data_str == "[DONE]":
+            has_done = True
+            break
+        parsed = json.loads(data_str)
+        if "chunk" in parsed:
+            events.append(parsed["chunk"])
+        elif "metadata" in parsed:
+            metadata_event = parsed["metadata"]
+
+    assert "".join(events).startswith("[hi]"), "translated answer should stream as a chunk"
+    assert metadata_event is not None
+    assert "citations" in metadata_event
+    assert has_done is True
+
+
+@pytest.mark.asyncio
+async def test_chat_streaming_multilingual_fast_path_returns_sse(async_client: AsyncClient):
+    """
+    Regression: the chit-chat fast path is also one-shot, so a non-English streaming
+    greeting must return SSE rather than a JSON body the client cannot parse.
+    """
+    payload = {
+        "query": "Namaste",
+        "jurisdiction": "india",
+        "language": "hi",
+        "stream": True,
+    }
+    response = await async_client.post("/api/chat", json=payload)
+    assert response.status_code == 200
+    assert "text/event-stream" in response.headers.get("content-type", "")
+    assert "data: [DONE]" in response.text
+    assert "IP-SAKTI Sahayak" in response.text
+
+
+def test_sarvam_language_codes_are_region_tagged():
+    """
+    Regression: Sarvam rejects bare ISO codes with HTTP 400, which surfaced in the UI
+    as a chat that streams forever and never answers.
+    """
+    from app.models.enums import Language
+    from app.services.sarvam import sarvam_code
+
+    assert sarvam_code(Language.ENGLISH) == "en-IN"
+    assert sarvam_code(Language.HINDI) == "hi-IN"
+    assert sarvam_code(Language.TAMIL) == "ta-IN"
+    # Odia is the one code that does not follow the ISO two-letter prefix.
+    assert sarvam_code(Language.ODIA) == "od-IN"
+
+    for language in Language:
+        code = sarvam_code(language)
+        assert code.endswith("-IN") and code != "-IN", f"{language} maps to {code!r}"
+
+
+def test_translation_splits_long_answers_at_the_limit():
+    """
+    Regression: Sarvam's mayura:v1 rejects inputs over 1000 characters, and RAG
+    answers are far longer, so every translated reply used to fail and blank the chat.
+    """
+    from app.services.sarvam import SARVAM_MAX_CHARS, _split_within_limit
+
+    # A short answer stays one request.
+    assert _split_within_limit("Short answer.") == ["Short answer."]
+
+    # A long markdown answer is chunked under the cap and rejoins byte-for-byte.
+    paragraph = "Section 3(p) bars traditional knowledge from patentability. " * 20
+    answer = "\n\n".join([f"## Heading {i}\n\n{paragraph}" for i in range(12)])
+    assert len(answer) > SARVAM_MAX_CHARS * 3
+
+    pieces = _split_within_limit(answer)
+    assert all(len(piece) <= SARVAM_MAX_CHARS for piece in pieces)
+    assert "".join(pieces) == answer
+    # Cuts land on structure, not mid-word.
+    assert all(piece.endswith(("\n\n", "\n", ". ", " ")) for piece in pieces[:-1])
+
+
+@pytest.mark.asyncio
 async def test_chat_validation_errors(async_client: AsyncClient):
     """
     Pydantic schema validation: reject empty query, oversized query, or invalid enum values.
@@ -195,3 +297,43 @@ async def test_chat_with_auth_header(async_client: AsyncClient, mock_supabase_se
     )
     assert response.status_code == 200
     assert mock_supabase_service.save_message.called
+
+
+@pytest.mark.asyncio
+async def test_chat_degraded_rag_log_carries_correlation_id(
+    async_client: AsyncClient, mock_nim_service, caplog
+):
+    """
+    When retrieval degrades (empty embedding → Qdrant search skipped), the warning
+    must carry the same correlation id the response echoes, so one grep ties the
+    answer back to the request that produced it.
+    """
+    # Force the degraded branch: embedding returns nothing.
+    mock_nim_service.embed_single = AsyncMock(return_value=[])
+
+    request_id = "req-correlation-1"
+    payload = {
+        "query": "Is traditional turmeric paste patentable under Indian law?",
+        "jurisdiction": "india",
+        "language": "en",
+    }
+    with caplog.at_level(logging.WARNING, logger="app.rag"):
+        response = await async_client.post(
+            "/api/chat", json=payload, headers={"X-Request-Id": request_id}
+        )
+
+    assert response.status_code == 200
+    # The server honours the caller's id and hands it back for client-side reports.
+    assert response.headers["X-Request-Id"] == request_id
+
+    degraded = [r for r in caplog.records if "Query embedding is empty" in r.getMessage()]
+    assert len(degraded) == 1, "expected exactly one degraded-retrieval log line"
+    record = degraded[0]
+
+    # Bound to the RAG pipeline logger (not a stray uvicorn logger) and stamped
+    # with the correlation id, both structured and in the rendered message text.
+    assert record.name == "app.rag"
+    assert record.request_id == request_id
+    assert record.getMessage().startswith(f"[req={request_id}] ")
+    assert f"[req={request_id}] Query embedding is empty" in caplog.text
+    assert "Qdrant search skipped" in caplog.text

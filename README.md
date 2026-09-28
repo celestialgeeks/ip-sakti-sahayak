@@ -24,6 +24,8 @@ Navigating intellectual property in traditional systems requires balancing statu
 
 Generic Large Language Models (LLMs) notoriously fail in this domain—hallucinating legal sections, fabricating non-existent TKDL accession IDs, and conflating domestic statutory exemptions with foreign patent laws. **IP-SAKTI Sahayak eliminates hallucination through segregated multi-collection vector indexing, a deterministic citation verification engine, real-time Section 3(p) statutory alerts, and cross-lingual translation across 22 scheduled Indian languages.**
 
+Beyond research, the platform now carries an Ayush founder across the **entire commercialisation arc**: prior-art and statutory intelligence → a deterministic **Formulation Lab** that simulates medicine quality, §3(e)/§3(p) patentability and NBA royalty per ingredient → a guided **Registration & Compliance Wizard** (Udyam, AYUSH/FSSAI licence, GST) → **Business Enablement** (funding-scheme matching, GI-tagged supplier sourcing, label compliance) — all grounded in a curated, schema-validated **Ayurvedic Library**.
+
 ---
 
 ## 🎯 The Problem: Why Ayush IP Intelligence is Broken
@@ -35,6 +37,7 @@ Generic Large Language Models (LLMs) notoriously fail in this domain—hallucina
 | **Jurisdiction Conflation** | Mixing Indian law (Patents Act §3(p)) with US law (35 U.S.C. §101 / USPTO natural product bar) or European law (EMA THMPD) leads to fatal legal filing errors. | **Strict Jurisdictional Isolation**: Segregates retrieval indices and prompt contexts into `India`, `International` (PCT/WIPO/Nagoya), and `Comparative` pipelines. |
 | **Biological Diversity & ABS Liability** | Commercial use of Indian bio-resources without National Biodiversity Authority (NBA) approval carries severe financial penalties under the 2023/2024 amendments. | **Automated ABS Compliance Checker**: Deterministic decision tree verifying biological origin, Form 1 requirements, BMC register checks, and SBB intimation rules. |
 | **Language Inequity** | Over 85% of Ayurvedic Vaidyas, farmers, and MSMEs research and formulate in regional Indic languages, while statutory IP databases are exclusively English. | **Cross-Lingual Retrieval**: Native queries in Hindi, Tamil, Telugu, Sanskrit, etc. translated via Sarvam AI, matched against statutory indices, and synthesized back into the user's native tongue. |
+| **Blind Formulation & Registration Fog** | Formulators tune ratios on intuition with no view of how quality, patentability and ABS royalty interact; registration then stalls across fragmented Udyam/licence/GST portals, and funding/label rules stay undiscovered until penalties arrive. | **Formulation Lab + Wizard + Business Enablement**: a deterministic simulation engine with per-ingredient attribution and a §3(e)/§3(p) gate ladder, a sequentially-gated compliance wizard that pre-fills actual applications, and LLM-free funding, supplier and label validators citing primary sources. |
 
 ---
 
@@ -45,7 +48,7 @@ The following diagram illustrates the complete end-to-end dataflow—from user q
 ```mermaid
 flowchart TD
     subgraph Client["Frontend Canvas (Next.js 16 + React 19 + Tailwind v4)"]
-        UI["User Interface: Chat / TKDL / Patents / Rules"]
+        UI["User Interface: Chat / TKDL / Library / Patents / Lab / Wizard / Business"]
         LangSel["Language Selector (22 Indic Languages)"]
         JurToggle["Jurisdiction Scope (India | International | Both)"]
         StreamConsumer["SSE EventSource Consumer & Markdown Parser"]
@@ -154,6 +157,24 @@ Where:
   - **Administrative Guidance & Circulars** = $0.6$
   - **Commentary & Secondary Literature** = $0.4$
 
+### 7. Deterministic Formulation Engine with Cross-Language Parity
+The Formulation Lab refuses to fake its numbers. The scoring core (`backend/app/core/formulation/engine.py::score_core`) is **pure** — no I/O, no randomness, no LLM prose — and is mirrored **verbatim in TypeScript** (`frontend/src/lib/formulation/engine.ts`):
+
+- **Two-speed feedback**: the client re-scores instantly on every slider move (live dot), while a debounced 400 ms `POST /api/formulation-lab/simulate` acts as the authority; any server/client mismatch is surfaced in the UI, never silently smoothed over.
+- **Engine-parity harness**: a version-controlled fixture (`backend/tests/fixtures/engine_parity.json`) is replayed by *both* the Pytest suite and the Node test runner, so the Python and TypeScript engines are contractually forbidden from drifting apart.
+- **Per-ingredient attribution**: contributions are computed by ±1.0% w/w **central-difference perturbation** of the pure core — each herb's marginal effect on quality, Chou-Talalay CI, patentability, royalty and cost is measured, not asserted, with deterministic half-up rounding shared across both engines.
+- **One gate ladder**: a single pure function (`gates.ts`) ranks the unmet statutory gates (§3(e) synergism, §3(p) concordance ≥ 90, safety ceilings, 100.0% w/w balance) and drives the adaptive CTA, the verdict line, the guided narration, and the stage trail (doors → bench → examine → dossier) from one source of truth.
+- **Honest Pre-FER**: the simulated IPO First Examination Report never fabricates `application_no` or `filing_date` — it is clearly badged as offline/simulated, and a `FATAL` §3(p) objection is remedyable via a directive that jumps back to the bench with the fix staged. The LLM may draft the summary and Form 2 claim text with RAG citations, but **may never move a FATAL/OVERCOME verdict**.
+- **Curated catalogs**: 28 botanicals with documented safety ceilings and ED50s, a Sanskrit/vernacular synonym map, and 14 presets with deliberate spread (including a §3(e) failure, a §3(p) trap, ceiling breaches, and cheap-but-weak decoys). Advertised preset chips are *generated* by `scripts/score_presets.py` rather than hand-typed, and CI asserts the spread, the no-locked-ingredients rule, and that each preset's baseline equals its ingredient list.
+
+### 8. LLM-Free Business Enablement Validators
+Funding, sourcing and label decisions carry real financial penalties, so the Business Enablement endpoints (`/api/business/*`) are **fully deterministic** — no model in the loop:
+
+- **Funding matcher**: a rule engine over curated 2025-26 scheme catalogs (Mudra / PMEGP / Stand-Up India / CGTMSE) producing ranked eligibility verdicts, including PMEGP special-category (SC/ST/OBC/women) overlays and Udyam-registration unlock gating consistent with the Wizard.
+- **Supplier directory**: GI-tagged raw-material suppliers tied back into the ABS/TKDL provenance narrative, with server-side filter/search on state, certification and GI tags.
+- **Label validator**: AYUSH (D&C Rule 161 / Schedule E1) and FSSAI label-compliance checks reusing the same cite-against-primary-source discipline as the legal citation engine.
+- **Fail-fast integrity**: catalog corruption surfaces as `503 business_catalog_unavailable` rather than silently returning empty results; every response embeds official source citations and a standing disclaimer.
+
 ---
 
 ## 🖥️ Platform Showcase & Interface Walkthrough
@@ -189,7 +210,7 @@ Where:
 <br/>
 
 ### 5. Sovereign Regulatory Directives & 2024 Patent Rules Hub (`/rules`)
-*Centralized statutory repository tracking the 2024 Patent Amendment Rules, Biological Diversity 2023/2024 amendments, and pre-filled compliance forms.*
+*Single-screen statutory console — only the directives and forms rails scroll. Tabbed filters with data-derived counts, jurisdiction scoping, a 2024 critical-update banner, and pre-filled compliance forms.*
 
 ![Regulatory Directives Hub](screenshots/04_rules_regulations.png)
 
@@ -199,6 +220,27 @@ Where:
 *Timeline-based commercialization pipeline with sequential step gating, a live progress visualizer, `/api/classify`-driven AYUSH-vs-FSSAI licence routing, Udyam MSME auto-classification with a generated application, and a printable compliance dossier.*
 
 ![Registration & Compliance Wizard](screenshots/wizard/step4_licence.png)
+
+<br/>
+
+### 7. Formulation Lab — Assembly Bench (`/formulation-lab`)
+*Deterministic simulation engine with per-ingredient contribution rows, two-speed scoring (instant client + server-verified authority), the §3(e)/§3(p) gate ladder driving a single adaptive CTA, and the doors → bench → examine → dossier stage trail.*
+
+![Formulation Lab Assembly Bench](screenshots/06_formulation_lab_bench.png)
+
+<br/>
+
+### 8. Business Enablement Hub — "Grow Business" (`/business`)
+*URL-synced tabs for deterministic funding eligibility (Mudra / PMEGP / Stand-Up India / CGTMSE), a GI-tagged raw-material supplier directory, and AYUSH & FSSAI label compliance validation — all LLM-free with embedded primary-source citations.*
+
+![Business Enablement Hub](screenshots/07_business_enablement.png)
+
+<br/>
+
+### 9. Ayurvedic Library — Dravya & Yoga Reference (`/ayurveda`)
+*Schema-validated monographs of medicinal plants, classical formulations and condition mappings with accent-insensitive weighted search, dosha balancing filters, cross-entity links, and a standing medical disclaimer; the same store grounds herb Q&A in the RAG pipeline.*
+
+![Ayurvedic Library](screenshots/08_ayurvedic_library.png)
 
 </div>
 
@@ -212,28 +254,45 @@ Where:
 - High-visibility statutory warning banners when Section 3(p) prior art or Traditional Knowledge conflicts are detected.
 - Built-in session persistence via Supabase and localized session recovery.
 
-### 2. TKDL & Classical Concordance Explorer (`/tkdl`)
+### 2. Ayurvedic Library — Dravya & Yoga Reference (`/ayurveda`)
+A curated, schema-validated knowledge store (11 medicinal plants, 6 classical formulations, 7 mapped conditions) built for IP research rather than medical advice:
+- Version-controlled JSON catalogs (`backend/data/ayurveda/`) with per-record integrity checks that **fail fast on load**; a CI-checkable validator (`scripts/validate_ayurveda_data.py`) guards the data.
+- Weighted, accent-insensitive cross-entity search with pagination, Sanskrit/botanical/vernacular name matching, dosha-balance filters, and cross-links between plants, formulations and conditions.
+- `/api/ayurveda/*` endpoints (stats, search, monograph detail pages) with OpenAPI examples and embedded disclaimers; freshness derived from file mtime instead of a hardcoded `updated_at`.
+- The same store **grounds herb Q&A inside the RAG pipeline**, surfacing curated monograph context behind every answer.
+
+### 3. TKDL & Classical Concordance Explorer (`/tkdl`)
 - Classical botanical concordance browser cross-referencing Ayurvedic Sanskrit classics (*Charaka Samhita*, *Sushruta Samhita*, *Bhavaprakasha*, *Ashtanga Hridaya*).
 - Phytochemical and pharmacological profile breakdown (e.g., Withanolides, Curcuminoids, Piperine).
 - IPC Classification cross-matching (`A61K 36/81`, `A61K 36/9066`).
 - Integrated Sanskrit shloka audio synthesis and third-party patent defense memorandum generation.
 
-### 3. Patent Prosecution & Freedom-To-Operate Engine (`/patents`)
+### 4. Patent Prosecution & Freedom-To-Operate Engine (`/patents`)
 - Interactive polyherbal formulation matrix builder with botanical extract percentages.
 - Freedom to Operate (FTO) scanner assessing novelty, inventive step, and non-obvious synergistic efficacy requirements.
 - Pre-grant opposition drafting assistant (Patents Act Section 25(1) / Form 7A generator).
 - US Patent Prosecution wrapper evaluating 35 U.S.C. §101 natural product subject matter eligibility.
 
-### 4. Regulatory Directives & Rules Hub (`/rules`)
-- Complete legislative tracker featuring searchable Gazette notifications from 1970 to 2024.
-- Filter by regulatory authority: Indian Patent Office (IPO), Ministry of Ayush, National Biodiversity Authority (NBA), and WIPO.
-- Direct statutory download links, timeline change tracking, and compliance checklists.
+### 5. Formulation Lab — Simulation, Examination & Dossier (`/formulation-lab`)
+The engineering deep dive is in §7 above; as a product module it implements the full `formulation-lab-flow-spec.md` flow:
+- **Entry doors**: start from a condition, a hero herb, a classical formulation, or a ranked preset — with "Continue recent work" restored from the autosaved scenario store.
+- **Assembly bench**: per-ingredient sliders with safety ceilings, stacked composition bar, `⌘K` herb drawer over 28 botanicals, one-level Undo with projected impact, auto-balance to 100.0% w/w, and Medicine/Law/Money reading lenses (order only, never data).
+- **Contribution rows**: who did what — each herb's marginal ΔQuality, ΔCI, ΔPatent, ΔRoyalty, ΔCost with an `Apply fix` directive; patient-safety ceiling breaches surfaced as CRITICAL/WARNING.
+- **Examine (Pre-FER)**: simulated IPO First Examination Report with FATAL/OVERCOME/ADVISORY objection cards, each looping back to the bench with the remedy staged, plus a recommended Form 2 claim draft.
+- **Dossier (Export)**: locked until zero FATAL objections; includes the formulation table, Pre-FER report, safety panel, quadrant trajectory, applied-directive log, ABS/Form III status and citations, with an isolated print stylesheet.
+- **Persistence & handoffs**: scenario autosave to SQLite with `?scenario=` round-trips, and a "Licence path →" handoff into the Registration Wizard.
 
-### 5. Formulation Classifier & ABS Compliance Assistant (`/api/classify`, `/api/abs-check`)
+### 6. Regulatory Directives & Rules Hub (`/rules`)
+A single-screen statutory console — no page scroll; only the directives and forms rails scroll internally:
+- Searchable Gazette notifications and directives (1970 → 2024) with tabbed filters whose counts are derived from the data, and jurisdiction filtering (IPO, Ministry of Ayush, NBA, WIPO).
+- Featured "critical update" card with per-rule chips (e.g. Rule 24B FER response window, Form 3 retrieval, §3(p) TKDL check binding) and one-click Gazette PDF / impact analysis / 2003-vs-2024 comparison.
+- Pre-filled statutory forms and templates (Form 3, 18A, 27, NBA III) with auto-fill and docket-generator handoffs, plus compliance checklists and an IPO & Ayush concordance strip.
+
+### 7. Formulation Classifier & ABS Compliance Assistant (`/api/classify`, `/api/abs-check`)
 - Classifies herbal formulations into 6 regulatory pathways: Classical Medicine, Patent/Proprietary Drug, New Drug, Phytopharmaceutical, Ayurveda-Aahar, or Cosmetic.
 - Deterministic Access and Benefit Sharing (ABS) compliance validator calculating Form 1 filing obligations, BMC register status, and foreign commercialization clearances.
 
-### 6. Registration & Compliance Wizard — "Get Registered" (`/wizard`)
+### 8. Registration & Compliance Wizard — "Get Registered" (`/wizard`)
 A guided, timeline-based commercialization pipeline that turns IP guidance into concrete registrations, integrating the fragmented government processes into one place. It **collects the founder's data and does part of the work**, rather than just listing requirements.
 - **Sequential gating**: steps unlock only as the previous one is completed; a persistent left-rail and a top progress visualizer (segmented stepper + completion ring) track status (Completed / In progress / Locked / Milestone) with icon + text (WCAG, never color-only).
 - **Eligibility gate**: two questions route pre-commercialization users to the Library / Patents / Chat, with a soft "continue anyway" escape hatch.
@@ -243,6 +302,13 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 - **Compliance dossier**: assembles every entry into a single printable summary.
 - **Per-user persistence**: progress auto-saves to Supabase (`wizard_states`, auth-guarded) and resumes across devices; falls back to `localStorage` for anonymous users.
 
+### 9. Business Enablement Suite — "Grow Business" (`/business`)
+The post-registration layer, reachable from the header at every stage of the journey:
+- **Funding & Loans tab**: enterprise profile (stage, loan need, project cost, turnover, sector, location, promoter category, woman/greenfield/Udyam flags) → ranked Mudra / PMEGP / Stand-Up India / CGTMSE eligibility verdicts with official scheme citations; Udyam registration from the Wizard unlocks scheme tiers.
+- **Supplier Sourcing tab**: filterable directory of verified, GI-tagged raw-material suppliers (state, certification, GI-only) wired into the ABS/TKDL provenance story.
+- **Label Compliance tab**: AYUSH (D&C Rule 161 / Schedule E1) and FSSAI label validation with per-rule pass/fail and statutory citations.
+- URL-synced tabs, full validation, loading/error/retry states, and accessibility-wired forms throughout.
+
 ---
 
 ## 🛠️ Technology Stack & Engineering Choices
@@ -250,13 +316,14 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 | Layer | Technology | Architectural Rationale |
 | :--- | :--- | :--- |
 | **Frontend Framework** | **Next.js 16 (App Router) + React 19** | Zero-compromise server-side rendering, streaming hydration, and modular layout architecture. |
-| **Styling & Design** | **Tailwind CSS v4 + Vanilla CSS** | Sovereign, dignified Indian Government portal aesthetic with slate/navy palettes, clean typography, and zero heavy UI bloat. |
+| **Styling & Design** | **Tailwind CSS v4 + shadcn/ui (Material 3 tokens)** | Sovereign, dignified Indian Government portal aesthetic with slate/navy palettes, a Material-3 token restyle, and shadcn primitives (breadcrumb, select, etc.) integrated without abandoning the design system. |
 | **Backend API** | **FastAPI (Python 3.11) + Uvicorn** | High-performance asynchronous execution, native Pydantic v2 schemas, and SSE streaming support. |
 | **LLM Inference** | **NVIDIA NIM (`nemotron-3.5-lightning-30b-a3b`)** | Enterprise-grade reasoning throughput, low latency, and robust instruction following for legal synthesis. |
 | **Embeddings** | **NVIDIA NIM (`nemotron-3-embed-1b`)** | High-density 2048-dimensional semantic embeddings optimized for complex domain-specific legal terminology. |
 | **Vector Database** | **Qdrant (Local / Cloud Cluster)** | Sub-millisecond HNSW vector search, payload filtering across 7 partitioned collections, and gRPC acceleration. |
 | **Multilingual AI** | **Sarvam AI API** | Industry-leading translation BLEU scores for Indic languages, preserving legal nuance and statutory definitions. |
-| **Database & Auth** | **Supabase (PostgreSQL + Auth)** | Serverless user authentication, persistent chat sessions, and audit logging. |
+| **Database & Auth** | **Supabase (PostgreSQL + Auth) + SQLite** | Serverless user authentication, persistent chat sessions, wizard-state and audit logging; a local SQLite store (`sessions`, `audit_log`, `feedback`, `formulation_scenarios`) backs scenario autosave and anonymous fallback. |
+| **Simulation Engine** | **Deterministic Python + TypeScript mirror** | The formulation scoring core exists twice — `engine.py` (authoritative) and `engine.ts` (instant client scoring) — kept byte-for-byte honest by a shared parity fixture instead of an LLM guessing numbers. |
 | **Containerization** | **Docker & Docker Compose** | Compose orchestrates FastAPI + Qdrant with persistent volumes; the Next.js frontend runs via its dev server locally and deploys through Render's node buildpack. |
 | **Testing & CI** | **Pytest + Node Test Runner** | Multi-layer test automation validating APIs, citation extraction, jurisdiction isolation, and TypeScript typings. |
 
@@ -268,44 +335,64 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 .
 ├── backend/                         # FastAPI Python 3.11 Backend
 │   ├── app/
-│   │   ├── api/                     # REST API Endpoints
+│   │   ├── api/
+│   │   │   ├── middleware/          # Auth, rate limiting, audit log, disclaimer injection
 │   │   │   ├── routes/
 │   │   │   │   ├── chat.py          # Streaming RAG chat endpoint (SSE)
 │   │   │   │   ├── classify.py      # Regulatory formulation classifier
 │   │   │   │   ├── abs_check.py     # Biological Diversity / ABS checker
+│   │   │   │   ├── formulation_lab.py  # Simulation, Pre-FER, optimize, scenario autosave
+│   │   │   │   ├── ayurveda.py      # Ayurvedic Library stats/search/monographs
+│   │   │   │   ├── business.py      # Funding matcher, suppliers, label compliance
 │   │   │   │   ├── translate.py     # Sarvam AI translation bridge
 │   │   │   │   ├── sources.py       # Corpus registry & metadata query
 │   │   │   │   ├── stats.py         # System telemetry & collection counts
+│   │   │   │   ├── feedback.py      # Answer thumbs-up/down capture
+│   │   │   │   ├── ingest.py        # Corpus ingestion / re-seeding
 │   │   │   │   ├── wizard.py        # Registration & Compliance Wizard state
 │   │   │   │   └── health.py        # Health & readiness probes
-│   │   ├── core/                    # Core RAG Intelligence
+│   │   ├── core/                    # Core RAG & Deterministic Intelligence
 │   │   │   ├── rag_pipeline.py      # Full RAG orchestrator with think-stripping
 │   │   │   ├── citation_engine.py   # Deterministic citation verifier & URL resolver
 │   │   │   ├── confidence_scorer.py # Multi-factor mathematical scoring
 │   │   │   ├── jurisdiction.py      # Jurisdictional collection & prompt routing
 │   │   │   ├── classifier.py        # Regulatory classification decision tree
 │   │   │   ├── abs_helper.py        # ABS compliance checklist generator
+│   │   │   ├── funding_matcher.py   # Mudra/PMEGP/Stand-Up India/CGTMSE rule engine
+│   │   │   ├── label_validator.py   # AYUSH (Rule 161/Sch E1) & FSSAI label checks
+│   │   │   ├── formulation/
+│   │   │   │   └── engine.py        # Pure scoring core, contributions, Pre-FER generator
 │   │   │   └── seed.py              # Self-healing corpus seeder for Qdrant
 │   │   ├── services/                # External Service Clients
 │   │   │   ├── nvidia_nim.py        # NVIDIA NIM LLM & Embeddings client
 │   │   │   ├── qdrant_service.py    # Async Qdrant client & collection management
 │   │   │   ├── sarvam.py            # Sarvam translation & language detection
+│   │   │   ├── ayurveda_service.py  # Validated library store (search/stats/cross-links)
+│   │   │   ├── business_service.py  # Fail-fast scheme/supplier/label catalog loader
+│   │   │   ├── sqlite_service.py    # Sessions, audit log, feedback, scenario autosave
 │   │   │   └── supabase_service.py  # Supabase session & chat persistence
 │   │   ├── models/                  # Pydantic Schemas & Enums
 │   │   │   ├── enums.py             # Jurisdiction, Language, Category enums
+│   │   │   ├── formulation.py       # Simulation / Pre-FER / scenario models
 │   │   │   └── schemas.py           # Request/Response data validation models
 │   │   ├── utils/                   # Prompts & Text Utilities
 │   │   │   └── prompts.py           # Legal system prompts & XML context templates
 │   │   ├── config.py                # Environment & application settings
 │   │   └── main.py                  # FastAPI application entry point & lifespan
-│   ├── data/corpus/                 # Version-controlled Legal & TKDL Corpus
-│   │   ├── india_ip/                # Patents Act 1970, Patent Rules 2024
-│   │   ├── india_biodiversity/      # BD Act 2002, 2023 Amendment, 2024 Rules
-│   │   ├── india_regulatory/        # Drugs & Cosmetics Act, Schedule T, FSSAI
-│   │   ├── india_tkdl/              # Classical formulations & pharmacopoeia
-│   │   ├── international_ip/        # WIPO GRATK Treaty, TRIPS, Nagoya
-│   │   └── case_law/                # Landmark IP disputes & precedents
-│   ├── tests/                       # Comprehensive Pytest Test Suite (11 test files)
+│   ├── data/
+│   │   ├── corpus/                  # Version-controlled Legal & TKDL Corpus
+│   │   │   ├── india_ip/            # Patents Act 1970, Patent Rules 2024
+│   │   │   ├── india_biodiversity/  # BD Act 2002, 2023 Amendment, 2024 Rules
+│   │   │   ├── india_regulatory/    # Drugs & Cosmetics Act, Schedule T, FSSAI
+│   │   │   ├── india_tkdl/          # Classical formulations & pharmacopoeia
+│   │   │   ├── international_ip/    # WIPO GRATK Treaty, TRIPS, Nagoya
+│   │   │   └── case_law/            # Landmark IP disputes & precedents
+│   │   ├── ayurveda/                # Plants / formulations / conditions (schema-validated)
+│   │   ├── formulation/             # 28 botanicals, 14 presets, herb synonym map
+│   │   └── business/                # Schemes, suppliers, labeling-rule catalogs
+│   ├── migrations/                  # Wizard-state SQL
+│   ├── scripts/                     # Parity fixture, preset scoring, seed & data validators
+│   ├── tests/                       # Pytest suite (17 files) incl. parity & honesty tests
 │   ├── Dockerfile                   # Production Python 3.11 container definition
 │   └── requirements.txt             # Locked Python backend dependencies
 ├── frontend/                        # Next.js 16 + React 19 Frontend
@@ -314,22 +401,38 @@ A guided, timeline-based commercialization pipeline that turns IP guidance into 
 │   │   │   ├── page.tsx             # Dignified Ayush Portal Homepage
 │   │   │   ├── chat/page.tsx        # Streaming RAG Chat Canvas
 │   │   │   ├── tkdl/page.tsx        # Classical Prior-Art & TKDL Explorer
+│   │   │   ├── ayurveda/            # Library hub + plants/formulations/conditions pages
 │   │   │   ├── patents/page.tsx     # Patent Prosecution & FTO Engine
+│   │   │   ├── formulation-lab/     # Doors → Bench → Examine (Pre-FER) → Dossier
 │   │   │   ├── rules/page.tsx       # Sovereign Regulatory Directives Hub
 │   │   │   ├── wizard/page.tsx      # Registration & Compliance Wizard ("Get Registered")
+│   │   │   ├── business/page.tsx    # Business Enablement hub ("Grow Business")
+│   │   │   ├── auth/callback/       # Supabase OAuth callback
 │   │   │   ├── login/page.tsx       # Supabase Authentication Page
 │   │   │   └── layout.tsx           # Sovereign Navbar, Banner, & Footer
 │   │   ├── components/              # Modular UI Components
 │   │   │   ├── chat/                # Composer, MessageCard, CitationChips
+│   │   │   ├── formulation-lab/     # EntryDoors, IngredientSlider, ContributionRows,
+│   │   │   │                        # HerbDrawer, PreFERView, DossierView, StageTrail
 │   │   │   ├── wizard/              # Step rail, progress visualizer, step forms
+│   │   │   ├── business/            # FundingMatcher, SupplierDirectory, LabelChecker
+│   │   │   ├── ayurveda/            # Shared library cards & disclaimer framing
+│   │   │   ├── ui/                  # shadcn primitives + AI thinking/sources animations
 │   │   │   ├── cards/               # Stat cards, Jurisdiction toggle
 │   │   │   ├── auth/                # Sign-in modal & user controls
-│   │   │   └── layout/              # Header, Navigation, Footer
+│   │   │   └── layout/              # Header, Sidebar, Navigation, Footer
 │   │   ├── hooks/                   # Custom React Hooks (useChat, useAuth)
-│   │   └── lib/                     # API client, types, & Supabase client
-│   ├── tests/                       # Node & TypeScript Integration Tests
+│   │   └── lib/                     # Clients & pure domain logic
+│   │       ├── api.ts               # Typed API client
+│   │       ├── ayurveda.ts          # Library client & models
+│   │       ├── formulation/         # engine.ts (parity mirror), gates.ts, stages.ts
+│   │       ├── wizard/              # Step content & persistence store
+│   │       └── supabase/            # Auth client
+│   ├── scripts/                     # gen_offline_catalog.mjs (offline fallback catalog)
+│   ├── tests/                       # Node --test TypeScript suite (13 files)
 │   ├── package.json                 # Next.js 16 dependencies
 │   └── tsconfig.json                # Strict TypeScript configuration
+├── formulation-lab-flow-spec.md     # Normative spec behind the Formulation Lab flow
 ├── docker-compose.yml               # Local orchestrator for Qdrant + FastAPI backend (frontend runs via npm run dev)
 ├── render.yaml                      # Production infrastructure blueprint for Render
 ├── run_tests.sh                     # Automated quality gate & test runner
@@ -425,14 +528,15 @@ The project's single verification route is `run_tests.sh`. It runs locally and, 
 ```
 
 The script runs three consecutive stages:
-1. **Backend Unit & Integration Tests (Pytest)**:
-   - Evaluates API endpoints (`/api/chat`, `/api/classify`, `/api/abs-check`, `/api/health`).
-   - Mocks vector searches and tests the Citation Engine with edge-case statutory citations.
-   - Tests confidence scoring weights and jurisdiction routing isolation.
+1. **Backend Unit & Integration Tests (Pytest — 17 files)**:
+   - Evaluates API endpoints (`/api/chat`, `/api/classify`, `/api/abs-check`, `/api/formulation-lab/*`, `/api/business/*`, `/api/ayurveda/*`, `/api/wizard/*`, `/api/health`).
+   - Mocks vector searches and tests the Citation Engine with edge-case statutory citations; `/api/translate` and `/api/ingest` tests are hermetic (no live provider calls).
+   - Tests confidence scoring weights, jurisdiction routing isolation, classification/ABS decision trees, and Pydantic model validation.
+   - **Engine parity**: replays the shared `tests/fixtures/engine_parity.json` through the Python engine, asserting the exact values the TypeScript mirror must reproduce; **honesty tests** guard that Pre-FER never fabricates application numbers and that preset labels match computed scores.
 2. **Frontend Type Checking (`tsc --noEmit`)**:
-   - Validates 100% strict TypeScript compliance across all App Router pages and custom hooks.
-3. **Frontend Automated Tests (`node --test`)**:
-   - Tests client API serialization, navigation contracts, and TypeScript interface integrity.
+   - Validates 100% strict TypeScript compliance across all App Router pages, hooks, and the mirrored engine.
+3. **Frontend Automated Tests (`node --test` — 13 files)**:
+   - Replays the same engine-parity fixture through `engine.ts`, and covers gate ladders, stage availability, wizard flow, chat hook contracts, business serialization, navigation/stage contracts, AI-source grounding, and TypeScript interface integrity.
 
 ---
 
@@ -456,6 +560,9 @@ The application is deployed on cloud infrastructure utilizing **Render**, **Qdra
 - **Low-Latency Streaming with Preamble Filtering**: Developed a custom SSE streaming parser in FastAPI that intercepts, buffers, and scrubs internal `<think>` reasoning artifacts in real time before reaching the client.
 - **Mathematical Confidence Model**: Created a tri-factor scoring algorithm combining semantic vector similarity, citation count density, and statutory hierarchy tier weighting.
 - **Cross-Lingual Retrieval for 22 Indic Languages**: Integrated Sarvam AI to democratize complex IP law for non-English speaking traditional practitioners, farmers, and researchers across India.
+- **Cross-Language Engine Parity Harness**: Authored a pure Python scoring core and its verbatim TypeScript mirror, locked together by a single version-controlled fixture replayed in both CI test suites — instant client simulation with server-authoritative verification.
+- **A Hard AI-Honesty Boundary**: Engineered the Formulation Lab so an LLM may draft claim text and summaries with citations, but is structurally forbidden from moving statutory verdicts; Pre-FER refuses to fabricate application numbers, and every preset's advertised score is computed, never hand-written.
+- **Whole-Journey Product Thinking**: Converted fragmented government processes into shipped workflows — a sequentially-gated registration wizard that pre-fills actual Udyam/licence applications, and deterministic funding, supplier and label validators that cite primary sources instead of listing requirements.
 - **Enterprise-Grade Full Stack Delivery**: Built a responsive, accessible frontend with Next.js 16, React 19, and Tailwind CSS v4, supported by a pull-request quality gate (`run_tests.sh`, run on GitHub Actions).
 
 ---
