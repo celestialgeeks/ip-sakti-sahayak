@@ -1,25 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { RasaTierId, SimulationResult } from "@/lib/formulation/types.ts";
+import React from "react";
+import { SimulationResult } from "@/lib/formulation/types.ts";
 
 interface LivingRasaCardProps {
   simulation: SimulationResult;
-  onPreviewTierChange?: (tier: RasaTierId) => void;
 }
 
-const TIER_ORDER: Array<{ id: RasaTierId; label: string; sanskrit: string }> = [
-  { id: "bala", label: "Bāla", sanskrit: "बाल" },
-  { id: "kumara", label: "Kumāra", sanskrit: "कुमार" },
-  { id: "yuvan", label: "Yuvan", sanskrit: "युवन्" },
-  { id: "vriddha", label: "Vriddha", sanskrit: "वृद्ध" },
-  { id: "siddha", label: "Siddha", sanskrit: "सिद्ध" },
-  { id: "divya_rasayana", label: "Rasayana", sanskrit: "दिव्य" },
-];
-
 export function LivingRasaCard({ simulation }: LivingRasaCardProps) {
-  const [previewTier, setPreviewTier] = useState<RasaTierId | null>(null);
-  const activeTier = previewTier || simulation.tier;
+  const activeTier = simulation.tier;
 
   const tierMetadata = {
     bala: { badge: "TIER I · RAW ADMIXTURE", badgeColor: "bg-surface-container text-outline", description: "Sub-optimal baseline. Lacks bio-catalyst to overcome Section 3(e) mere admixture bar." },
@@ -46,10 +35,10 @@ export function LivingRasaCard({ simulation }: LivingRasaCardProps) {
       {/* ── Card Header ──────────────────────────────────────────────── */}
       <div className="space-y-2 pb-4 border-b border-surface-container pl-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <span className={`text-[10px] font-mono uppercase px-2.5 py-0.5 rounded font-semibold ${tierMetadata.badgeColor}`}>
+          <span className={`text-xs font-mono uppercase px-2.5 py-0.5 rounded font-semibold ${tierMetadata.badgeColor}`}>
             {tierMetadata.badge}
           </span>
-          <span className={`text-[11px] font-label-sm font-bold px-2 py-0.5 rounded ${sec3e.cls}`}>{sec3e.txt}</span>
+          <span className={`text-xs font-label-sm font-bold px-2 py-0.5 rounded ${sec3e.cls}`}>{sec3e.txt}</span>
         </div>
         <h3 className="font-headline-md text-title-lg text-portal-navy-deep font-bold">{simulation.tier_sanskrit}</h3>
         <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">{tierMetadata.description}</p>
@@ -100,40 +89,11 @@ export function LivingRasaCard({ simulation }: LivingRasaCardProps) {
         <span className="text-[10px] font-label-sm uppercase text-outline font-semibold block">Active Mechanisms &amp; Sourcing Status:</span>
         <div className="flex flex-wrap gap-1.5">
           {simulation.active_buffs.map((b, i) => (
-            <span key={`b${i}`} className="text-[11px] px-2 py-0.5 rounded bg-secondary-container/50 text-on-secondary-container border border-secondary-container font-medium">{b}</span>
+            <span key={`b${i}`} className="text-xs px-2 py-0.5 rounded bg-secondary-container/50 text-on-secondary-container border border-secondary-container font-medium">{b}</span>
           ))}
           {simulation.active_debuffs.map((d, i) => (
-            <span key={`d${i}`} className="text-[11px] px-2 py-0.5 rounded bg-error-container/60 text-on-error-container border border-error-container font-medium">{d}</span>
+            <span key={`d${i}`} className="text-xs px-2 py-0.5 rounded bg-error-container/60 text-on-error-container border border-error-container font-medium">{d}</span>
           ))}
-        </div>
-      </div>
-
-      {/* ── Tier Preview Segmented Control ───────────────────────────── */}
-      <div className="pt-4 border-t border-surface-container space-y-2 pl-2">
-        <div className="flex items-center justify-between text-[11px] text-outline">
-          <span className="font-label-sm uppercase font-semibold">Stage Preview:</span>
-          {previewTier && (
-            <button onClick={() => setPreviewTier(null)} className="text-primary hover:underline font-semibold">
-              Reset to Live State
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-6 gap-1 bg-surface-container p-1 rounded-lg border border-portal-border/50">
-          {TIER_ORDER.map((t) => {
-            const isSelected = activeTier === t.id;
-            const isLive = simulation.tier === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setPreviewTier(t.id)}
-                className={`py-1 text-center rounded text-[11px] font-medium transition-all ${
-                  isSelected ? "bg-primary-container text-surface-container-lowest font-bold shadow-xs" : "text-on-surface-variant hover:text-primary"
-                } ${isLive && !isSelected ? "ring-1 ring-tiranga-saffron" : ""}`}
-              >
-                {t.label}
-              </button>
-            );
-          })}
         </div>
       </div>
     </div>

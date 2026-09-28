@@ -183,16 +183,16 @@
   {
     "id": "shwasa_cheap_kwath",
     "title": "Svasa Respiratory Decoction (Budget Cut)",
-    "description": "Cheap to make and legal-clean, but no bio-enhancer and no hero adaptogen — the IPO reads it as a mere admixture (§3(e)).",
+    "description": "Cheap to make and safety-clean, but no bio-enhancer and no hero adaptogen — the IPO reads it as a mere admixture (§3(e)).",
     "target_tier": "bala",
     "ingredients": [
       {
         "herb_id": "tulsi",
-        "ratio": 40.0
+        "ratio": 25.0
       },
       {
         "herb_id": "gokshura",
-        "ratio": 15.0
+        "ratio": 20.0
       },
       {
         "herb_id": "methi",
@@ -200,22 +200,27 @@
       },
       {
         "herb_id": "kantakari",
-        "ratio": 20.0
+        "ratio": 15.0
       },
       {
         "herb_id": "ghee",
+        "ratio": 15.0
+      },
+      {
+        "herb_id": "musta",
         "ratio": 10.0
       }
     ],
     "baseline_ratios": {
-      "tulsi": 40.0,
-      "gokshura": 15.0,
+      "tulsi": 25.0,
+      "gokshura": 20.0,
       "methi": 15.0,
-      "kantakari": 20.0,
-      "ghee": 10.0
+      "kantakari": 15.0,
+      "ghee": 15.0,
+      "musta": 10.0
     },
     "computed": {
-      "quality": 41,
+      "quality": 55,
       "ci": 1.21,
       "sec_3e_status": "REJECTED",
       "tkdl_concordance_score": 58,

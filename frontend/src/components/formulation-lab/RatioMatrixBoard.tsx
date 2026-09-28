@@ -1,25 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+// Stage 2 — the bench input side (spec §5.1). Stacked 100% composition bar at
+// the point of input; per-row slider + ± stepper + lock; Add-herb is the ⌘K
+// drawer (no more bare <select>); sum chip · Auto-Balance · Undo travel together.
+
+import React, { useMemo } from "react";
 import { BotanicalItem, IngredientRatio } from "@/lib/formulation/types.ts";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/interfaces-select";
+import { IngredientSlider } from "./IngredientSlider";
 
 interface RatioMatrixBoardProps {
   ingredients: IngredientRatio[];
   botanicals: BotanicalItem[];
-  baselineRatios: Record<string, number>;
+  startRatios: Record<string, number>;
   onRatioChange: (herbId: string, newRatio: number) => void;
   onToggleLock: (herbId: string) => void;
   onRemoveHerb: (herbId: string) => void;
-  onAddHerb: (herbId: string) => void;
   onAutoBalance: () => void;
-  onResetBaseline: () => void;
+  onUndo: () => void;
+  canUndo: boolean;
+  onOpenHerbDrawer: () => void;
   totalRatio: number;
   isBalanced: boolean;
 }
@@ -34,228 +33,224 @@ const CATEGORY_ICON: Record<string, string> = {
   digestive: "restaurant",
 };
 
+const CATEGORY_HUE: Record<string, string> = {
+  adaptogen: "#8FA98A",
+  anti_inflammatory: "#C9A66B",
+  medhya: "#8DA3B9",
+  bio_enhancer: "#B98A8A",
+  carrier: "#D9CBA3",
+  mineral_resin: "#9C8B7E",
+  digestive: "#A8B5A0",
+};
+
 export function RatioMatrixBoard({
   ingredients,
   botanicals,
-  baselineRatios,
+  startRatios,
   onRatioChange,
   onToggleLock,
   onRemoveHerb,
-  onAddHerb,
   onAutoBalance,
-  onResetBaseline,
+  onUndo,
+  canUndo,
+  onOpenHerbDrawer,
   totalRatio,
   isBalanced,
 }: RatioMatrixBoardProps) {
-  const [selectedHerbToAdd, setSelectedHerbToAdd] = useState<string>("");
-  const [filter, setFilter] = useState<string>("");
-
-  const botanicalsMap = React.useMemo(() => {
+  const botanicalsMap = useMemo(() => {
     const map = new Map<string, BotanicalItem>();
     botanicals.forEach((b) => map.set(b.id, b));
     return map;
   }, [botanicals]);
 
-  const existingHerbIds = new Set(ingredients.map((i) => i.herb_id));
-  const availableBotanicals = botanicals.filter(
-    (b) => !existingHerbIds.has(b.id) && b.common_name.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  const handleAddSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedHerbToAdd) return;
-    onAddHerb(selectedHerbToAdd);
-    setSelectedHerbToAdd("");
-    setFilter("");
-  };
+  const barTotal = Math.max(totalRatio, 0.001);
 
   return (
-    <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg relative">
-      {/* ── Toolbar Strip ─────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-md mb-space-sm border-b border-surface-container">
+    <div className="bg-surface-container-lowest rounded-xl shadow-sm p-4 sm:p-5 relative space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="font-title-lg text-title-lg font-bold text-portal-navy-deep flex items-center gap-2">
+          <h2 className="font-title-md text-title-md font-bold text-portal-navy-deep flex items-center gap-2">
             <span className="material-symbols-outlined text-tiranga-saffron">tune</span>
-            Ingredients &amp; Stoichiometric Modifier Matrix
+            Composition
           </h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Modify sliders to project live combinatorial effects across registries.
+          <p className="text-sm text-on-surface-variant">
+            Move a slider and the rows below name what that herb just did.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-outline pointer-events-none">search</span>
-            <input
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="pl-8 pr-3 py-1.5 bg-portal-surface-slate rounded text-body-sm text-on-surface placeholder:text-outline text-[12px] w-36 focus:outline-none focus:bg-surface-container-lowest"
-              placeholder="Filter ingredient..."
-              type="text"
-            />
+        <button
+          onClick={onOpenHerbDrawer}
+          className="px-3 py-2 rounded-lg text-sm font-bold border border-portal-border bg-surface-container-lowest hover:border-tiranga-saffron hover:text-tiranga-saffron-deep transition-colors inline-flex items-center gap-1.5"
+        >
+          <span className="material-symbols-outlined text-[17px]">add_circle</span>
+          Add herb
+          <kbd className="text-xs font-mono text-outline border border-portal-border rounded px-1">⌘K</kbd>
+        </button>
+      </div>
+
+      {/* Stacked 100% composition bar — the percentage at the point of input (§5.1) */}
+      {ingredients.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex h-6 w-full rounded-lg overflow-hidden border border-portal-border/60 bg-surface-container">
+            {ingredients.map((ing) => {
+              const herb = botanicalsMap.get(ing.herb_id);
+              const pct = (ing.ratio / barTotal) * 100;
+              if (pct <= 0) return null;
+              return (
+                <div
+                  key={ing.herb_id}
+                  className="h-full flex items-center justify-center overflow-hidden transition-all duration-300"
+                  style={{ width: `${pct}%`, backgroundColor: CATEGORY_HUE[herb?.category ?? ""] ?? "#C4BBAA" }}
+                  title={`${herb?.common_name ?? ing.herb_id}: ${ing.ratio.toFixed(1)}% (${pct.toFixed(1)}% of batch)`}
+                >
+                  {pct >= 9 && (
+                    <span className="text-xs font-bold text-portal-navy-deep/90 truncate px-1">
+                      {herb?.common_name.split(" (")[0] ?? ing.herb_id} {ing.ratio.toFixed(0)}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
+          <p className="text-xs text-outline">
+            {ingredients.length} constituent{ingredients.length > 1 ? "s" : ""} · batch total{" "}
+            <span className={isBalanced ? "font-bold text-tiranga-green-deep" : "font-bold text-tiranga-saffron-deep"}>
+              {totalRatio.toFixed(1)}%
+            </span>{" "}
+            of 100.0% w/w
+          </p>
         </div>
-      </div>
+      )}
 
-      {/* ── Table Header ──────────────────────────────────────────────── */}
-      <div className="hidden sm:grid sm:grid-cols-12 gap-2 px-3 py-2 bg-portal-surface-subtle rounded font-label-sm text-[11px] font-bold text-outline-variant uppercase tracking-wider mb-2">
-        <div className="col-span-6">Botanical / Active Compound</div>
-        <div className="col-span-2 text-center">Baseline</div>
-        <div className="col-span-3 text-center">What-If Ratio %</div>
-        <div className="col-span-1 text-right">Lock</div>
-      </div>
-
-      {/* ── Interactive Ingredient Rows ───────────────────────────────── */}
+      {/* Rows */}
       <div className="flex flex-col gap-2">
         {ingredients.length === 0 && (
-          <div className="p-6 text-center text-on-surface-variant font-body-sm border border-dashed border-portal-border rounded-lg">
-            No constituents bound. Add a botanical below to begin.
+          <div className="p-6 text-center text-on-surface-variant text-sm border border-dashed border-portal-border rounded-lg">
+            Nothing bound yet — press <b>Add herb</b> (⌘K) to begin.
           </div>
         )}
         {ingredients.map((ing) => {
           const herb = botanicalsMap.get(ing.herb_id);
-          const baseline = baselineRatios[ing.herb_id] ?? ing.ratio;
-          const delta = Math.round((ing.ratio - baseline) * 10) / 10;
-          const isFocused = delta > 0;
+          const start = startRatios[ing.herb_id] ?? ing.ratio;
+          const delta = Math.round((ing.ratio - start) * 10) / 10;
+          const overCeiling =
+            herb?.safety_ceiling_percent != null && ing.ratio > herb.safety_ceiling_percent;
 
           return (
             <div
               key={ing.herb_id}
-              className={`grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg items-center transition-all ${
-                isFocused
-                  ? "bg-tertiary-fixed/30 ring-2 ring-tiranga-saffron shadow-xs"
-                  : delta < 0
-                  ? "bg-error-container/30"
-                  : "bg-surface-container-lowest hover:bg-surface-container-low border border-portal-border/40"
+              className={`grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 p-3 rounded-xl items-center border transition-all ${
+                overCeiling
+                  ? "border-error/50 bg-error-container/30"
+                  : ing.is_locked
+                  ? "border-emblem-gold/50 bg-tertiary-fixed/30"
+                  : "border-portal-border/60 bg-surface-container-lowest hover:shadow-sm"
               }`}
             >
-              {/* Botanical info */}
-              <div className="sm:col-span-6 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md bg-surface-container-lowest flex items-center justify-center text-tiranga-saffron shadow-xs flex-shrink-0">
-                  <span className="material-symbols-outlined text-[22px]">{CATEGORY_ICON[herb?.category || ""] || "eco"}</span>
+              <div className="sm:col-span-4 flex items-center gap-2.5 min-w-0">
+                <div
+                  className="w-9 h-9 rounded-lg border border-portal-border/60 flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: CATEGORY_HUE[herb?.category ?? ""] ?? "#E7E0D4" }}
+                >
+                  <span className="material-symbols-outlined text-[19px] text-portal-navy-deep">
+                    {CATEGORY_ICON[herb?.category || ""] || "eco"}
+                  </span>
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-title-md text-body-md font-bold text-portal-navy-deep truncate">{herb?.common_name || ing.herb_id}</span>
-                    {delta !== 0 && (
-                      <span className={`px-1.5 py-0.5 font-label-sm text-[10px] rounded font-bold uppercase ${delta > 0 ? "bg-tiranga-saffron/20 text-tiranga-saffron-deep" : "bg-surface-container-high text-portal-navy-deep"}`}>
-                        Delta {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}%
-                      </span>
-                    )}
-                    {herb?.is_mineral_resin && (
-                      <span className="px-1.5 py-0.5 bg-tertiary-fixed/60 text-on-tertiary-fixed font-label-sm text-[10px] rounded font-bold uppercase">Mineral · NBA</span>
-                    )}
-                  </div>
-                  <div className="text-[12px] font-body-sm italic text-on-surface-variant truncate">{herb?.botanical_name}</div>
-                  <div className="text-[11px] font-label-sm text-outline mt-0.5 truncate">{herb?.marker_compound} · {herb?.standardized_percentage}</div>
+                  <span className="text-sm font-bold text-portal-navy-deep block truncate">
+                    {herb?.common_name || ing.herb_id}
+                  </span>
+                  <span className="text-xs italic text-outline truncate block">
+                    {herb?.sanskrit_name}
+                  </span>
                 </div>
               </div>
 
-              {/* Baseline */}
-              <div className="sm:col-span-2 flex items-center justify-between sm:justify-center text-center">
-                <span className="sm:hidden font-label-sm text-[12px] text-outline">Baseline:</span>
-                <span className="font-label-md text-body-sm text-on-surface-variant line-through">{baseline.toFixed(1)}%</span>
+              <div className="sm:col-span-3 min-w-0">
+                <p className="text-xs text-on-surface-variant truncate" title={herb?.marker_compound}>
+                  {herb?.marker_compound} · {herb?.standardized_percentage}
+                </p>
+                <p className={`text-xs mt-0.5 ${overCeiling ? "font-bold text-error" : "text-outline"}`}>
+                  {overCeiling ? "🛑 above ceiling " : "ceiling "}
+                  {herb?.safety_ceiling_percent != null ? `${herb.safety_ceiling_percent}%` : "—"}
+                  {delta !== 0 && (
+                    <span className="ml-2 font-mono">Δ{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)} vs start</span>
+                  )}
+                </p>
               </div>
 
-              {/* Slider & input */}
-              <div className="sm:col-span-3 flex flex-col gap-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="0.5"
+              <div className="sm:col-span-3">
+                <IngredientSlider
+                  herbId={ing.herb_id}
                   value={ing.ratio}
-                  disabled={ing.is_locked}
-                  onChange={(e) => onRatioChange(ing.herb_id, parseFloat(e.target.value))}
-                  className={`w-full accent-tiranga-saffron h-1.5 bg-surface-container rounded-lg ${ing.is_locked ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  baseline={start}
+                  isLocked={ing.is_locked}
+                  onChange={(newRatio) => onRatioChange(ing.herb_id, newRatio)}
                 />
-                <div className="flex items-center justify-between text-[11px] font-label-sm">
-                  <span className={delta > 0 ? "text-secondary font-semibold" : "text-outline"}>{ing.is_locked ? "Stoichiometric Constant" : delta < 0 ? "Reduced levy" : "Modifying..."}</span>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={ing.ratio}
-                      disabled={ing.is_locked}
-                      onChange={(e) => onRatioChange(ing.herb_id, parseFloat(e.target.value) || 0)}
-                      className="w-14 py-0.5 px-1.5 bg-surface-container-lowest font-bold text-portal-navy-deep text-right rounded border-0 text-body-sm shadow-xs"
-                    />
-                    <span className="font-bold text-portal-navy-deep">%</span>
-                  </div>
-                </div>
               </div>
 
-              {/* Lock + remove */}
-              <div className="sm:col-span-1 flex items-center justify-end gap-1.5">
+              <div className="sm:col-span-2 flex items-center justify-end gap-1">
                 <button
                   onClick={() => onToggleLock(ing.herb_id)}
-                  title={ing.is_locked ? "Unlock Ratio" : "Lock Ratio"}
-                  className={`p-1 transition-colors ${ing.is_locked ? "text-portal-navy-deep" : "text-outline hover:text-portal-navy-deep"}`}
+                  title={ing.is_locked ? "Unlock ratio" : "Lock ratio against Auto-Balance"}
+                  className={`p-1.5 rounded-md transition-colors ${
+                    ing.is_locked
+                      ? "bg-emblem-gold/20 text-emblem-gold border border-emblem-gold/40"
+                      : "text-outline hover:text-portal-navy-deep hover:bg-surface-container"
+                  }`}
                   type="button"
+                  aria-label={ing.is_locked ? `Unlock ${herb?.common_name}` : `Lock ${herb?.common_name}`}
                 >
                   <span className="material-symbols-outlined text-[18px]">{ing.is_locked ? "lock" : "lock_open"}</span>
                 </button>
-                {ingredients.length > 1 && (
-                  <button
-                    onClick={() => onRemoveHerb(ing.herb_id)}
-                    title="Remove"
-                    className="p-1 text-outline hover:text-error transition-colors"
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => onRemoveHerb(ing.herb_id)}
+                  title="Remove constituent"
+                  className="p-1.5 rounded-md text-outline hover:text-error hover:bg-error-container/40 transition-colors"
+                  type="button"
+                  aria-label={`Remove ${herb?.common_name}`}
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* ── Add Constituent ───────────────────────────────────────────── */}
-      {availableBotanicals.length > 0 && (
-        <form onSubmit={handleAddSubmit} className="flex items-center gap-2 mt-3">
-          <Select value={selectedHerbToAdd} onValueChange={setSelectedHerbToAdd}>
-            <SelectTrigger
-              aria-label="Add botanical constituent to matrix"
-              className="w-full min-w-0 flex-1 rounded border-portal-border bg-portal-surface-slate px-3 text-body-sm text-on-surface shadow-none data-[size=default]:h-[38px] data-[state=open]:border-tiranga-saffron"
-            >
-              <SelectValue placeholder="+ Add botanical constituent to matrix..." />
-            </SelectTrigger>
-            <SelectContent className="[&_[data-slot=select-item]]:text-body-sm">
-              {availableBotanicals.map((b) => (
-                <SelectItem key={b.id} value={b.id}>
-                  {b.common_name} ({b.botanical_name}) — {b.category.toUpperCase()}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <button
-            type="submit"
-            disabled={!selectedHerbToAdd}
-            className="flex items-center gap-1 px-3 py-2 rounded bg-primary-container text-surface-container-lowest font-label-sm text-label-sm hover:bg-surface-tint transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <span className="material-symbols-outlined text-[16px]">add_circle</span>
-            Add Extract
-          </button>
-        </form>
-      )}
-
-      {/* ── Bottom Micro Controls ─────────────────────────────────────── */}
-      <div className="mt-space-md pt-3 border-t border-surface-container flex flex-wrap items-center justify-between gap-3 text-body-sm">
-        <div className="flex items-center gap-2 text-[12px] text-on-surface-variant">
-          <span className="material-symbols-outlined text-[16px] text-tiranga-saffron">info</span>
-          <span>
-            Stoichiometric sum:{" "}
-            <span className={`font-bold ${isBalanced ? "text-secondary" : "text-error"}`}>{totalRatio.toFixed(1)}% / 100.0%</span>
-          </span>
-        </div>
+      {/* sum chip · Auto-Balance · Undo — Undo always adjacent to the sum chip (§7) */}
+      <div className="pt-2 border-t border-surface-container flex flex-wrap items-center justify-between gap-2">
+        <span
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-bold border ${
+            isBalanced
+              ? "border-tiranga-green/40 bg-secondary-container/40 text-on-secondary-container"
+              : "border-tiranga-saffron/60 bg-tertiary-fixed/50 text-on-tertiary-fixed"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[16px]">{isBalanced ? "balance" : "scale_unbalanced"}</span>
+          {totalRatio.toFixed(1)}% / 100.0% w/w
+        </span>
         <div className="flex items-center gap-2">
-          <button onClick={onResetBaseline} className="px-3 py-1.5 rounded bg-portal-surface-slate text-portal-navy-deep font-label-sm text-label-sm hover:bg-surface-container-high transition-colors" type="button">
-            Reset to Baseline Spec
+          <button
+            onClick={onUndo}
+            disabled={!canUndo}
+            className={`px-3 py-1.5 rounded-lg text-sm font-semibold inline-flex items-center gap-1 transition-colors ${
+              canUndo
+                ? "border border-portal-border bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant"
+                : "border border-portal-border/40 text-outline opacity-50 cursor-not-allowed"
+            }`}
+            type="button"
+            title="Undo last Apply (one level)"
+          >
+            <span className="material-symbols-outlined text-[16px]">undo</span>
+            Undo
           </button>
-          <button onClick={onAutoBalance} className="px-3 py-1.5 rounded bg-primary-container text-surface-container-lowest font-label-sm text-label-sm hover:bg-surface-tint transition-colors" type="button">
-            Auto-Balance 100%
+          <button
+            onClick={onAutoBalance}
+            className="px-3 py-1.5 rounded-lg text-sm font-bold bg-primary-container text-surface-container-lowest hover:bg-portal-navy-deep transition-colors inline-flex items-center gap-1"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[16px]">auto_fix_high</span>
+            Auto-Balance
           </button>
         </div>
       </div>
