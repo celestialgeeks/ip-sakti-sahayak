@@ -406,16 +406,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🧪 Testing & Automated Quality Gates
+## 🧪 Testing & Quality Gates
 
-The project includes an end-to-end automated test runner and quality gate script (`run_tests.sh`) enforcing code stability across both backend and frontend layers:
+The project's single verification route is `run_tests.sh`. It runs locally and, on every pull request targeting `master` (and on pushes to it), as a GitHub Actions check defined in `.github/workflows/ci.yml`. The check reports pass/fail on the PR but is not yet a *required* status check — merging is not blocked by branch protection.
 
 ```bash
-# Execute the full automated audit
+# Execute the full audit locally
 ./run_tests.sh
 ```
 
-The script runs three consecutive quality stages:
+The script runs three consecutive stages:
 1. **Backend Unit & Integration Tests (Pytest)**:
    - Evaluates API endpoints (`/api/chat`, `/api/classify`, `/api/abs-check`, `/api/health`).
    - Mocks vector searches and tests the Citation Engine with edge-case statutory citations.
@@ -447,7 +447,7 @@ The application is deployed on cloud infrastructure utilizing **Render**, **Qdra
 - **Low-Latency Streaming with Preamble Filtering**: Developed a custom SSE streaming parser in FastAPI that intercepts, buffers, and scrubs internal `<think>` reasoning artifacts in real time before reaching the client.
 - **Mathematical Confidence Model**: Created a tri-factor scoring algorithm combining semantic vector similarity, citation count density, and statutory hierarchy tier weighting.
 - **Cross-Lingual Retrieval for 22 Indic Languages**: Integrated Sarvam AI to democratize complex IP law for non-English speaking traditional practitioners, farmers, and researchers across India.
-- **Enterprise-Grade Full Stack Delivery**: Built a responsive, accessible frontend with Next.js 16, React 19, and Tailwind CSS v4, supported by an automated CI quality gate (`run_tests.sh`).
+- **Enterprise-Grade Full Stack Delivery**: Built a responsive, accessible frontend with Next.js 16, React 19, and Tailwind CSS v4, supported by a pull-request quality gate (`run_tests.sh`, run on GitHub Actions).
 
 ---
 

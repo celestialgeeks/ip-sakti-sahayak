@@ -1,0 +1,45 @@
+name: CI
+
+# Repo-owned pull-request quality gate.
+# Runs the single documented verification route (./run_tests.sh) on every PR
+# targeting the default branch, and again on pushes to it.
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    name: run_tests.sh
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run unified test gate
+        # app/config.py fails fast at import when API keys are absent; the test
+        # suite mocks every external service, so DEBUG=true downgrades those
+        # startup problems to warnings and lets pytest import the app.
+        env:
+          DEBUG: "true"
+        run: ./run_tests.sh
