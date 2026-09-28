@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { BadgeCheck, Store } from "lucide-react";
+
+import { MetalButton } from "@/components/ui/metal-button";
 
 export function Header() {
   const [language, setLanguage] = useState("en");
@@ -129,35 +132,36 @@ export function Header() {
 
         {/* Right Header Indicators & Actions */}
         <div className="flex items-center gap-3">
-          {/* Registration & Compliance Wizard entry — calm, compact */}
-          <Link
-            href="/wizard"
-            title="Registration, licences & GST guide"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white/60 px-2.5 py-1.5 text-[12.5px] font-medium text-[#0b3c5d] transition-colors no-underline hover:border-[#0b3c5d] hover:bg-[#EEF3F8]"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0b3c5d]">
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-            Get Registered
-          </Link>
+          {/* Registration & Compliance Wizard entry — calm, compact.
+              Hidden below `sm` from the outside: `.metal-fx-root` declares its own
+              `display: inline-flex`, so a `hidden` utility on the wrapper would lose the cascade. */}
+          <span className="hidden sm:inline-flex">
+            <MetalButton
+              href="/wizard"
+              preset="silver"
+              theme="light"
+              title="Registration, licences & GST guide"
+              className="h-8 px-2.5 text-[12.5px] font-medium"
+            >
+              <BadgeCheck className="size-3.5 text-[#0b3c5d]" />
+              Get Registered
+            </MetalButton>
+          </span>
 
           {/* Utility Buttons */}
           <div className="flex items-center gap-1">
             {/* Business Enablement entry point — beside the download button */}
-            <Link
+            <MetalButton
               href="/business"
+              preset="silver"
+              theme="light"
               title="Funding, supplier sourcing & label compliance"
-              className="mr-1 inline-flex items-center gap-1.5 rounded-md border border-[#E65100]/40 bg-[#FFF3E9] px-2.5 py-1.5 text-[12.5px] font-semibold text-[#E65100] transition-colors no-underline hover:border-[#E65100] hover:bg-[#ffe6d5]"
+              wrapperClassName="mr-1"
+              className="h-8 px-2.5 text-[12.5px] font-semibold"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#E65100]">
-                <path d="M3 9l1.5-5h15L21 9" />
-                <path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" />
-                <path d="M9 21v-6h6v6" />
-                <path d="M3 9h18" />
-              </svg>
+              <Store className="size-3.5 text-[#0b3c5d]" />
               <span className="hidden md:inline">Grow Business</span>
-            </Link>
+            </MetalButton>
 
             <button 
               onClick={handleDownload}
