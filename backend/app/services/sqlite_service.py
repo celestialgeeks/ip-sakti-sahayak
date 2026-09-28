@@ -56,6 +56,17 @@ class SQLiteService:
                     comment TEXT
                 )
             """)
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS formulation_scenarios (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    ingredients TEXT NOT NULL DEFAULT '[]',
+                    entity_type TEXT NOT NULL DEFAULT 'domestic',
+                    herb_count INTEGER NOT NULL DEFAULT 0,
+                    total_ratio REAL NOT NULL DEFAULT 0.0,
+                    updated_at TEXT NOT NULL
+                )
+            """)
             await db.commit()
 
     async def log_query(
@@ -108,6 +119,100 @@ class SQLiteService:
                 (datetime.utcnow().isoformat(), message_id, rating, comment),
             )
             await db.commit()
+
+    async def save_scenario(
+        self,
+        scenario_id: str,
+        title: str,
+        ingredients: List[Dict],
+        entity_type: str,
+    ):
+        """Upsert a working Formulation Lab scenario (autosave, §14.7)."""
+        self._ensure_dir()
+        total = round(sum(float(i.get("ratio", 0.0)) for i in ingredients), 2)
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS formulation_scenarios (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    ingredients TEXT NOT NULL DEFAULT '[]',
+                    entity_type TEXT NOT NULL DEFAULT 'domestic',
+                    herb_count INTEGER NOT NULL DEFAULT 0,
+                    total_ratio REAL NOT NULL DEFAULT 0.0,
+                    updated_at TEXT NOT NULL
+                )
+            """)
+            await db.execute(
+                """INSERT INTO formulation_scenarios
+                       (id, title, ingredients, entity_type, herb_count, total_ratio, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(id) DO UPDATE SET
+                       title=excluded.title,
+                       ingredients=excluded.ingredients,
+                       entity_type=excluded.entity_type,
+                       herb_count=excluded.herb_count,
+                       total_ratio=excluded.total_ratio,
+                       updated_at=excluded.updated_at""",
+                (
+                    scenario_id,
+                    title,
+                    json.dumps(ingredients),
+                    entity_type,
+                    len(ingredients),
+                    total,
+                    datetime.utcnow().isoformat(),
+                ),
+            )
+            await db.commit()
+
+    async def list_scenarios(self, limit: int = 12) -> List[Dict]:
+        """Most-recently-updated scenarios for 'Continue recent work'."""
+        self._ensure_dir()
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS formulation_scenarios (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    ingredients TEXT NOT NULL DEFAULT '[]',
+                    entity_type TEXT NOT NULL DEFAULT 'domestic',
+                    herb_count INTEGER NOT NULL DEFAULT 0,
+                    total_ratio REAL NOT NULL DEFAULT 0.0,
+                    updated_at TEXT NOT NULL
+                )
+            """)
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT id, title, entity_type, herb_count, total_ratio, updated_at "
+                "FROM formulation_scenarios ORDER BY updated_at DESC LIMIT ?",
+                (limit,),
+            )
+            return [dict(row) for row in await cursor.fetchall()]
+
+    async def get_scenario(self, scenario_id: str) -> Optional[Dict]:
+        """Full restore payload for one scenario."""
+        self._ensure_dir()
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT id, title, ingredients, entity_type, updated_at "
+                "FROM formulation_scenarios WHERE id = ?",
+                (scenario_id,),
+            )
+            row = await cursor.fetchone()
+            if row is None:
+                return None
+            data = dict(row)
+            data["ingredients"] = json.loads(data["ingredients"])
+            return data
+
+    async def delete_scenario(self, scenario_id: str) -> bool:
+        self._ensure_dir()
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.execute(
+                "DELETE FROM formulation_scenarios WHERE id = ?", (scenario_id,)
+            )
+            await db.commit()
+            return cursor.rowcount > 0
 
 
 # Singleton instance

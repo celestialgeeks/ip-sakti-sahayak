@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 // ── Inline SVGs ─────────────────────────────────────────────────────────────
 function CheckVerifiedIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -90,6 +97,12 @@ function TableIcon({ className = "w-4 h-4" }: { className?: string }) {
     </svg>
   );
 }
+
+// Trigger styling shared by the four filter-console dropdowns.
+const filterTriggerCls =
+  "w-full rounded-lg border-slate-200 bg-[#F4F6F9] text-xs text-slate-800 data-[state=open]:bg-white";
+// Keeps option rows at the dense 12px scale used by this console.
+const filterContentCls = "[&_[data-slot=select-item]]:text-xs";
 
 export default function TKDLPage() {
   const router = useRouter();
@@ -295,69 +308,76 @@ export default function TKDLPage() {
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Classical Source Treatise
               </label>
-              <select
+              <Select
                 value={selectedTreatise}
-                onChange={(e) => setSelectedTreatise(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F4F6F9] border border-slate-200 text-xs rounded-lg text-slate-800 focus:bg-white focus:outline-none cursor-pointer"
+                onValueChange={setSelectedTreatise}
               >
-                <option>Charaka Samhita (चर्क संहिता)</option>
-                <option>Sushruta Samhita (सुश्रुत संहिता)</option>
-                <option>Ashtanga Hridaya (अष्टाङ्ग हृदयम्)</option>
-                <option>Bhavaprakasha Nighantu (भावप्रकाश)</option>
-                <option>Sarangadhara Samhita (शार्ङ्गधर)</option>
-                <option>Chakradatta (चक्रदत्त)</option>
-              </select>
+                <SelectTrigger size="sm" className={filterTriggerCls}>
+                  <SelectValue placeholder="Classical Source Treatise" />
+                </SelectTrigger>
+                <SelectContent className={filterContentCls}>
+                  <SelectItem value="Charaka Samhita (चर्क संहिता)">Charaka Samhita (चर्क संहिता)</SelectItem>
+                  <SelectItem value="Sushruta Samhita (सुश्रुत संहिता)">Sushruta Samhita (सुश्रुत संहिता)</SelectItem>
+                  <SelectItem value="Ashtanga Hridaya (अष्टाङ्ग हृदयम्)">Ashtanga Hridaya (अष्टाङ्ग हृदयम्)</SelectItem>
+                  <SelectItem value="Bhavaprakasha Nighantu (भावप्रकाश)">Bhavaprakasha Nighantu (भावप्रकाश)</SelectItem>
+                  <SelectItem value="Sarangadhara Samhita (शार्ङ्गधर)">Sarangadhara Samhita (शार्ङ्गधर)</SelectItem>
+                  <SelectItem value="Chakradatta (चक्रदत्त)">Chakradatta (चक्रदत्त)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Therapeutic Action (Karma)
               </label>
-              <select
-                value={selectedKarma}
-                onChange={(e) => setSelectedKarma(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F4F6F9] border border-slate-200 text-xs rounded-lg text-slate-800 focus:bg-white focus:outline-none cursor-pointer"
-              >
-                <option>Shothahara (Anti-inflammatory / Arthritic)</option>
-                <option>Rasayana (Immunomodulatory & Longevity)</option>
-                <option>Deepana-Pachana (Bioavailability & Digestion)</option>
-                <option>Jwarahara (Antipyretic / Febrile)</option>
-                <option>Medhya (Neuro-protective & Nootropic)</option>
-              </select>
+              <Select value={selectedKarma} onValueChange={setSelectedKarma}>
+                <SelectTrigger size="sm" className={filterTriggerCls}>
+                  <SelectValue placeholder="Therapeutic Action (Karma)" />
+                </SelectTrigger>
+                <SelectContent className={filterContentCls}>
+                  <SelectItem value="Shothahara (Anti-inflammatory / Arthritic)">Shothahara (Anti-inflammatory / Arthritic)</SelectItem>
+                  <SelectItem value="Rasayana (Immunomodulatory & Longevity)">Rasayana (Immunomodulatory & Longevity)</SelectItem>
+                  <SelectItem value="Deepana-Pachana (Bioavailability & Digestion)">Deepana-Pachana (Bioavailability & Digestion)</SelectItem>
+                  <SelectItem value="Jwarahara (Antipyretic / Febrile)">Jwarahara (Antipyretic / Febrile)</SelectItem>
+                  <SelectItem value="Medhya (Neuro-protective & Nootropic)">Medhya (Neuro-protective & Nootropic)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Kalpana (Dosage Matrix)
               </label>
-              <select
-                value={selectedKalpana}
-                onChange={(e) => setSelectedKalpana(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F4F6F9] border border-slate-200 text-xs rounded-lg text-slate-800 focus:bg-white focus:outline-none cursor-pointer"
-              >
-                <option>Ghrita / Sneha Paka (Medicated Lipid Base)</option>
-                <option>Kwatha / Kashaya (Aqueous Decoction)</option>
-                <option>Churna / Choorna (Micro-pulverized Powder)</option>
-                <option>Vati / Gutika (Compacted Tablet)</option>
-                <option>Asava-Arishta (Bio-fermented Extract)</option>
-                <option>Taila (Medicated Sesame Oil)</option>
-              </select>
+              <Select value={selectedKalpana} onValueChange={setSelectedKalpana}>
+                <SelectTrigger size="sm" className={filterTriggerCls}>
+                  <SelectValue placeholder="Kalpana (Dosage Matrix)" />
+                </SelectTrigger>
+                <SelectContent className={filterContentCls}>
+                  <SelectItem value="Ghrita / Sneha Paka (Medicated Lipid Base)">Ghrita / Sneha Paka (Medicated Lipid Base)</SelectItem>
+                  <SelectItem value="Kwatha / Kashaya (Aqueous Decoction)">Kwatha / Kashaya (Aqueous Decoction)</SelectItem>
+                  <SelectItem value="Churna / Choorna (Micro-pulverized Powder)">Churna / Choorna (Micro-pulverized Powder)</SelectItem>
+                  <SelectItem value="Vati / Gutika (Compacted Tablet)">Vati / Gutika (Compacted Tablet)</SelectItem>
+                  <SelectItem value="Asava-Arishta (Bio-fermented Extract)">Asava-Arishta (Bio-fermented Extract)</SelectItem>
+                  <SelectItem value="Taila (Medicated Sesame Oil)">Taila (Medicated Sesame Oil)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1">
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Legal Invalidation Status
               </label>
-              <select
-                value={selectedLegal}
-                onChange={(e) => setSelectedLegal(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F4F6F9] border border-slate-200 text-xs rounded-lg text-slate-800 focus:bg-white focus:outline-none cursor-pointer"
-              >
-                <option>Section 3(p) · Absolute Classical Bar</option>
-                <option>Section 3(e) · Mere Admixture (No Synergism)</option>
-                <option>Section 3(d) · New Form / Known Substance</option>
-                <option>Active Global Third-Party Observation Sent</option>
-              </select>
+              <Select value={selectedLegal} onValueChange={setSelectedLegal}>
+                <SelectTrigger size="sm" className={filterTriggerCls}>
+                  <SelectValue placeholder="Legal Invalidation Status" />
+                </SelectTrigger>
+                <SelectContent className={filterContentCls}>
+                  <SelectItem value="Section 3(p) · Absolute Classical Bar">Section 3(p) · Absolute Classical Bar</SelectItem>
+                  <SelectItem value="Section 3(e) · Mere Admixture (No Synergism)">Section 3(e) · Mere Admixture (No Synergism)</SelectItem>
+                  <SelectItem value="Section 3(d) · New Form / Known Substance">Section 3(d) · New Form / Known Substance</SelectItem>
+                  <SelectItem value="Active Global Third-Party Observation Sent">Active Global Third-Party Observation Sent</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { matchFunding } from "@/lib/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 import type {
   FundingMatchRequest,
   FundingMatchResponse,
@@ -33,6 +40,10 @@ const STATUS_META: Record<SchemeStatus, { label: string; cls: string; spine: str
 
 const field = "w-full h-10 rounded border border-[#D2D9E2] bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0b3c5d]";
 const label = "block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1";
+// Select primitive equivalents of `field` so dropdowns match the text inputs.
+const selectField =
+  "w-full rounded border-[#D2D9E2] bg-white px-3 text-sm text-slate-800 data-[size=default]:h-10";
+const selectItemCls = "[&_[data-slot=select-item]]:text-sm";
 
 export function FundingMatcher() {
   const router = useRouter();
@@ -119,30 +130,45 @@ export function FundingMatcher() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={label} htmlFor="fm-sector">Sector</label>
-              <select id="fm-sector" className={field} value={form.sector} onChange={(e) => set("sector", e.target.value as FundingMatchRequest["sector"])}>
-                <option value="manufacturing">Manufacturing</option>
-                <option value="service">Wellness service</option>
-                <option value="trading">Trading</option>
-                <option value="export">Export</option>
-              </select>
+              <Select value={form.sector} onValueChange={(v) => set("sector", v as FundingMatchRequest["sector"])}>
+                <SelectTrigger id="fm-sector" className={selectField}>
+                  <SelectValue placeholder="Sector" />
+                </SelectTrigger>
+                <SelectContent className={selectItemCls}>
+                  <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                  <SelectItem value="service">Wellness service</SelectItem>
+                  <SelectItem value="trading">Trading</SelectItem>
+                  <SelectItem value="export">Export</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className={label} htmlFor="fm-location">Location</label>
-              <select id="fm-location" className={field} value={form.location} onChange={(e) => set("location", e.target.value as FundingMatchRequest["location"])}>
-                <option value="urban">Urban</option>
-                <option value="rural">Rural</option>
-              </select>
+              <Select value={form.location} onValueChange={(v) => set("location", v as FundingMatchRequest["location"])}>
+                <SelectTrigger id="fm-location" className={selectField}>
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent className={selectItemCls}>
+                  <SelectItem value="urban">Urban</SelectItem>
+                  <SelectItem value="rural">Rural</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div>
             <label className={label} htmlFor="fm-category">Promoter category</label>
-            <select id="fm-category" className={field} value={form.social_category} onChange={(e) => set("social_category", e.target.value as FundingMatchRequest["social_category"])}>
-              <option value="general">General</option>
-              <option value="obc">OBC</option>
-              <option value="sc">SC</option>
-              <option value="st">ST</option>
-            </select>
+            <Select value={form.social_category} onValueChange={(v) => set("social_category", v as FundingMatchRequest["social_category"])}>
+              <SelectTrigger id="fm-category" className={selectField}>
+                <SelectValue placeholder="Promoter category" />
+              </SelectTrigger>
+              <SelectContent className={selectItemCls}>
+                <SelectItem value="general">General</SelectItem>
+                <SelectItem value="obc">OBC</SelectItem>
+                <SelectItem value="sc">SC</SelectItem>
+                <SelectItem value="st">ST</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2 pt-1">

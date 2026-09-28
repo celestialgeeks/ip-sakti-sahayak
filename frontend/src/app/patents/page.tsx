@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 // ── Inline SVGs for fast, zero-shift rendering ──────────────────────────────
 function CheckVerifiedIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -295,20 +302,24 @@ export default function PatentsPage() {
 
               {/* Dosage Form */}
               <div className="md:col-span-4 space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
+                <label htmlFor="dosageForm" className="text-xs font-bold text-slate-700">
                   Formulation Type / Dosage Form <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={dosageForm}
-                  onChange={(e) => setDosageForm(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f] cursor-pointer"
-                >
-                  <option>Emulgel / Hydrogel Topical Matrix</option>
-                  <option>Tablet / Vati / Gutika</option>
-                  <option>Medicated Oil / Ghrita / Taila</option>
-                  <option>Phytosomal Nano-dispersion</option>
-                  <option>Liquid Extract / Asava-Arishta</option>
-                </select>
+                <Select value={dosageForm} onValueChange={setDosageForm}>
+                  <SelectTrigger
+                    id="dosageForm"
+                    className="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-800 data-[state=open]:bg-white"
+                  >
+                    <SelectValue placeholder="Select dosage form" />
+                  </SelectTrigger>
+                  <SelectContent className="[&_[data-slot=select-item]]:text-sm">
+                    <SelectItem value="Emulgel / Hydrogel Topical Matrix">Emulgel / Hydrogel Topical Matrix</SelectItem>
+                    <SelectItem value="Tablet / Vati / Gutika">Tablet / Vati / Gutika</SelectItem>
+                    <SelectItem value="Medicated Oil / Ghrita / Taila">Medicated Oil / Ghrita / Taila</SelectItem>
+                    <SelectItem value="Phytosomal Nano-dispersion">Phytosomal Nano-dispersion</SelectItem>
+                    <SelectItem value="Liquid Extract / Asava-Arishta">Liquid Extract / Asava-Arishta</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Botanical Ingredients Tag Field */}
@@ -659,11 +670,20 @@ export default function PatentsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500 font-medium">Sort by:</span>
-                <select className="px-2.5 py-1 bg-white border border-slate-200 text-xs rounded-lg shadow-sm focus:outline-none">
-                  <option>Claim Similarity (% High to Low)</option>
-                  <option>Gazette Date (Newest first)</option>
-                  <option>Jurisdiction (IPO first)</option>
-                </select>
+                <Select defaultValue="Claim Similarity (% High to Low)">
+                  <SelectTrigger
+                    size="sm"
+                    aria-label="Sort patent landscape results"
+                    className="rounded-lg border-slate-200 bg-white text-xs text-slate-800"
+                  >
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent className="[&_[data-slot=select-item]]:text-xs">
+                    <SelectItem value="Claim Similarity (% High to Low)">Claim Similarity (% High to Low)</SelectItem>
+                    <SelectItem value="Gazette Date (Newest first)">Gazette Date (Newest first)</SelectItem>
+                    <SelectItem value="Jurisdiction (IPO first)">Jurisdiction (IPO first)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

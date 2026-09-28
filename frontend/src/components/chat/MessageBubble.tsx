@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Citation, ConfidenceLevel } from "@/lib/types";
 import { submitFeedback } from "@/lib/api";
+import AISources, { AISource } from "@/components/ui/ai-sources";
+import { BookOpen, Leaf, Scale } from "lucide-react";
 
 interface MessageBubbleProps {
   message: {
@@ -228,50 +230,36 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
         )}
 
-        {/* Referenced Primary Sources as Compact Interactive Pill Hyperlinks */}
+        {/* Referenced Primary Sources animated with AISources */}
         {!isUser && citations.length > 0 && (
-          <div className="mt-3 pt-2.5 flex flex-col gap-1.5" style={{ borderTop: "1px solid var(--border-hairline)" }}>
-            <span className="text-[10px] font-bold tracking-wider uppercase" style={{ color: "var(--ink-muted)" }}>
-              Referenced Primary Documents
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {citations.map((cite, i) => {
+          <div className="mt-3 pt-2.5" style={{ borderTop: "1px solid var(--border-hairline)" }}>
+            <AISources
+              defaultOpen={true}
+              label="Referenced Primary Documents"
+              sources={citations.map((cite, i) => {
                 const targetUrl = cite.url || "https://ipindia.gov.in";
-                return (
-                  <a
-                    key={cite.id || i}
-                    href={targetUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all hover:scale-[1.02] hover:shadow-xs group/pill"
-                    style={{
-                      background: "rgba(217, 119, 6, 0.08)",
-                      border: "1px solid rgba(217, 119, 6, 0.28)",
-                      color: "var(--ink-primary)",
-                      textDecoration: "none",
-                    }}
-                    title={`Open ${cite.source} on the internet`}
-                  >
-                    <span className="truncate max-w-[260px]">{cite.source}</span>
-                    <svg
-                      width="10"
-                      height="10"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="shrink-0 opacity-60 group-hover/pill:opacity-100 group-hover/pill:translate-x-0.5 transition-all"
-                    >
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                  </a>
-                );
+                const cat = (cite.category || "").toLowerCase();
+                const isClassical = cat.includes("tkdl") || cat.includes("classical") || cat.includes("samhita");
+                const isBio = cat.includes("bio") || cat.includes("botanical");
+                return {
+                  id: cite.id || `cite-${i}`,
+                  title: cite.source,
+                  snippet: cite.text || cite.category,
+                  url: targetUrl,
+                  favicon: (
+                    <span className="flex size-full items-center justify-center p-0.5">
+                      {isClassical ? (
+                        <BookOpen className="size-full text-amber-700" />
+                      ) : isBio ? (
+                        <Leaf className="size-full text-emerald-700" />
+                      ) : (
+                        <Scale className="size-full text-[#00263f]" />
+                      )}
+                    </span>
+                  ),
+                };
               })}
-            </div>
+            />
           </div>
         )}
 

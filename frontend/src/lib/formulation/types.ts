@@ -15,6 +15,14 @@ export type BotanicalCategoryId =
   | "mineral_resin"
   | "digestive";
 
+export type HerbLayer =
+  | "arthin"
+  | "yogavahi"
+  | "anupana"
+  | "sah_caraka"
+  | "resin_bhasma"
+  | "supportive";
+
 export interface BotanicalItem {
   id: string;
   common_name: string;
@@ -26,6 +34,7 @@ export interface BotanicalItem {
   standardized_percentage: string;
   category: BotanicalCategoryId;
   single_agent_ed50: number;
+  safety_ceiling_percent?: number | null;
   is_mineral_resin: boolean;
   is_threatened: boolean;
   is_cultivated: boolean;
@@ -39,6 +48,16 @@ export interface IngredientRatio {
   is_locked?: boolean;
 }
 
+export interface PresetComputedChips {
+  quality: number;
+  ci: number;
+  sec_3e_status: string;
+  tkdl_concordance_score: number;
+  tier: RasaTierId;
+  nba_abs_royalty_percentage: number;
+  cost_per_unit: number;
+}
+
 export interface PresetFormulation {
   id: string;
   title: string;
@@ -46,6 +65,31 @@ export interface PresetFormulation {
   target_tier: RasaTierId;
   ingredients: IngredientRatio[];
   baseline_ratios: Record<string, number>;
+  /** Build-time engine output (spec §8.3) — never hand-declared. */
+  computed?: PresetComputedChips;
+}
+
+export interface Directive {
+  action_type: "add" | "increase" | "decrease" | "remove";
+  herb_id: string;
+  target_ratio: number;
+  text?: string;
+  projected_impact?: string;
+}
+
+export interface IngredientContribution {
+  herb_id: string;
+  herb_name: string;
+  ratio: number;
+  layer: HerbLayer;
+  quality_delta: number;
+  ci_delta: number;
+  patentability_delta: number;
+  royalty_delta: number;
+  cost_delta: number;
+  state: "positive" | "negative" | "blocking";
+  blocking_reason?: string | null;
+  fix?: Directive | null;
 }
 
 export interface PairwiseSynergy {
@@ -86,6 +130,7 @@ export interface OptimizationDirective {
   action_type: "add" | "increase" | "decrease" | "remove";
   herb_id: string;
   target_ratio: number;
+  projected_impact?: string;
 }
 
 export interface SimulationResult {
@@ -132,6 +177,9 @@ export interface SimulationResult {
   hplc_markers: HplcMarker[];
   cost_waterfall: CostWaterfallItem[];
   suggestions: string[];
+  entity_type?: "domestic" | "foreign";
+  cost_per_unit?: number;
+  contributions?: IngredientContribution[];
 }
 
 export interface PreFERObjection {
@@ -143,8 +191,11 @@ export interface PreFERObjection {
 }
 
 export interface PreFERReport {
-  application_no: string;
-  filing_date: string;
+  /** §14.1: a simulated report carries no application number unless a real
+   *  examiner service supplies one. Null renders as "no application on file". */
+  application_no: string | null;
+  filing_date: string | null;
+  provenance?: string;
   examiner_group: string;
   overall_patentability_score: number;
   summary: string;
@@ -153,4 +204,21 @@ export interface PreFERReport {
   objections: PreFERObjection[];
   wipo_gratk_status: Record<string, string>;
   recommended_claim_draft: string[];
+}
+
+export interface ScenarioSummary {
+  id: string;
+  title: string;
+  herb_count: number;
+  total_ratio: number;
+  entity_type: "domestic" | "foreign";
+  updated_at: string;
+}
+
+export interface ScenarioDetail {
+  id: string;
+  title: string;
+  ingredients: IngredientRatio[];
+  entity_type: "domestic" | "foreign";
+  updated_at: string;
 }

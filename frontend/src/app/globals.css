@@ -1,10 +1,129 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* ─── IP-SAKTI Sahayak Design System ───────────────────────────
    Tokens extracted from Stitch project: "Ayurvedic Scholarly Interface"
    Fonts: Playfair Display (headlines) + Inter (body/labels)
    Palette: Saffron (#C0392B) + Emerald (#1A7F4E) on archival vellum
 ─────────────────────────────────────────────────────────────── */
+
+/* Material Symbols base (Google Fonts import provides the class; this is a fallback) */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Stitch Material-3 "Ayurvedic Scholarly Interface" token set ───
+   Ported verbatim from the Formulation Lab screens' Tailwind config so
+   the Stitch markup (bg-surface-container-lowest, text-primary,
+   font-headline-md, p-space-md, …) resolves identically in the app. */
+@theme {
+  /* Colors */
+  --color-emblem-gold: #B8860B;
+  --color-on-tertiary-fixed: #380d00;
+  --color-on-tertiary-container: #ff7d49;
+  --color-on-secondary-container: #307231;
+  --color-ashoka-navy: #000080;
+  --color-on-surface-variant: #42474e;
+  --color-secondary-fixed-dim: #91d78a;
+  --color-on-primary: #ffffff;
+  --color-portal-border: #D2D9E2;
+  --color-surface-container-high: #dee8ff;
+  --color-on-primary-fixed-variant: #1f4a6c;
+  --color-inverse-surface: #263143;
+  --color-on-secondary-fixed: #002203;
+  --color-on-error-container: #93000a;
+  --color-tertiary-fixed-dim: #ffb59a;
+  --color-portal-navy-deep: #002855;
+  --color-on-tertiary-fixed-variant: #802a00;
+  --color-on-secondary: #ffffff;
+  --color-surface-variant: #d8e3fb;
+  --color-on-error: #ffffff;
+  --color-surface: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-secondary-container: #acf4a4;
+  --color-portal-surface-subtle: #EEF3F8;
+  --color-portal-surface-slate: #F4F6F9;
+  --color-surface-tint: #396285;
+  --color-background: #f9f9ff;
+  --color-on-primary-container: #7fa7cd;
+  --color-tiranga-saffron-deep: #E65100;
+  --color-secondary-fixed: #acf4a4;
+  --color-tiranga-saffron: #FF9933;
+  --color-on-background: #111c2d;
+  --color-on-secondary-fixed-variant: #0c5216;
+  --color-surface-container-low: #f0f3ff;
+  --color-surface-container-highest: #d8e3fb;
+  --color-tertiary-container: #692100;
+  --color-surface-bright: #f9f9ff;
+  --color-primary-container: #0b3c5d;
+  --color-secondary: #2a6b2c;
+  --color-surface-dim: #cfdaf2;
+  --color-primary-fixed: #cee5ff;
+  --color-tertiary: #451300;
+  --color-surface-container: #e7eeff;
+  --color-tiranga-green: #138808;
+  --color-error: #ba1a1a;
+  --color-inverse-primary: #a3cbf2;
+  --color-on-tertiary: #ffffff;
+  --color-outline-variant: #c2c7ce;
+  --color-error-container: #ffdad6;
+  --color-tertiary-fixed: #ffdbcf;
+  --color-tiranga-green-deep: #1B5E20;
+  --color-outline: #72777e;
+  --color-primary: #00263f;
+  --color-primary-fixed-dim: #a3cbf2;
+  --color-on-surface: #111c2d;
+
+  /* Spacing scale (p-space-md, gap-gutter, mb-margin, …) */
+  --spacing-margin: 2rem;
+  --spacing-space-xl: 2.5rem;
+  --spacing-gutter-mobile: 1rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-margin-mobile: 1rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-sm: 0.5rem;
+
+  /* Font families (reference next/font CSS variables so loaded fonts resolve) */
+  --font-body-md: var(--font-inter), sans-serif;
+  --font-body-sm: var(--font-inter), sans-serif;
+  --font-body-lg: var(--font-inter), sans-serif;
+  --font-title-md: var(--font-noto-sans), sans-serif;
+  --font-title-lg: var(--font-noto-sans), sans-serif;
+  --font-headline-sm: var(--font-noto-sans), sans-serif;
+  --font-headline-md: var(--font-noto-sans), sans-serif;
+  --font-headline-lg: var(--font-noto-sans), sans-serif;
+  --font-headline-xl: var(--font-noto-sans), sans-serif;
+  --font-label-sm: var(--font-public-sans), sans-serif;
+  --font-label-md: var(--font-public-sans), sans-serif;
+  --font-label-lg: var(--font-public-sans), sans-serif;
+
+  /* Font sizes (text-headline-md, text-label-sm, …) */
+  --text-body-sm: 12px; --text-body-sm--line-height: 18px; --text-body-sm--font-weight: 400;
+  --text-body-md: 14px; --text-body-md--line-height: 22px; --text-body-md--font-weight: 400;
+  --text-body-lg: 16px; --text-body-lg--line-height: 26px; --text-body-lg--font-weight: 400;
+  --text-title-md: 16px; --text-title-md--line-height: 24px; --text-title-md--font-weight: 600;
+  --text-title-lg: 18px; --text-title-lg--line-height: 26px; --text-title-lg--font-weight: 600;
+  --text-headline-sm: 20px; --text-headline-sm--line-height: 28px; --text-headline-sm--font-weight: 600;
+  --text-headline-md: 24px; --text-headline-md--line-height: 32px; --text-headline-md--font-weight: 600;
+  --text-headline-lg: 32px; --text-headline-lg--line-height: 40px; --text-headline-lg--font-weight: 700;
+  --text-headline-xl: 40px; --text-headline-xl--line-height: 48px; --text-headline-xl--font-weight: 700;
+  --text-label-sm: 11px; --text-label-sm--line-height: 14px; --text-label-sm--font-weight: 700;
+  --text-label-md: 12px; --text-label-md--line-height: 16px; --text-label-md--font-weight: 600;
+  --text-label-lg: 14px; --text-label-lg--line-height: 20px; --text-label-lg--font-weight: 600;
+}
 
 :root {
   /* ── Layout ── */
@@ -48,6 +167,27 @@
   --font-sans: var(--font-inter), var(--font-noto-sans), sans-serif;
   --font-heading: var(--font-noto-sans), sans-serif;
   --font-label: var(--font-public-sans), sans-serif;
+
+  /* ── Semantic UI primitive tokens ──
+     Names used by the shared primitives in `components/ui` (Select, …).
+     Values are remapped to the IP-SAKTI portal palette — never the
+     library defaults — so overlays match the existing chrome. */
+  --color-foreground: #0F172A;
+  --color-border: #D2D9E2;
+  --color-input: #D2D9E2;
+  --color-ring: #0b3c5d;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0F172A;
+  --color-muted: #EEF3F8;
+  --color-muted-foreground: #64748B;
+  --color-accent: #EEF3F8;
+  --color-accent-foreground: #00263f;
+  --color-destructive: #ba1a1a;
+  --color-destructive-foreground: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary-foreground: #0F172A;
 }
 
 /* ── Base Styles ── */
@@ -238,5 +378,27 @@ body {
     font-size: 24px;
     line-height: 32px;
     letter-spacing: 0;
+  }
+}
+
+/* ── Formulation Lab dossier print (§13): print the dossier document only,
+      never the app shell. Replaces window.print() of the whole page. ── */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #dossier-root,
+  #dossier-root * {
+    visibility: visible !important;
+  }
+  #dossier-root {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  #dossier-root .print\:hidden {
+    display: none !important;
   }
 }

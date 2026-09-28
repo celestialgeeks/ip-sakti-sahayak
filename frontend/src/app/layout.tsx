@@ -36,6 +36,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${notoSans.variable} ${publicSans.variable}`}>
+      <head>
+        {/* Material Symbols icon font (used by the Stitch Material-3 UI) */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-screen">
         {/* Gradient accent line at top */}
         <div className="header-accent" />

@@ -2,12 +2,24 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchSuppliers } from "@/lib/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 import type { Supplier } from "@/lib/types";
 
 const STATES = ["", "Kerala", "Karnataka", "Delhi", "Uttar Pradesh", "Maharashtra", "Jammu & Kashmir", "Madhya Pradesh", "Tamil Nadu"];
 const CERTS = ["", "GMP", "FSSAI", "AYUSH", "organic"];
 
+// Radix items cannot use "" as a value, so the "no filter" choice gets a
+// sentinel and is translated back to "" before hitting the API.
+const ANY = "__any__";
+
 const field = "h-9 rounded border border-[#D2D9E2] bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0b3c5d]";
+const itemsCls = "[&_[data-slot=select-item]]:text-sm";
 
 export function SupplierDirectory() {
   const [items, setItems] = useState<Supplier[]>([]);
@@ -44,12 +56,24 @@ export function SupplierDirectory() {
         <div className="flex flex-wrap items-center gap-3">
           <input aria-label="Search suppliers" className={`${field} flex-1 min-w-[200px]`} placeholder="Search material, supplier or region (e.g. Ashwagandha, Turmeric)"
             value={q} onChange={(e) => setQ(e.target.value)} />
-          <select aria-label="Filter by state" className={field} value={state} onChange={(e) => setState(e.target.value)}>
-            {STATES.map((s) => <option key={s} value={s}>{s || "All states"}</option>)}
-          </select>
-          <select aria-label="Filter by certification" className={field} value={cert} onChange={(e) => setCert(e.target.value)}>
-            {CERTS.map((c) => <option key={c} value={c}>{c || "Any certification"}</option>)}
-          </select>
+          <Select value={state || ANY} onValueChange={(v) => setState(v === ANY ? "" : v)}>
+            <SelectTrigger aria-label="Filter by state" className={field}>
+              <SelectValue placeholder="All states" />
+            </SelectTrigger>
+            <SelectContent className={itemsCls}>
+              <SelectItem value={ANY}>All states</SelectItem>
+              {STATES.filter(Boolean).map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={cert || ANY} onValueChange={(v) => setCert(v === ANY ? "" : v)}>
+            <SelectTrigger aria-label="Filter by certification" className={field}>
+              <SelectValue placeholder="Any certification" />
+            </SelectTrigger>
+            <SelectContent className={itemsCls}>
+              <SelectItem value={ANY}>Any certification</SelectItem>
+              {CERTS.filter(Boolean).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" className="accent-[#138808]" checked={giOnly} onChange={(e) => setGiOnly(e.target.checked)} />
             GI-tagged only

@@ -1,0 +1,1205 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>IP-SAKTI Sahayak 2.0 | Ministry of Ayush, Government of India</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&amp;family=Inter:wght@400;500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;family=Public+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "emblem-gold": "#B8860B",
+          "on-tertiary-fixed": "#380d00",
+          "on-tertiary-container": "#ff7d49",
+          "on-secondary-container": "#307231",
+          "ashoka-navy": "#000080",
+          "on-surface-variant": "#42474e",
+          "secondary-fixed-dim": "#91d78a",
+          "on-primary": "#ffffff",
+          "portal-border": "#D2D9E2",
+          "surface-container-high": "#dee8ff",
+          "on-primary-fixed-variant": "#1f4a6c",
+          "inverse-surface": "#263143",
+          "on-secondary-fixed": "#002203",
+          "on-error-container": "#93000a",
+          "tertiary-fixed-dim": "#ffb59a",
+          "portal-navy-deep": "#002855",
+          "on-tertiary-fixed-variant": "#802a00",
+          "on-secondary": "#ffffff",
+          "on-surface": "#111c2d",
+          "surface-variant": "#d8e3fb",
+          "on-error": "#ffffff",
+          "surface": "#f9f9ff",
+          "surface-container-lowest": "#ffffff",
+          "secondary-container": "#acf4a4",
+          "portal-surface-subtle": "#EEF3F8",
+          "portal-surface-slate": "#F4F6F9",
+          "surface-tint": "#396285",
+          "background": "#f9f9ff",
+          "on-primary-container": "#7fa7cd",
+          "tiranga-saffron-deep": "#E65100",
+          "secondary-fixed": "#acf4a4",
+          "inverse-on-surface": "#ecf1ff",
+          "tiranga-saffron": "#FF9933",
+          "on-background": "#111c2d",
+          "on-secondary-fixed-variant": "#0c5216",
+          "surface-container-low": "#f0f3ff",
+          "surface-container-highest": "#d8e3fb",
+          "tertiary-container": "#692100",
+          "surface-bright": "#f9f9ff",
+          "primary-container": "#0b3c5d",
+          "secondary": "#2a6b2c",
+          "surface-dim": "#cfdaf2",
+          "primary-fixed": "#cee5ff",
+          "tertiary": "#451300",
+          "surface-container": "#e7eeff",
+          "tiranga-green": "#138808",
+          "error": "#ba1a1a",
+          "inverse-primary": "#a3cbf2",
+          "on-tertiary": "#ffffff",
+          "outline-variant": "#c2c7ce",
+          "error-container": "#ffdad6",
+          "tertiary-fixed": "#ffdbcf",
+          "tiranga-green-deep": "#1B5E20",
+          "outline": "#72777e",
+          "on-primary-fixed": "#001d32",
+          "primary": "#00263f",
+          "primary-fixed-dim": "#a3cbf2"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "margin": "2rem",
+          "space-xl": "2.5rem",
+          "gutter-mobile": "1rem",
+          "gutter": "1.5rem",
+          "margin-mobile": "1rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-md": "1rem",
+          "space-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "body-md": ["Inter"],
+          "title-md": ["Noto Sans"],
+          "headline-md": ["Noto Sans"],
+          "label-md": ["Public Sans"],
+          "headline-xl": ["Noto Sans"],
+          "body-sm": ["Inter"],
+          "headline-lg-mobile": ["Noto Sans"],
+          "headline-xl-mobile": ["Noto Sans"],
+          "label-sm": ["Public Sans"],
+          "label-lg": ["Public Sans"],
+          "body-lg": ["Inter"],
+          "headline-sm": ["Noto Sans"],
+          "headline-lg": ["Noto Sans"],
+          "title-lg": ["Noto Sans"],
+          "cinzel": ["Cinzel", "serif"]
+        },
+        "fontSize": {
+          "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+          "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+          "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+          "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+          "headline-xl": ["40px", { "lineHeight": "48px", "fontWeight": "700" }],
+          "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+          "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+          "headline-xl-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+          "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "700" }],
+          "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+          "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+          "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+          "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+          "title-lg": ["18px", { "lineHeight": "26px", "fontWeight": "600" }]
+        }
+      }
+    }
+  };
+</script>
+<style>
+  @layer base {
+    html, body { margin: 0; padding: 0; }
+    body { overscroll-behavior: none; }
+  }
+  ::-webkit-scrollbar { display: none; }
+  .tricolor-stripe {
+    background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+  }
+  .anime-card-glow {
+    box-shadow: 0 0 25px rgba(255, 153, 51, 0.25), 0 10px 30px rgba(0, 40, 85, 0.35);
+  }
+  .mana-orb {
+    box-shadow: 0 0 15px rgba(255, 153, 51, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.8);
+  }
+  .holo-shimmer {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,215,0,0.15) 25%, rgba(19,136,8,0.15) 50%, rgba(255,153,51,0.2) 75%, rgba(255,255,255,0.15) 100%);
+  }
+  @keyframes pulseAura {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.04); opacity: 1; }
+  }
+  .animate-aura {
+    animation: pulseAura 4s ease-in-out infinite;
+  }
+</style>
+<meta content="web_dashboard" name="shell-type">
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased">
+<!-- Top Institutional Bar & Main Gov Header -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-portal-border shadow-xs">
+<!-- National Tricolor Strip -->
+<div class="h-[3px] w-full tricolor-stripe"></div>
+<!-- Accessibility & Official Apex Bar -->
+<div class="bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm px-gutter-mobile sm:px-gutter py-1 flex items-center justify-between border-b border-outline-variant/30">
+<div class="flex items-center gap-space-md">
+<span class="font-semibold text-surface-container-lowest tracking-wider flex items-center gap-1.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-tiranga-saffron"></span>
+        भारत सरकार | GOVERNMENT OF INDIA
+      </span>
+<span class="hidden md:inline-block text-outline">•</span>
+<span class="hidden md:inline text-outline-variant">आयुष मंत्रालय | Ministry of Ayush</span>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Accessibility Font Controls -->
+<div class="flex items-center gap-1 border-r border-outline-variant/40 pr-3">
+<span class="text-outline-variant mr-1 text-[10px] uppercase font-label-sm">Font:</span>
+<button class="px-1 py-0.5 rounded hover:bg-surface-variant hover:text-on-surface transition-colors" title="Decrease Font">A-</button>
+<button class="px-1 py-0.5 rounded bg-surface-variant text-on-surface font-bold" title="Standard Font">A</button>
+<button class="px-1 py-0.5 rounded hover:bg-surface-variant hover:text-on-surface transition-colors" title="Increase Font">A+</button>
+</div>
+<!-- Language Switcher -->
+<div class="flex items-center gap-1 font-semibold text-inverse-on-surface">
+<span class="text-surface-container-lowest hover:underline cursor-pointer">English</span>
+<span class="text-outline-variant">|</span>
+<span class="text-outline-variant hover:text-surface-container-lowest hover:underline cursor-pointer font-normal">हिन्दी</span>
+</div>
+</div>
+</div>
+<!-- Primary Nav Header with Official Seals & Status Badges -->
+<div class="h-16 px-gutter-mobile sm:px-gutter flex items-center justify-between">
+<!-- Ayush & Lion Emblem Title -->
+<div class="flex items-center gap-3.5">
+<div class="flex items-center gap-3">
+<img alt="State Emblem of India" class="h-11 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRRLbJAeuvaAbipe1qusQWrdyjYbkPpSRTQjTFXKDFGTK2VASQpi2mYI-njar5O2de332KW2YXGlfYE--ZP_o2nmp9nWZwxH09PW7GOZ-bZRsXfshvXvCXQuSyZpF8qpxgrxh4hG644v4ntLctywctQRnC2MULsjROmIEo-dPIhwt-ry0sWWDg-fEG1UMencs_sIB5GrlPRkv-6qy8wlB9kzvmUJ5SxPyK5PqOtaLeSJh2DJOcOfaglH6vt16C31DPQQ">
+<div class="flex flex-col justify-center">
+<div class="font-headline-sm text-[13px] font-semibold tracking-tight text-on-surface-variant leading-tight">भारत सरकार</div>
+<div class="font-headline-md text-title-lg font-bold tracking-tight text-portal-navy-deep leading-tight">आयुष मंत्रालय</div>
+<div class="font-label-md text-body-sm text-outline font-medium leading-tight mt-0.5">Ministry of Ayush <span class="text-outline-variant">|</span> IP-SAKTI Sahayak</div>
+</div>
+</div>
+</div>
+<!-- Right Header Indicators & Actions -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-space-md mr-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Export Dossier" type="button">
+<span class="material-symbols-outlined text-[22px]">download</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Help &amp; Documentation" type="button">
+<span class="material-symbols-outlined text-[22px]">help_outline</span>
+</button>
+<a class="font-label-lg text-body-md font-semibold text-primary hover:text-primary-container ml-2 border border-portal-border rounded px-3 py-1 bg-portal-surface-subtle hover:bg-surface-container transition-colors" data-path="login" href="/login">Sign In</a>
+</div>
+</div>
+</div>
+</header>
+<!-- Left Official Nav Sidebar -->
+<aside class="fixed left-0 top-[91px] bottom-0 w-64 bg-inverse-surface text-inverse-on-surface border-r border-outline-variant/30 z-40 flex flex-col justify-between overflow-y-auto text-[13px]">
+<div class="flex flex-col flex-1 p-3">
+<button class="flex items-center justify-between w-full px-3 py-2 rounded bg-surface-container-high/10 text-surface-container-lowest hover:bg-surface-container-high/20 transition-colors group mb-3" type="button">
+<div class="flex items-center gap-2 font-label-md text-body-sm text-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="">New Session</span>
+</div>
+<div class="flex items-center gap-0.5 text-[11px] text-outline font-mono">
+<span class="px-1 py-0.2 rounded border border-outline-variant/30 bg-surface-container-low/10">⌘</span>
+<span class="px-1 py-0.2 rounded border border-outline-variant/30 bg-surface-container-low/10">N</span>
+</div>
+</button>
+<!-- Core Registries Header -->
+<div class="flex items-center gap-1.5 px-2 mb-2 mt-1">
+<span class="material-symbols-outlined text-[15px] text-tiranga-saffron">assured_workload</span>
+<span class="font-label-sm text-[10px] font-bold text-outline-variant uppercase tracking-wider">Core Registries</span>
+</div>
+<!-- Core Registries Navigation -->
+<nav class="flex flex-col gap-1 pb-3 mb-2 border-b border-outline-variant/20" data-active-classes="bg-surface-container-high/25 text-surface-container-lowest font-semibold border-l-2 border-tiranga-saffron pl-2">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px]" data-path="tkdl-registry" href="/tkdl" title="TKDL Registry">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">menu_book</span>
+<span class="">TKDL Registry</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px]" data-path="patent-gazette-prior-art" href="/patents" title="Patent Gazette &amp; Prior Art">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">gavel</span>
+<span class="">Patent Gazette &amp; Prior Art</span>
+</a>
+<a aria-current="page" class="flex items-center gap-2.5 px-3 py-2 rounded transition-colors bg-surface-container-high/25 text-surface-container-lowest font-semibold border-l-2 border-tiranga-saffron pl-2" data-path="formulation-lab" href="/formulation-lab" title="Formulation Lab">
+<span class="material-symbols-outlined text-[18px] text-tiranga-saffron">science</span>
+<span class="">Formulation Lab</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded text-inverse-on-surface hover:text-surface-container-lowest hover:bg-surface-container-high/15 transition-colors text-[13px]" data-path="latest-rules-regulations" href="/rules" title="Latest Rules &amp; Regulations">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">history_edu</span>
+<span class="">Latest Rules &amp; Regulations</span>
+</a>
+</nav>
+<!-- Sessions Search Filter -->
+<div class="relative mb-3 mt-1">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-outline pointer-events-none">search</span>
+<input class="w-full bg-surface-container-high/10 border border-outline-variant/30 rounded pl-8 pr-3 py-1.5 text-body-sm text-surface-container-lowest placeholder:text-outline focus:outline-none focus:border-tiranga-saffron text-[12px]" placeholder="Search sessions..." type="text">
+</div>
+<!-- Past Sessions List Heading -->
+<div class="flex items-center gap-2 px-1 mb-2">
+<span class="material-symbols-outlined text-[14px] text-outline">schedule</span>
+<span class="font-label-sm text-[10px] font-bold text-outline-variant uppercase tracking-wider">Recent Sessions</span>
+</div>
+<div class="flex flex-col items-center justify-center text-center px-2 py-6 mt-1">
+<p class="text-[12px] text-outline font-medium">No past sessions recorded.</p>
+<p class="text-[11px] text-outline-variant mt-0.5">Formulations &amp; queries will appear here.</p>
+</div>
+</div>
+<!-- User Status / Login Strip -->
+<div class="p-3 border-t border-outline-variant/30 bg-inverse-surface/80">
+<a class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded bg-primary-container hover:bg-surface-tint text-surface-container-lowest text-label-md font-semibold transition-colors shadow-xs" data-path="login" href="/login">
+<span class="material-symbols-outlined text-[18px]">login</span>
+<span class="">Login / Register</span>
+</a>
+</div>
+</aside>
+<!-- Main Body Content Area with Left Sidebar Offset -->
+<div class="flex-1 flex flex-col pl-64 min-h-screen">
+<main class="pt-[91px] pb-16 flex-1 relative flex flex-col items-center w-full">
+<div class="flex flex-col w-full">
+<!-- Top Container Wrapper -->
+<div class="relative w-full px-space-md sm:px-gutter lg:px-margin max-w-[1440px] mx-auto pt-space-md pb-space-lg">
+<!-- Section Title & Meta Header Block -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg mb-space-md relative overflow-hidden">
+<!-- Top Saffron/Green Decorative Accent Ribbon -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-tiranga-saffron via-surface-container-lowest to-tiranga-green opacity-90"></div>
+<div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-space-md">
+<div class="max-w-4xl">
+<div class="flex flex-wrap items-center gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-primary-container text-surface-container-lowest font-label-sm text-label-sm tracking-wide">
+<span class="material-symbols-outlined text-[14px]">science</span>
+          LAB MODULE
+        </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-[11px] font-bold">
+<span class="material-symbols-outlined text-[13px] text-tiranga-saffron-deep">bolt</span>
+          Dynamic Potency Engine 2.0
+        </span>
+</div>
+<h1 class="font-headline-md text-headline-md text-portal-navy-deep font-bold tracking-tight">
+        Formulation Lab: Ratio Impact Simulator <span class="text-on-surface-variant font-normal text-headline-sm">— The “What-If” Engine</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+        Simulate dosage and stoichiometric variations in real time to evaluate synergistic bio-efficacy, satisfy <strong class="text-portal-navy-deep font-semibold">Section 3(e)</strong> non-obviousness criteria under the Indian Patents Act, maintain classical TKDL concordance, and optimize NBA Benefit-Sharing obligations.
+      </p>
+</div>
+<!-- Top Action Hub -->
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-2 rounded-lg bg-portal-surface-slate hover:bg-surface-container-high text-portal-navy-deep font-label-sm text-label-sm font-semibold flex items-center gap-1.5 border border-portal-border transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">history</span>
+<span>Revert Spec</span>
+</button>
+<button class="px-3.5 py-2 rounded-lg bg-primary-container hover:bg-portal-navy-deep text-surface-container-lowest font-label-sm text-label-sm font-semibold flex items-center gap-1.5 shadow-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">share</span>
+<span>Export Spec Sheet</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Live KPI Metric Strip -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-md">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden border border-portal-border/60">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Compound Total</span>
+<span class="flex items-center gap-1 text-tiranga-green font-label-sm text-label-sm font-bold bg-secondary-container/40 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">balance</span> Balanced
+      </span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-portal-navy-deep tracking-tight" id="kpi-total-ratio">100.0%</span>
+<span class="font-label-sm text-label-sm text-outline">/ 100.0%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-tiranga-green h-full rounded-full transition-all duration-300" id="kpi-ratio-bar" style="width: 100%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline mt-1.5">
+<span class="">Stoichiometric balance</span>
+<span class="text-secondary font-semibold">Normalized</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden border border-portal-border/60">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Synergy Index (CI Score)</span>
+<span class="inline-flex items-center gap-0.5 text-tiranga-green font-label-sm text-label-sm font-bold bg-secondary-container/40 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +0.14 Boost
+      </span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-portal-navy-deep tracking-tight" id="kpi-ci-score">0.68</span>
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-[11px] font-bold">Sec 3(e) Cleared</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-tiranga-green-deep h-full rounded-full" style="width: 76%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline mt-1.5">
+<span class="">Chou-Talalay CI &lt; 1.0</span>
+<span class="text-portal-navy-deep font-semibold">Super-Additive</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden border border-portal-border/60">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">TKDL Concordance</span>
+<span class="flex items-center gap-1 text-emblem-gold font-label-sm text-label-sm font-bold bg-tertiary-fixed/60 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">auto_stories</span> Charaka Chikitsa
+      </span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-portal-navy-deep tracking-tight" id="kpi-tkdl-concordance">92%</span>
+<span class="font-label-sm text-label-sm text-outline">High Alignment</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-emblem-gold h-full rounded-full" style="width: 92%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline mt-1.5">
+<span class="">Ayurvedic Pharmacopoeia</span>
+<span class="text-emblem-gold font-semibold">Admissible</span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden border border-portal-border/60">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">NBA Benefit-Sharing</span>
+<span class="flex items-center gap-1 text-tiranga-green font-label-sm text-label-sm font-bold bg-secondary-container/40 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">verified_user</span> Rule 13
+      </span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-portal-navy-deep tracking-tight" id="kpi-nba-rate">3.5%</span>
+<span class="font-label-sm text-label-sm text-outline">Net Ex-Factory</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-tiranga-saffron-deep h-full rounded-full" style="width: 45%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline mt-1.5">
+<span class="">Biological Diversity Act 2002</span>
+<span class="text-secondary font-semibold">Fast-Track Tier</span>
+</div>
+</div>
+</div>
+<!-- TOP HERO ROW: Ingredients Matrix (7 cols) + Anime RPG Ayurvedic Power Card (5 cols) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-stretch mb-space-md">
+<!-- LEFT COLUMN: Ingredients & Ratio Modifier Matrix (7 cols) -->
+<div class="lg:col-span-7 flex flex-col justify-between bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg border border-portal-border/70 relative">
+<div>
+<!-- Toolbar Strip -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-md mb-space-sm border-b border-surface-container">
+<div>
+<h2 class="font-title-lg text-title-lg font-bold text-portal-navy-deep flex items-center gap-2">
+<span class="material-symbols-outlined text-tiranga-saffron">tune</span>
+            Ingredients &amp; Stoichiometric Modifier Matrix
+          </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Modify active sliders to drive the Ayurvedic Power Card and live compliance engines.</p>
+</div>
+<!-- Quick Filter & Add -->
+<div class="flex items-center gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-outline pointer-events-none">search</span>
+<input class="pl-8 pr-3 py-1.5 bg-portal-surface-slate rounded text-body-sm text-on-surface placeholder:text-outline text-[12px] w-36 focus:outline-none focus:bg-surface-container-lowest border border-portal-border/60" placeholder="Filter ingredient..." type="text">
+</div>
+<button class="flex items-center gap-1 px-2.5 py-1.5 rounded bg-primary-container text-surface-container-lowest font-label-sm text-label-sm hover:bg-surface-tint transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+<span>Add Extract</span>
+</button>
+</div>
+</div>
+<!-- Table Header -->
+<div class="hidden sm:grid sm:grid-cols-12 gap-2 px-3 py-2 bg-portal-surface-subtle rounded font-label-sm text-[11px] font-bold text-outline-variant uppercase tracking-wider mb-2">
+<div class="col-span-1 flex items-center justify-center">Select</div>
+<div class="col-span-5">Botanical / Active Compound</div>
+<div class="col-span-2 text-center">Baseline</div>
+<div class="col-span-3 text-center">What-If Ratio %</div>
+<div class="col-span-1 text-right">Lock</div>
+</div>
+<!-- Interactive Ingredient Rows Container -->
+<div class="flex flex-col gap-2">
+<!-- ROW 1: Ashwagandha (Active Modified / Boosted) -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg bg-tertiary-fixed/30 ring-2 ring-tiranga-saffron shadow-xs relative transition-all items-center" id="row-ashwagandha">
+<div class="sm:col-span-1 flex items-center justify-between sm:justify-center">
+<span class="sm:hidden font-label-sm text-body-sm font-semibold text-portal-navy-deep">Selected:</span>
+<input checked="" class="w-4 h-4 rounded text-tiranga-saffron focus:ring-tiranga-saffron accent-tiranga-saffron cursor-pointer" type="checkbox">
+</div>
+<div class="sm:col-span-5 flex items-center gap-3">
+<div class="w-9 h-9 rounded-md bg-surface-container-lowest flex items-center justify-center text-tiranga-saffron shadow-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">spa</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-body-md font-bold text-portal-navy-deep truncate">Ashwagandha</span>
+<span class="px-1.5 py-0.2 bg-tiranga-saffron/20 text-tiranga-saffron-deep font-label-sm text-[10px] rounded font-bold uppercase">Delta +10%</span>
+</div>
+<div class="text-[12px] font-body-sm italic text-on-surface-variant truncate">Withania somnifera (Root Extract)</div>
+<div class="text-[11px] font-label-sm text-outline mt-0.5">Withanolides ≥ 5.2% HPLC</div>
+</div>
+</div>
+<div class="sm:col-span-2 flex items-center justify-between sm:justify-center text-center">
+<span class="sm:hidden font-label-sm text-[12px] text-outline">Baseline:</span>
+<span class="font-label-md text-body-sm text-on-surface-variant line-through">30.0%</span>
+</div>
+<div class="sm:col-span-3 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<input class="w-full accent-tiranga-saffron h-1.5 bg-surface-container rounded-lg cursor-pointer" id="slider-ashwagandha" max="60" min="10" step="1" type="range" value="40">
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm">
+<span class="text-tiranga-saffron font-semibold">⚡ Power Surge</span>
+<div class="flex items-center gap-1">
+<input class="w-14 py-0.5 px-1.5 bg-surface-container-lowest font-bold text-portal-navy-deep text-right rounded border-0 text-body-sm shadow-xs" id="val-ashwagandha" max="75" min="5" step="0.5" type="number" value="40.0">
+<span class="font-bold text-portal-navy-deep">%</span>
+</div>
+</div>
+</div>
+<div class="sm:col-span-1 flex items-center justify-end gap-1.5">
+<button class="p-1 text-tiranga-saffron hover:text-tiranga-saffron-deep" title="Simulated row flagged" type="button">
+<span class="material-symbols-outlined text-[18px]">flag</span>
+</button>
+<button class="p-1 text-outline hover:text-portal-navy-deep" title="Lock Ratio" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+</button>
+</div>
+</div>
+<!-- ROW 2: Shilajit (Compensated Delta -10%) -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors items-center" id="row-shilajit">
+<div class="sm:col-span-1 flex items-center justify-between sm:justify-center">
+<span class="sm:hidden font-label-sm text-body-sm font-semibold text-portal-navy-deep">Selected:</span>
+<input class="w-4 h-4 rounded text-portal-navy-deep cursor-pointer" type="checkbox">
+</div>
+<div class="sm:col-span-5 flex items-center gap-3">
+<div class="w-9 h-9 rounded-md bg-surface-container-lowest flex items-center justify-center text-portal-navy-deep shadow-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">terrain</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-body-md font-bold text-portal-navy-deep truncate">Shilajit Purified</span>
+<span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-[10px] rounded font-bold uppercase">Optimized</span>
+</div>
+<div class="text-[12px] font-body-sm italic text-on-surface-variant truncate">Asphaltum punjabianum (Resin)</div>
+<div class="text-[11px] font-label-sm text-outline mt-0.5">Fulvic Acid ≥ 50.0%</div>
+</div>
+</div>
+<div class="sm:col-span-2 flex items-center justify-between sm:justify-center text-center">
+<span class="sm:hidden font-label-sm text-[12px] text-outline">Baseline:</span>
+<span class="font-label-md text-body-sm text-on-surface-variant line-through">20.0%</span>
+</div>
+<div class="sm:col-span-3 flex flex-col gap-1">
+<input class="w-full accent-primary-container h-1.5 bg-surface-container rounded-lg cursor-pointer" id="slider-shilajit" max="40" min="0" step="1" type="range" value="10">
+<div class="flex items-center justify-between text-[11px] font-label-sm">
+<span class="text-secondary font-semibold">Reduced levy -1.5%</span>
+<div class="flex items-center gap-1">
+<input class="w-14 py-0.5 px-1.5 bg-surface-container-lowest font-bold text-portal-navy-deep text-right rounded border-0 text-body-sm shadow-xs" id="val-shilajit" max="40" min="0" step="0.5" type="number" value="10.0">
+<span class="font-bold text-portal-navy-deep">%</span>
+</div>
+</div>
+</div>
+<div class="sm:col-span-1 flex items-center justify-end gap-1.5">
+<button class="p-1 text-outline hover:text-portal-navy-deep" title="Inspect" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1 text-outline hover:text-portal-navy-deep" title="Lock Ratio" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+</button>
+</div>
+</div>
+<!-- ROW 3: Haridra / Curcumin (Locked Baseline) -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors items-center border border-surface-container">
+<div class="sm:col-span-1 flex items-center justify-between sm:justify-center">
+<span class="sm:hidden font-label-sm text-body-sm font-semibold text-portal-navy-deep">Selected:</span>
+<input class="w-4 h-4 rounded text-portal-navy-deep cursor-pointer" type="checkbox">
+</div>
+<div class="sm:col-span-5 flex items-center gap-3">
+<div class="w-9 h-9 rounded-md bg-surface-container flex items-center justify-center text-emblem-gold shadow-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">grain</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-body-md font-bold text-portal-navy-deep truncate">Haridra (Curcumin)</span>
+<span class="px-1.5 py-0.2 bg-surface-container text-outline font-label-sm text-[10px] rounded font-semibold uppercase">Locked</span>
+</div>
+<div class="text-[12px] font-body-sm italic text-on-surface-variant truncate">Curcuma longa (Rhizome 95%)</div>
+<div class="text-[11px] font-label-sm text-outline mt-0.5">Total Curcuminoids 95.0%</div>
+</div>
+</div>
+<div class="sm:col-span-2 flex items-center justify-between sm:justify-center text-center">
+<span class="sm:hidden font-label-sm text-[12px] text-outline">Baseline:</span>
+<span class="font-label-md text-body-sm text-portal-navy-deep font-semibold">30.0%</span>
+</div>
+<div class="sm:col-span-3 flex flex-col gap-1 opacity-70">
+<input class="w-full accent-outline h-1.5 bg-surface-container rounded-lg cursor-not-allowed" disabled="" max="50" min="10" type="range" value="30">
+<div class="flex items-center justify-between text-[11px] font-label-sm">
+<span class="text-outline">Stoichiometric Constant</span>
+<div class="flex items-center gap-1">
+<span class="font-bold text-portal-navy-deep text-body-sm">30.0%</span>
+</div>
+</div>
+</div>
+<div class="sm:col-span-1 flex items-center justify-end gap-1.5">
+<button class="p-1 text-portal-navy-deep" title="Locked Parameter" type="button">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+</div>
+</div>
+<!-- ROW 4: Pippali (Bio-enhancer Piperine) -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors items-center border border-surface-container">
+<div class="sm:col-span-1 flex items-center justify-between sm:justify-center">
+<span class="sm:hidden font-label-sm text-body-sm font-semibold text-portal-navy-deep">Selected:</span>
+<input class="w-4 h-4 rounded text-portal-navy-deep cursor-pointer" type="checkbox">
+</div>
+<div class="sm:col-span-5 flex items-center gap-3">
+<div class="w-9 h-9 rounded-md bg-surface-container flex items-center justify-center text-tiranga-green shadow-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-body-md font-bold text-portal-navy-deep truncate">Pippali Bio-Enhancer</span>
+<span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-[10px] rounded font-bold uppercase">Yogavahi</span>
+</div>
+<div class="text-[12px] font-body-sm italic text-on-surface-variant truncate">Piper longum (Fruit)</div>
+<div class="text-[11px] font-label-sm text-outline mt-0.5">Piperine ≥ 98.0% Bio-Catalyst</div>
+</div>
+</div>
+<div class="sm:col-span-2 flex items-center justify-between sm:justify-center text-center">
+<span class="sm:hidden font-label-sm text-[12px] text-outline">Baseline:</span>
+<span class="font-label-md text-body-sm text-on-surface-variant">5.0%</span>
+</div>
+<div class="sm:col-span-3 flex flex-col gap-1">
+<input class="w-full accent-primary-container h-1.5 bg-surface-container rounded-lg cursor-pointer" id="slider-pippali" max="15" min="1" step="0.5" type="range" value="5">
+<div class="flex items-center justify-between text-[11px] font-label-sm">
+<span class="text-secondary font-semibold">Absorption Booster</span>
+<div class="flex items-center gap-1">
+<input class="w-14 py-0.5 px-1.5 bg-surface-container font-bold text-portal-navy-deep text-right rounded border-0 text-body-sm shadow-xs" id="val-pippali" max="15" min="1" step="0.5" type="number" value="5.0">
+<span class="font-bold text-portal-navy-deep">%</span>
+</div>
+</div>
+</div>
+<div class="sm:col-span-1 flex items-center justify-end gap-1.5">
+<button class="p-1 text-outline hover:text-portal-navy-deep" title="Lock Ratio" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+</button>
+</div>
+</div>
+<!-- ROW 5: Aqueous Lipid Base Excipients -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors items-center border border-surface-container">
+<div class="sm:col-span-1 flex items-center justify-between sm:justify-center">
+<span class="sm:hidden font-label-sm text-body-sm font-semibold text-portal-navy-deep">Selected:</span>
+<input class="w-4 h-4 rounded text-portal-navy-deep cursor-pointer" type="checkbox">
+</div>
+<div class="sm:col-span-5 flex items-center gap-3">
+<div class="w-9 h-9 rounded-md bg-surface-container flex items-center justify-center text-outline shadow-xs flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">science</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-body-md font-bold text-portal-navy-deep truncate">Medicated Ghee Adjuvant</span>
+<span class="px-1.5 py-0.2 bg-surface-container text-on-surface-variant font-label-sm text-[10px] rounded font-semibold uppercase">Vehicle</span>
+</div>
+<div class="text-[12px] font-body-sm italic text-on-surface-variant truncate">Medicated Clarified Butter / Phospholipids</div>
+<div class="text-[11px] font-label-sm text-outline mt-0.5">Ayurvedic Ghrita Standard IP/API</div>
+</div>
+</div>
+<div class="sm:col-span-2 flex items-center justify-between sm:justify-center text-center">
+<span class="sm:hidden font-label-sm text-[12px] text-outline">Baseline:</span>
+<span class="font-label-md text-body-sm text-on-surface-variant">15.0%</span>
+</div>
+<div class="sm:col-span-3 flex flex-col gap-1">
+<input class="w-full accent-primary-container h-1.5 bg-surface-container rounded-lg cursor-pointer" id="slider-excipient" max="30" min="5" step="1" type="range" value="15">
+<div class="flex items-center justify-between text-[11px] font-label-sm">
+<span class="text-outline">Auto-balance buffer</span>
+<div class="flex items-center gap-1">
+<input class="w-14 py-0.5 px-1.5 bg-surface-container font-bold text-portal-navy-deep text-right rounded border-0 text-body-sm shadow-xs" id="val-excipient" max="30" min="5" step="0.5" type="number" value="15.0">
+<span class="font-bold text-portal-navy-deep">%</span>
+</div>
+</div>
+</div>
+<div class="sm:col-span-1 flex items-center justify-end gap-1.5">
+<button class="p-1 text-outline hover:text-portal-navy-deep" title="Lock Ratio" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Micro Controls for Formulation -->
+<div class="mt-space-md pt-3 border-t border-surface-container flex flex-wrap items-center justify-between gap-3 text-body-sm">
+<div class="flex items-center gap-2 text-[12px] text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tiranga-saffron">info</span>
+<span>Ratios automatically maintain a 100.0% stoichiometric closure via excipient balancing.</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded bg-portal-surface-slate text-portal-navy-deep font-label-sm text-label-sm hover:bg-surface-container-high transition-colors" id="btn-reset" type="button">
+          Reset to Baseline
+        </button>
+<button class="px-3 py-1.5 rounded bg-primary-container text-surface-container-lowest font-label-sm text-label-sm hover:bg-surface-tint transition-colors" id="btn-auto-balance" type="button">
+          Auto-Balance 100%
+        </button>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Modern Anime-Card / RPG Artifact Ayurvedic Power Card (5 cols) -->
+<div class="lg:col-span-5 flex flex-col">
+<div class="relative rounded-2xl overflow-hidden p-0.5 bg-gradient-to-br from-tiranga-saffron via-emblem-gold to-portal-navy-deep shadow-xl anime-card-glow h-full flex flex-col">
+<!-- Card Body Container -->
+<div class="relative bg-gradient-to-b from-inverse-surface via-[#0a1b2e] to-[#040f1a] rounded-[15px] p-4 sm:p-5 flex-1 flex flex-col text-inverse-on-surface overflow-hidden">
+<!-- Holographic Decorative Light Streaks -->
+<div class="absolute inset-0 pointer-events-none holo-shimmer opacity-20"></div>
+<div class="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-tiranga-saffron/25 blur-2xl pointer-events-none"></div>
+<div class="absolute -bottom-16 -left-16 w-44 h-44 rounded-full bg-tiranga-green/20 blur-2xl pointer-events-none"></div>
+<!-- Tier Header & Star Rating Strip -->
+<div class="relative z-10 flex items-center justify-between pb-3 border-b border-outline-variant/30">
+<div class="flex items-center gap-2.5">
+<div class="px-2.5 py-1 rounded-md bg-gradient-to-r from-tiranga-saffron to-tiranga-saffron-deep text-surface-container-lowest font-label-sm text-[11px] font-extrabold tracking-wider shadow-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">stars</span>
+              TIER IV : DIVYA RASAYANA
+            </div>
+<span class="text-[11px] text-tiranga-saffron font-label-sm font-semibold tracking-wide uppercase hidden sm:inline">Divine Rejuvenator Grade</span>
+</div>
+<!-- Celestial Star Rating -->
+<div class="flex items-center text-emblem-gold text-[13px] tracking-tight" title="Grade 4 of 5 Celestial Stars">
+<span>★</span><span>★</span><span>★</span><span>★</span><span class="text-outline-variant/60">★</span>
+</div>
+</div>
+<!-- Central Character / Archetype Art Window -->
+<div class="relative z-10 mt-3 rounded-xl overflow-hidden border border-emblem-gold/50 bg-[#001026] relative group shadow-inner">
+<!-- Multi-Armed Celestial Archetype Artwork from DataStore -->
+<div class="relative w-full h-44 sm:h-48 overflow-hidden flex items-center justify-center bg-[#000d2a]">
+<img alt="Celestial Multi-Armed Archetype representing Ayurvedic Potency and Synergy" class="w-full h-full object-cover mix-blend-luminosity filter contrast-125 brightness-110 opacity-90 animate-aura" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu8LUfveecNyJla4SJ8eQ1jBcxvj-rYZ0wi9zSJHk5_PJ1KBWgB9u_-Ax_GTIqrbz6lHQe4dYBv3P8I7DJKAZ6EW1ETGcHiTCT3FhYGD0FWSWgTkZKE6vagvGTWzssgdtSfeufpQJNiObfJsFgmS7bCEi-L_mBXCFv7GCPoKMHpJe5o75hcwDrXK7qQkbfaMf1Cz8Caa7itTp4vZoJeeOJCqv5vWf8s4Ftv1RhzZ4gU2ebHtRrRo-oN8mqCvCWUwSqsw">
+<div class="absolute inset-0 bg-gradient-to-t from-[#040f1a] via-transparent to-transparent"></div>
+<!-- Tridosha Elemental Floating Badges -->
+<div class="absolute top-2 left-2 flex flex-col gap-1 z-20">
+<span class="px-1.5 py-0.5 rounded bg-black/65 backdrop-blur-sm border border-sky-400/50 text-[10px] text-sky-300 font-mono flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> VATA : SHAMANA
+              </span>
+<span class="px-1.5 py-0.5 rounded bg-black/65 backdrop-blur-sm border border-amber-400/50 text-[10px] text-amber-300 font-mono flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> PITTA : SAMYA
+              </span>
+<span class="px-1.5 py-0.5 rounded bg-black/65 backdrop-blur-sm border border-emerald-400/50 text-[10px] text-emerald-300 font-mono flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> KAPHA : BALANCED
+              </span>
+</div>
+<!-- Rank Stamp in corner -->
+<div class="absolute top-2 right-2 z-20 flex flex-col items-center justify-center w-11 h-11 rounded-lg bg-gradient-to-b from-emblem-gold to-tiranga-saffron-deep border border-yellow-200 shadow-lg text-surface-container-lowest">
+<span class="text-[9px] font-label-sm font-bold uppercase tracking-tighter leading-none">RANK</span>
+<span class="text-[17px] font-black font-cinzel leading-none mt-0.5">S+</span>
+</div>
+<!-- Archetype Label Banner -->
+<div class="absolute bottom-2 left-3 right-3 z-20 flex items-center justify-between bg-inverse-surface/85 backdrop-blur-sm px-2.5 py-1 rounded-md border border-outline-variant/30">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-tiranga-saffron">auto_awesome</span>
+<span class="text-[12px] font-bold text-surface-container-lowest font-headline-sm">Dhanvantari Resonator</span>
+</div>
+<span class="text-[10px] font-mono text-secondary-fixed font-bold tracking-wide">ED90 SUPER-ADDITIVE</span>
+</div>
+</div>
+</div>
+<!-- Power Stats Bento Grid (Ojas, Potency, NF-κB, Multiplier) -->
+<div class="relative z-10 mt-3 grid grid-cols-2 gap-2">
+<!-- Stat 1: Ojas -->
+<div class="p-2.5 rounded-lg bg-surface-container-high/10 border border-outline-variant/25 flex flex-col">
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline-variant">
+<span>OJAS (VITAL ENERGY)</span>
+<span class="text-tiranga-saffron font-bold">+1,200 Surge</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-title-lg font-black text-amber-300 tracking-tight">9,450</span>
+<span class="text-[11px] text-outline-variant">/ 10,000</span>
+</div>
+</div>
+<!-- Stat 2: Bio-Potency -->
+<div class="p-2.5 rounded-lg bg-surface-container-high/10 border border-outline-variant/25 flex flex-col">
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline-variant">
+<span>SYNERGY POTENCY</span>
+<span class="text-tiranga-green font-bold">CI 0.68</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-title-lg font-black text-emerald-400 tracking-tight">94%</span>
+<span class="text-[11px] text-secondary-fixed">Max Efficacy</span>
+</div>
+</div>
+<!-- Stat 3: Anti-Inflammatory Aura -->
+<div class="p-2.5 rounded-lg bg-surface-container-high/10 border border-outline-variant/25 flex flex-col">
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline-variant">
+<span>NF-κB SUPPRESSION</span>
+<span class="text-sky-300 font-bold">In-Vitro</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-title-lg font-black text-sky-300 tracking-tight">+28.4%</span>
+<span class="text-[11px] text-outline-variant">vs Baseline</span>
+</div>
+</div>
+<!-- Stat 4: Bioavailability Multiplier -->
+<div class="p-2.5 rounded-lg bg-surface-container-high/10 border border-outline-variant/25 flex flex-col">
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline-variant">
+<span>ABSORPTION FACTOR</span>
+<span class="text-yellow-300 font-bold">Piperine Boost</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-title-lg font-black text-yellow-300 tracking-tight">3.2x</span>
+<span class="text-[11px] text-outline-variant">AUC Multiplier</span>
+</div>
+</div>
+</div>
+<!-- Dynamic RPG Exp / Potency Progress Bar -->
+<div class="relative z-10 mt-3 pt-2.5 border-t border-outline-variant/25">
+<div class="flex items-center justify-between text-[11px] font-label-sm mb-1">
+<span class="text-tiranga-saffron font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">upgrade</span>
+              LEVEL UP! Ratio Optimized for Sec 3(e) Clearance
+            </span>
+<span class="font-mono text-surface-container-lowest font-bold">94.5% Cap</span>
+</div>
+<!-- Multi-Segmented Glowing Bar -->
+<div class="h-2.5 w-full bg-surface-container-high/20 rounded-full p-0.5 border border-outline-variant/30 flex overflow-hidden">
+<div class="bg-gradient-to-r from-tiranga-green via-tiranga-saffron to-emblem-gold h-full rounded-full transition-all duration-500 shadow-sm" style="width: 94.5%;"></div>
+</div>
+</div>
+<!-- Active Buffs & Synergies List -->
+<div class="relative z-10 mt-3 pt-2.5 border-t border-outline-variant/25 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary-container/20 border border-secondary-container/40 text-secondary-fixed text-[11px] font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[13px] text-tiranga-green">check_circle</span>
+            Yogavahi Bio-Ignition Active
+          </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary-fixed/20 border border-tertiary-fixed/40 text-tertiary-fixed text-[11px] font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[13px] text-tiranga-saffron">verified</span>
+            Lipid Carrier Samskara Cleared
+          </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high/20 border border-outline-variant/30 text-surface-container-lowest text-[11px] font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[13px] text-sky-300">shield</span>
+            Exempt from Artisanal Mineral Penalty
+          </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- DETAILED STATUTORY & REGULATORY INFO GRID (Placed Below full width as requested) -->
+<div class="mb-space-md">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-portal-navy-deep text-[22px]">policy</span>
+<h2 class="font-headline-sm text-title-lg font-bold text-portal-navy-deep">
+      Comprehensive Statutory, Patent &amp; TKDL Examination Intelligence
+    </h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- CARD 1: Biological Diversity Act 2002 & NBA Benefit-Sharing Calculator -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg relative overflow-hidden border border-portal-border/70 flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-tiranga-saffron"></div>
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-surface-container mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tiranga-saffron text-[22px]">gavel</span>
+<h3 class="font-title-md text-title-md font-bold text-portal-navy-deep">
+              Benefit-Sharing &amp; Biodiversity
+            </h3>
+</div>
+<span class="px-2 py-0.5 rounded bg-secondary-container/70 text-on-secondary-container font-label-sm text-[11px] font-bold">
+            Rule 13 Clear
+          </span>
+</div>
+<div class="bg-portal-surface-subtle rounded-lg p-2.5 mb-3 text-body-sm border-l-2 border-tiranga-green pl-3">
+<p class="font-bold text-portal-navy-deep text-[12px]">Biological Diversity Act 2002 — Regulation 11</p>
+<p class="font-body-sm text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
+            Formula leverages bio-resources sourced within Indian territory. ABS Regulations 2014 access fees trigger recalculation when mineral resin extraction exceeds artisanal caps.
+          </p>
+</div>
+<div class="space-y-2">
+<div class="p-2.5 rounded bg-surface-container-low flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-bold text-portal-navy-deep text-[12px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-tiranga-saffron">check_circle</span>
+                Shilajit Reduction (20% → 10%)
+              </span>
+<span class="text-tiranga-green font-bold font-label-sm text-[11px]">-1.5% Royalty Savings</span>
+</div>
+<p class="font-body-sm text-[11px] text-on-surface-variant leading-relaxed">
+              Lowering resin decreases botanical sourcing indemnity risk by 50%. Shifts National Biodiversity Authority (NBA) <strong>Form III</strong> clearance to expedited Fast-Track Assessment.
+            </p>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-1">
+<div class="p-2 bg-surface-container rounded text-center">
+<span class="text-[10px] font-label-sm text-outline block">Projected ABS Bracket</span>
+<span class="font-headline-sm text-body-md font-bold text-portal-navy-deep">3.5% Net Ex-Factory</span>
+</div>
+<div class="p-2 bg-surface-container rounded text-center">
+<span class="text-[10px] font-label-sm text-outline block">Annual Compliance Tier</span>
+<span class="font-headline-sm text-body-md font-bold text-tiranga-green">Fast-Track Category B</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-3 pt-2 border-t border-surface-container">
+<span class="text-[11px] font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tiranga-green">verified_user</span>
+          Statutory clearance projection ready for NBA Schedule Form III.
+        </span>
+</div>
+</div>
+<!-- CARD 2: Patent Section 3(e) Synergism Verification -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg relative overflow-hidden border border-portal-border/70 flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-primary-container"></div>
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-surface-container mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[22px]">verified</span>
+<h3 class="font-title-md text-title-md font-bold text-portal-navy-deep">
+              Patent Section 3(e) Synergism
+            </h3>
+</div>
+<span class="px-2 py-0.5 rounded bg-secondary-container/70 text-on-secondary-container font-label-sm text-[11px] font-bold">
+            Cleared &lt; 1.0
+          </span>
+</div>
+<p class="font-body-sm text-[11px] text-on-surface-variant leading-relaxed mb-3">
+          Section 3(e) of the Indian Patents Act, 1970 requires proving that formulation efficacy is quantitatively superior to the aggregated sum of individual constituents, defeating “mere admixture”.
+        </p>
+<!-- Chou-Talalay Gauge & Chart -->
+<div class="bg-portal-surface-slate rounded-lg p-2.5 mb-2.5">
+<div class="flex items-center justify-between text-body-sm mb-1">
+<span class="font-label-md text-[11px] text-portal-navy-deep font-semibold">Chou-Talalay CI Score at ED90:</span>
+<span class="font-bold text-tiranga-green font-headline-sm text-body-lg">0.68</span>
+</div>
+<div class="relative w-full h-2.5 bg-surface-container rounded-full overflow-hidden flex">
+<div class="w-1/3 bg-tiranga-green-deep" title="Strong Synergy (0.1 - 0.7)"></div>
+<div class="w-1/3 bg-emblem-gold" title="Moderate Synergy (0.7 - 0.9)"></div>
+<div class="w-1/3 bg-error" title="Antagonism / Mere Admixture (&gt; 1.0)"></div>
+</div>
+<div class="flex justify-between text-[9px] font-label-sm text-outline mt-1">
+<span>0.1 (Strong Synergy)</span>
+<span class="font-bold text-tiranga-green">Δ 0.68 Active</span>
+<span>1.0 (Mere Admixture)</span>
+</div>
+</div>
+<div class="p-2 rounded bg-surface-container-low text-[11px] text-on-surface-variant">
+<span class="font-bold text-portal-navy-deep">Patent Examiner Preview:</span>
+          Substantive non-obvious synergistic enhancement between <em>Withania</em> extract (40%) and piperine vehicle overcomes first-action 3(e) objections.
+        </div>
+</div>
+<div class="mt-3 pt-2 border-t border-surface-container">
+<span class="text-[11px] font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary-container">biotech</span>
+          NF-κB Down-regulation: +28.4% | AUC: +3.2x
+        </span>
+</div>
+</div>
+<!-- CARD 3: Classical TKDL Concordance Check -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg relative overflow-hidden border border-portal-border/70 flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-emblem-gold"></div>
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-surface-container mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emblem-gold text-[22px]">menu_book</span>
+<h3 class="font-title-md text-title-md font-bold text-portal-navy-deep">
+              Classical TKDL Concordance
+            </h3>
+</div>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-[11px] font-bold">
+            Canon Verified
+          </span>
+</div>
+<div class="space-y-2">
+<div class="text-[11px] font-body-sm text-on-surface-variant">
+<span class="font-bold text-portal-navy-deep">Shloka Citation:</span>
+<em>Charaka Samhita, Chikitsa Sthana, Adhyaya 28 (Rasayana Formulation V).</em>
+</div>
+<div class="p-2.5 rounded bg-portal-surface-subtle font-body-sm text-[11px] text-portal-navy-deep italic border-l-2 border-emblem-gold">
+            “अश्वगन्धां विदारीं च शतावरीं मधुयष्टिकाम्...” — High-dose Withania somnifera requires lipidic Samskara (Ghrita processing) when single-dose concentration crosses 35% by volume.
+          </div>
+<div class="p-2 rounded bg-surface-container-low text-[11px] text-on-surface-variant">
+<div class="flex items-start gap-1.5 text-portal-navy-deep font-semibold">
+<span class="material-symbols-outlined text-[15px] text-tiranga-saffron flex-shrink-0 mt-0.5">check_circle</span>
+<span>15.0% Medicated Ghee vehicle satisfies classical Samskara requirement for 40.0% Ashwagandha.</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-3 pt-2 border-t border-surface-container">
+<span class="text-[11px] font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-emblem-gold">auto_stories</span>
+          Ayurvedic Pharmacopoeia of India (API Vol. 1) concordance: 92%.
+        </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Botanical Herbarium Specimen Visual Reference Bento -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg mb-space-md border border-portal-border/70">
+<div class="flex items-center justify-between mb-3">
+<h3 class="font-title-md text-title-md font-bold text-portal-navy-deep flex items-center gap-2">
+<span class="material-symbols-outlined text-tiranga-green">psychiatry</span>
+      Ayush Botanical Herbarium &amp; Active Extract Reference
+    </h3>
+<span class="text-[11px] font-label-sm text-outline">Verified High-Performance Liquid Chromatography (HPLC) Specs</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<!-- Specimen 1 -->
+<div class="bg-surface-container-low rounded-lg p-2.5 flex flex-col gap-2 border border-surface-container">
+<div class="w-full h-24 rounded bg-surface-container overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="High-resolution laboratory macro photo of fresh Withania somnifera Ashwagandha roots and green foliage on a white clean pharmaceutical inspection bench with botanical diagnostic labels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAOMc4t4ywq_o4pbOd-RJDC9ppbAaNe_HEmqyL4z_rz7DRH414ir8yps2MqSXNCFuOQlXnQbXSMwCocC6m2_v5-rDYV0QL3V_BwPcjCyef8ZNHHM2VMgY5NHcMjz-bjcAj9tPVEe0tJePZO-HuoZX9xa-F8UdL2bhed74rmwc8fVEHSwlFqREB16MHQwtB6BXq8trLk57_AWU2UCgnmL5Z5rv-Jn_Y5pWNnAOdmKvlmrMeRCMTqYL2">
+<span class="absolute top-1 left-1 px-1.5 py-0.5 bg-portal-navy-deep/80 text-surface-container-lowest font-label-sm text-[10px] rounded">Ashwagandha</span>
+</div>
+<div class="text-[11px] font-label-md text-on-surface-variant leading-tight">
+<span class="font-bold text-portal-navy-deep">Bioactive:</span> Withaferin A &amp; Withanolide D glycosides. Adaptogenic core.
+      </div>
+</div>
+<!-- Specimen 2 -->
+<div class="bg-surface-container-low rounded-lg p-2.5 flex flex-col gap-2 border border-surface-container">
+<div class="w-full h-24 rounded bg-surface-container overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Scientific pharmaceutical documentation photo of authentic Himalayan Shilajit black mineral exudate resin stored in an official amber glass laboratory jar with graduated syringe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgdeGhYs7TRCzhzOPo9UohfjrGJG3FsA5nzTxAM4LgWeSBlKOg7DW1TIJMFPl0nwEvUHnkfVPL3XKcO2nqCYPgnJOx87Du6sEb97HNPoQtlHcWw6cjUQfiN_EAnTVH1-aOQjhAcAsvJuF7ezPOStMwC2ANfKyYckqjYwH0KR7YZVGPoNIEfMvTLIqZe_pitAFzHDOFsRCYJ-FiIkXwGPl2inhp4dNSfaJlBDZrsrRVYBpzZPAx-NMF">
+<span class="absolute top-1 left-1 px-1.5 py-0.5 bg-portal-navy-deep/80 text-surface-container-lowest font-label-sm text-[10px] rounded">Shilajit Resin</span>
+</div>
+<div class="text-[11px] font-label-md text-on-surface-variant leading-tight">
+<span class="font-bold text-portal-navy-deep">Bioactive:</span> Dibenzo-alpha-pyrones &amp; Fulvic Acid mineral vehicle.
+      </div>
+</div>
+<!-- Specimen 3 -->
+<div class="bg-surface-container-low rounded-lg p-2.5 flex flex-col gap-2 border border-surface-container">
+<div class="w-full h-24 rounded bg-surface-container overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Golden Curcuma longa turmeric rhizomes sliced open alongside concentrated vibrant orange curcumin extract powder on sterile analytical petri dish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrHVPww1i5sO2cJdt3jugSQKXh4vpRltuiql2Et0ozUFFXCjwnw23J67Gp5BBjOe1dGe0ZR8ymtD3B3AUMeXcp--WQcTMaCea6vqgGko8vVp0HXlwNJvYQztWgJGxwodeAxNgDldHEE2MCDUO3xwqQoVNsUK8I6cNnt6M4qagB6KPjpsRpCApxd59NQpP3oRo64UBNz2_P6s9Po9UQyVwm-NVXRvGVL14VyBQCee7H5t-H8mF7vCPL">
+<span class="absolute top-1 left-1 px-1.5 py-0.5 bg-portal-navy-deep/80 text-surface-container-lowest font-label-sm text-[10px] rounded">Haridra Extract</span>
+</div>
+<div class="text-[11px] font-label-md text-on-surface-variant leading-tight">
+<span class="font-bold text-portal-navy-deep">Bioactive:</span> Curcumin, Demethoxycurcumin &amp; Bisdemethoxycurcumin.
+      </div>
+</div>
+</div>
+</div>
+<!-- BOTTOM SECTION: Sensitivity Curve & Historical Variations -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg mb-space-md border border-portal-border/70">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-surface-container">
+<div>
+<h3 class="font-title-lg text-title-lg font-bold text-portal-navy-deep flex items-center gap-2">
+<span class="material-symbols-outlined text-tiranga-green">stacked_line_chart</span>
+        Multi-Variable Ratio Sensitivity &amp; Benefit Optimization Curve
+      </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Projected Synergy Index vs Biodiversity Levy across simulated Ashwagandha ratio steps (10% → 60%).</p>
+</div>
+<div class="flex items-center gap-3 text-label-sm font-label-sm">
+<span class="flex items-center gap-1 text-tiranga-green font-semibold">
+<span class="w-2.5 h-2.5 rounded-full bg-tiranga-green"></span> Synergy Index (Lower is Better)
+      </span>
+<span class="flex items-center gap-1 text-portal-navy-deep font-semibold">
+<span class="w-2.5 h-2.5 rounded-full bg-portal-navy-deep"></span> NBA Commercial Levy %
+      </span>
+</div>
+</div>
+<!-- Clean Inline SVG Sensitivity Graph -->
+<div class="w-full overflow-x-auto">
+<div class="min-w-[680px] h-48 relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 700 160">
+<!-- Grid lines -->
+<line class="text-surface-container" stroke="currentColor" stroke-dasharray="4" x1="40" x2="680" y1="20" y2="20"></line>
+<line class="text-surface-container" stroke="currentColor" stroke-dasharray="4" x1="40" x2="680" y1="60" y2="60"></line>
+<line class="text-surface-container" stroke="currentColor" stroke-dasharray="4" x1="40" x2="680" y1="100" y2="100"></line>
+<line class="text-surface-container" stroke="currentColor" x1="40" x2="680" y1="140" y2="140"></line>
+<!-- Section 3(e) Threshold Line at 1.0 -->
+<line opacity="0.6" stroke="#ba1a1a" stroke-dasharray="2" stroke-width="1.5" x1="40" x2="680" y1="70" y2="70"></line>
+<text fill="#ba1a1a" font-family="Public Sans" font-size="9" font-weight="600" x="685" y="74">CI 1.0 Section 3(e) Cutoff</text>
+<!-- Line 1: Synergy Curve (Green) -->
+<path d="M 50 115 Q 180 95, 320 60 T 520 40 T 660 30" fill="none" stroke="#138808" stroke-width="3"></path>
+<!-- Points on Green Line -->
+<circle cx="50" cy="115" fill="#138808" r="4"></circle>
+<circle cx="200" cy="92" fill="#138808" r="4"></circle>
+<circle cx="350" cy="58" fill="#138808" r="4"></circle>
+<circle cx="470" cy="45" fill="#138808" r="6" stroke="#ffffff" stroke-width="2"></circle> <!-- Current active point (40%) -->
+<circle cx="600" cy="35" fill="#138808" r="4"></circle>
+<!-- Line 2: NBA Royalty (Navy) -->
+<path d="M 50 135 Q 200 130, 350 120 T 470 105 T 660 70" fill="none" stroke="#002855" stroke-dasharray="3 3" stroke-width="2.5"></path>
+<circle cx="470" cy="105" fill="#002855" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<!-- Active Simulation Marker Column -->
+<line stroke="#FF9933" stroke-dasharray="2" stroke-width="1.5" x1="470" x2="470" y1="10" y2="140"></line>
+<text fill="#E65100" font-family="Public Sans" font-size="10" font-weight="bold" x="440" y="15">Current What-If (40%)</text>
+<!-- X-Axis Labels -->
+<text fill="#72777e" font-family="Inter" font-size="10" text-anchor="middle" x="50" y="155">10%</text>
+<text fill="#72777e" font-family="Inter" font-size="10" text-anchor="middle" x="180" y="155">20%</text>
+<text fill="#72777e" font-family="Inter" font-size="10" text-anchor="middle" x="320" y="155">30% (Baseline)</text>
+<text fill="#002855" font-family="Public Sans" font-size="11" font-weight="bold" text-anchor="middle" x="470" y="155">40% (Simulated)</text>
+<text fill="#72777e" font-family="Inter" font-size="10" text-anchor="middle" x="600" y="155">50%</text>
+<text fill="#72777e" font-family="Inter" font-size="10" text-anchor="middle" x="660" y="155">60%</text>
+</svg>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-surface-container text-body-sm text-[12px] text-on-surface-variant">
+<span>Optimal stoichiometric sweet spot identified at <strong>38.5% - 42.0% Withania somnifera</strong> where synergistic potency peaks before escalating into excessive raw harvest royalties.</span>
+</div>
+</div>
+<!-- Statutory Action Bar Execution Block -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md border border-portal-border/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<div class="font-title-md text-portal-navy-deep font-bold text-[15px]">Simulated Ratio Specification Ready</div>
+<div class="text-[12px] text-on-surface-variant">All statutory validations cleared for fast-track patent submission.</div>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none py-2 px-3 rounded bg-portal-surface-subtle hover:bg-surface-container text-portal-navy-deep font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1.5 transition-colors border border-portal-border" type="button">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Run Pre-FER Check</span>
+</button>
+<button class="flex-1 sm:flex-none py-2 px-3 rounded bg-portal-surface-subtle hover:bg-surface-container text-portal-navy-deep font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1.5 transition-colors border border-portal-border" type="button">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>NBA Form III</span>
+</button>
+<button class="flex-1 sm:flex-none py-2.5 px-5 rounded bg-primary-container hover:bg-portal-navy-deep text-surface-container-lowest font-label-md text-body-md font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm" id="btn-commit-sim" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span>Lock &amp; Commit Dossier</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive JavaScript for Live Recalculations & Slider Reactions -->
+<script>
+    (function() {
+      const sliderAsh = document.getElementById('slider-ashwagandha');
+      const valAsh = document.getElementById('val-ashwagandha');
+      const sliderShilajit = document.getElementById('slider-shilajit');
+      const valShilajit = document.getElementById('val-shilajit');
+      const sliderPippali = document.getElementById('slider-pippali');
+      const valPippali = document.getElementById('val-pippali');
+      const sliderExcipient = document.getElementById('slider-excipient');
+      const valExcipient = document.getElementById('val-excipient');
+
+      const kpiTotalRatio = document.getElementById('kpi-total-ratio');
+      const kpiRatioBar = document.getElementById('kpi-ratio-bar');
+      const kpiCiScore = document.getElementById('kpi-ci-score');
+      const kpiTkdlConcordance = document.getElementById('kpi-tkdl-concordance');
+      const kpiNbaRate = document.getElementById('kpi-nba-rate');
+
+      const btnReset = document.getElementById('btn-reset');
+      const btnAutoBalance = document.getElementById('btn-auto-balance');
+      const btnCommit = document.getElementById('btn-commit-sim');
+
+      function updateCalculations() {
+        const ash = parseFloat(valAsh.value) || 0;
+        const shil = parseFloat(valShilajit.value) || 0;
+        const haridra = 30.0; // locked constant
+        const pip = parseFloat(valPippali.value) || 0;
+        const exc = parseFloat(valExcipient.value) || 0;
+
+        const total = (ash + shil + haridra + pip + exc).toFixed(1);
+        kpiTotalRatio.textContent = total + '%';
+
+        // Auto balance color indicator
+        if (Math.abs(total - 100.0) < 0.1) {
+          kpiRatioBar.style.width = '100%';
+          kpiRatioBar.className = 'bg-tiranga-green h-full rounded-full transition-all duration-300';
+          kpiTotalRatio.className = 'font-headline-lg text-headline-lg font-bold text-portal-navy-deep tracking-tight';
+        } else {
+          const pct = Math.min(100, Math.max(0, (total / 100.0) * 100));
+          kpiRatioBar.style.width = pct + '%';
+          kpiRatioBar.className = 'bg-error h-full rounded-full transition-all duration-300';
+          kpiTotalRatio.className = 'font-headline-lg text-headline-lg font-bold text-error tracking-tight';
+        }
+
+        // Dynamic Chou-Talalay score: higher ashwagandha (up to 45%) improves synergy
+        let baseCI = 0.82;
+        let deltaCI = (ash - 30.0) * 0.014;
+        let finalCI = Math.max(0.48, (baseCI - deltaCI)).toFixed(2);
+        kpiCiScore.textContent = finalCI;
+
+        // TKDL Concordance
+        if (ash > 45) {
+          kpiTkdlConcordance.textContent = '76%';
+          kpiTkdlConcordance.className = 'font-headline-lg text-headline-lg font-bold text-error tracking-tight';
+        } else {
+          kpiTkdlConcordance.textContent = '92%';
+          kpiTkdlConcordance.className = 'font-headline-lg text-headline-lg font-bold text-portal-navy-deep tracking-tight';
+        }
+
+        // NBA benefit rate: lower shilajit decreases royalty
+        let baseNba = 3.0 + (shil * 0.05);
+        kpiNbaRate.textContent = baseNba.toFixed(1) + '%';
+      }
+
+      function syncPair(slider, input) {
+        slider.addEventListener('input', function() {
+          input.value = parseFloat(slider.value).toFixed(1);
+          updateCalculations();
+        });
+        input.addEventListener('input', function() {
+          slider.value = input.value;
+          updateCalculations();
+        });
+      }
+
+      syncPair(sliderAsh, valAsh);
+      syncPair(sliderShilajit, valShilajit);
+      syncPair(sliderPippali, valPippali);
+      syncPair(sliderExcipient, valExcipient);
+
+      // Reset button
+      if (btnReset) {
+        btnReset.addEventListener('click', function() {
+          sliderAsh.value = 30; valAsh.value = '30.0';
+          sliderShilajit.value = 20; valShilajit.value = '20.0';
+          sliderPippali.value = 5; valPippali.value = '5.0';
+          sliderExcipient.value = 15; valExcipient.value = '15.0';
+          updateCalculations();
+        });
+      }
+
+      // Auto Balance button
+      if (btnAutoBalance) {
+        btnAutoBalance.addEventListener('click', function() {
+          const ash = parseFloat(valAsh.value) || 0;
+          const shil = parseFloat(valShilajit.value) || 0;
+          const haridra = 30.0;
+          const pip = parseFloat(valPippali.value) || 0;
+          const remainder = Math.max(0, 100.0 - (ash + shil + haridra + pip));
+          valExcipient.value = remainder.toFixed(1);
+          sliderExcipient.value = remainder;
+          updateCalculations();
+        });
+      }
+
+      // Commit button feedback
+      if (btnCommit) {
+        btnCommit.addEventListener('click', function() {
+          const original = btnCommit.innerHTML;
+          btnCommit.innerHTML = '<span class="material-symbols-outlined text-[20px] text-tiranga-green animate-spin">sync</span><span>Recording Simulation to Ledger...</span>';
+          setTimeout(function() {
+            btnCommit.innerHTML = '<span class="material-symbols-outlined text-[20px] text-secondary-container">check_circle</span><span>Simulation Dossier #409 Locked</span>';
+            setTimeout(function() { btnCommit.innerHTML = original; }, 3000);
+          }, 900);
+        });
+      }
+
+      updateCalculations();
+    })();
+  </script>
+</div>
+</main>
+</div>
+<script>
+  (function() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('nav[data-active-classes] a[data-path]');
+    if (navLinks.length > 0) {
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath || (currentPath === '/' && link.getAttribute('data-path') === 'formulation-lab')) {
+          link.classList.add('bg-surface-container-high/25', 'text-surface-container-lowest', 'font-semibold', 'border-l-2', 'border-tiranga-saffron');
+        }
+      });
+    }
+  })();
+</script>
+</body></html>
