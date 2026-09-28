@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/interfaces-select";
+import { cn } from "@/lib/utils";
 
 // ── Icons (Custom inline SVGs for zero layout shift & zero external CDN lag) ─
 function CheckVerifiedIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -194,6 +195,52 @@ interface FormItem {
   actionModal: string;
 }
 
+// ── Console sizing tokens ──────────────────────────────────────────────────
+// This screen is a fixed-height console: every control is 32px tall (the same
+// height the shared Select primitive exposes as `size="sm"`) and the smallest
+// live text is 12px, so header, toolbar and rails stack into one viewport
+// without clipping. Never go below 12px — statute text must read without zoom.
+const H = "h-8"; // shared control height
+
+const fieldCls = cn(
+  H,
+  "min-w-0 rounded-lg border border-slate-200 bg-[#F4F6F9] px-2.5 text-[12px] text-[#111c2d] transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f]/60",
+);
+const ghostBtnCls = cn(
+  H,
+  "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[12px] font-semibold text-[#00263f] transition-colors hover:bg-slate-100",
+);
+const solidBtnCls = cn(
+  H,
+  "inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#00263f] px-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-[#001d32]",
+);
+const iconBtnCls = cn(
+  H,
+  "w-8 shrink-0 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-[#00263f] transition-colors hover:bg-slate-200",
+);
+const metaChipCls =
+  "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[12px] font-semibold text-[#00263f]";
+
+const CATEGORY_TABS: { id: CategoryType; label: string }[] = [
+  { id: "all", label: "All items" },
+  { id: "rules", label: "Patent Rules" },
+  { id: "tkdl", label: "TKDL & Classical" },
+  { id: "section3", label: "Sec 3(p) / 3(e)" },
+  { id: "forms", label: "Forms & Templates" },
+];
+
+/** Empty state inside a rail — offers the way out instead of a dead end. */
+function RailEmptyState({ label, onReset }: { label: string; onReset: () => void }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
+      <p className="text-[12px] text-slate-500">No {label} match the current filters.</p>
+      <button type="button" onClick={onReset} className={ghostBtnCls}>
+        Reset filters
+      </button>
+    </div>
+  );
+}
+
 // ── Data Repositories ──────────────────────────────────────────────────────
 const DIRECTIVES: DirectiveItem[] = [
   {
@@ -311,6 +358,9 @@ export default function RulesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<JurisdictionType>("all");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
+  // Below `lg` the two rails cannot sit side by side, so exactly one is mounted.
+  // That keeps the console on a single screen instead of a long page scroll.
+  const [activeRail, setActiveRail] = useState<"directives" | "forms">("directives");
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState("Today, 08:30 AM");
   const [syncToast, setSyncToast] = useState<string | null>(null);
@@ -397,560 +447,508 @@ export default function RulesPage() {
     });
   }, [activeCategory, selectedJurisdiction, searchQuery]);
 
-  const totalVisibleItems = filteredDirectives.length + filteredForms.length;
+  // Tab counts are derived from the jurisdiction + search filters (never from
+  // the tab itself), so a number on a tab can't disagree with its own list.
+  const countFor = (category: CategoryType) => {
+    const q = searchQuery.trim().toLowerCase();
+    const hit = (haystack: string) => !q || haystack.toLowerCase().includes(q);
+    return (
+      DIRECTIVES.filter(
+        (d) =>
+          (category === "all" || d.category.includes(category)) &&
+          (selectedJurisdiction === "all" || d.jurisdiction === selectedJurisdiction) &&
+          hit(`${d.title} ${d.description} ${d.ref} ${d.tags.join(" ")}`),
+      ).length +
+      FORMS.filter(
+        (f) =>
+          (category === "all" || f.category.includes(category)) &&
+          (selectedJurisdiction === "all" || f.jurisdiction === selectedJurisdiction) &&
+          hit(`${f.formNumber} ${f.title} ${f.description}`),
+      ).length
+    );
+  };
 
   return (
-    <div className="w-full min-h-[calc(100vh-95px)] bg-[#F4F6F9] text-[#111c2d]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    // Fixed-height console: the shell itself never scrolls — only the two rails
+    // below do. `min-w-0` + `overflow-hidden` are what stop the tab strip and
+    // long labels from bleeding past the viewport on phones.
+    <div
+      id="rules-shell"
+      className="relative flex h-[calc(100dvh-95px)] min-w-0 flex-col overflow-y-auto lg:overflow-hidden bg-[#F4F6F9] text-[#111c2d]"
+    >
+      {/* ── Sync toast (overlay, so it never pushes the console) ────────── */}
+      {syncToast && (
+        <div className="animate-fade-in absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 rounded-b-lg bg-[#00263f] px-4 py-2 text-[12px] text-white shadow-lg">
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="h-2 w-2 shrink-0 animate-ping rounded-full bg-[#138808]" />
+            <span className="truncate">{syncToast}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setSyncToast(null)}
+            aria-label="Dismiss sync message"
+            className="shrink-0 px-1 font-bold text-slate-300 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
-        {/* ── Top Notification Toast ────────────────────────────────────── */}
-        {syncToast && (
-          <div className="bg-[#00263f] text-white px-4 py-2.5 rounded-lg shadow-lg border border-slate-700 flex items-center justify-between animate-fade-in text-sm">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#138808] animate-ping" />
-              <span>{syncToast}</span>
+      {/* ── Section 1: Title bar, live status, export actions ───────────── */}
+      <header className="shrink-0 border-b border-slate-200 bg-white px-3 py-2.5 sm:px-4">
+        <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+          <div className="min-w-[220px] flex-1">
+            <div className="mb-1.5 flex h-[3px] w-20 overflow-hidden rounded-full">
+              <div className="w-1/3 bg-[#FF9933]" />
+              <div className="w-1/3 bg-slate-200" />
+              <div className="w-1/3 bg-[#138808]" />
             </div>
+            <h1 className="text-[17px] font-bold leading-tight tracking-tight text-[#00263f] sm:text-[19px]">
+              Latest Rules, Regulations &amp; Statutory Forms
+            </h1>
+            <p className="mt-0.5 hidden text-[12px] leading-snug text-slate-600 sm:block">
+              Indian Patents Act 1970 · Patent Rules 2003 (as amended 2024) · TKDL
+              citation protocol · NBA benefit-sharing compliance.
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5">
             <button
-              onClick={() => setSyncToast(null)}
-              className="text-slate-400 hover:text-white ml-4 font-bold"
+              type="button"
+              onClick={handleLiveSync}
+              disabled={isSyncing}
+              className={ghostBtnCls}
+              title="Pull the latest e-Gazette notifications"
             >
-              ✕
+              <SyncIcon
+                className={cn("h-3.5 w-3.5", isSyncing ? "animate-spin text-[#FF9933]" : "text-slate-500")}
+              />
+              <span className="hidden sm:inline">{isSyncing ? "Syncing…" : "IPO Sync Live"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className={solidBtnCls}
+              title="Print or save the full regulatory digest"
+            >
+              <DownloadIcon className="h-3.5 w-3.5 text-[#FF9933]" />
+              <span className="hidden sm:inline">Export Digest (PDF)</span>
             </button>
           </div>
-        )}
+        </div>
 
-        {/* ── Section 1: Top Statutory Intelligence Header ───────────────── */}
-        <section className="relative overflow-hidden bg-white rounded-xl p-5 sm:p-7 border border-slate-200/80 shadow-sm">
-          {/* Subtle architectural background watermark */}
-          <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-[#00263f]/5 pointer-events-none blur-2xl" />
+        {/* Status chips — short enough to wrap, so nothing is ever clipped.
+            Below `sm` only the sync chip survives; the rest duplicate the
+            featured strip and the tab counts. */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <span className={cn(metaChipCls, "hidden border-blue-100 bg-[#f0f3ff] sm:inline-flex")}>
+            <GavelIcon className="h-3.5 w-3.5 shrink-0" />
+            Amendment Rules 2024 · in force 15-Mar-2024
+          </span>
+          <span className={cn(metaChipCls, "hidden border-green-100 bg-[#eaf7eb] md:inline-flex")}>
+            <PharmacyIcon className="h-3.5 w-3.5 shrink-0" />
+            Sec 3(p) scrutiny v2.4 · TKDL cross-check
+          </span>
+          <span className={cn(metaChipCls, "hidden border-blue-100 bg-[#e7eeff] lg:inline-flex")}>
+            <DocumentIcon className="h-3.5 w-3.5 shrink-0" />
+            14 forms pre-filled · 3, 18A, 27, NBA III
+          </span>
+          <span className={cn(metaChipCls, "border-green-100 bg-[#eaf7eb]")}>
+            <CloudSyncIcon className="h-3.5 w-3.5 shrink-0 text-[#138808]" />
+            Synced {lastSyncTime} IST
+          </span>
+        </div>
+      </header>
 
-          {/* National Tricolor Accent Bar */}
-          <div className="flex h-[3px] rounded-full mb-4 overflow-hidden w-28">
-            <div className="w-1/3 bg-[#FF9933]" />
-            <div className="w-1/3 bg-slate-200" />
-            <div className="w-1/3 bg-[#138808]" />
+      {/* ── Section 2: Filter toolbar + category tabs ───────────────────── */}
+      <div className="shrink-0 border-b border-slate-200 bg-white px-3 pb-2 sm:px-4">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* Search — flex-1 with min-w-0 so it shrinks instead of pushing out */}
+          <div className="relative min-w-[150px] max-w-md flex-1">
+            <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <input
+              id="statutory-search"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search rule no., section, gazette or form…"
+              className={cn(fieldCls, "w-full pl-8")}
+            />
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#00263f] text-white text-[11px] font-semibold tracking-wider">
-                  <CheckVerifiedIcon className="w-3.5 h-3.5 text-[#FF9933]" />
-                  OFFICIAL STATUTORY GAZETTE REGISTRY
-                </span>
-                <span className="text-slate-500 text-xs font-semibold tracking-wider">
-                  CGPDTM • MIN OF AYUSH
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-bold text-[#00263f] tracking-tight leading-tight">
-                Latest Rules, Regulations & Statutory Forms
-              </h1>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-                Authoritative legal repository of the Indian Patents Act (1970), Patent Rules 2003 (as amended 2024), TKDL Prior Art Citation Guidelines, and National Biodiversity Authority (NBA) statutory compliance protocols.
-              </p>
-            </div>
+          {/* Jurisdiction — short option labels so the trigger never clips */}
+          <Select
+            value={selectedJurisdiction}
+            onValueChange={(v) => setSelectedJurisdiction(v as JurisdictionType)}
+          >
+            <SelectTrigger
+              size="sm"
+              aria-label="Filter by jurisdiction"
+              className={cn(fieldCls, "w-[168px] justify-between gap-1.5 px-2.5")}
+            >
+              <span className="flex min-w-0 items-center gap-1.5">
+                <BankIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <SelectValue className="min-w-0 flex-1 truncate text-left" placeholder="Jurisdiction" />
+              </span>
+            </SelectTrigger>
+            <SelectContent className="[&_[data-slot=select-item]]:text-[12px]">
+              <SelectItem value="all">All jurisdictions</SelectItem>
+              <SelectItem value="ipo">IPO / CGPDTM</SelectItem>
+              <SelectItem value="ayush">Ministry of Ayush</SelectItem>
+              <SelectItem value="nba">National Biodiversity Authority</SelectItem>
+              <SelectItem value="pct">WIPO / PCT</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Action Buttons: Live Sync & Export Digest */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-start shrink-0">
-              <button
-                type="button"
-                onClick={handleLiveSync}
-                disabled={isSyncing}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#00263f] font-semibold text-sm transition-colors border border-slate-200 shadow-sm"
-              >
-                <SyncIcon className={`w-4 h-4 ${isSyncing ? "animate-spin text-[#FF9933]" : "text-slate-600"}`} />
-                <span>{isSyncing ? "Syncing..." : "IPO Sync Live"}</span>
-              </button>
+          <button type="button" id="clear-search-btn" onClick={handleResetFilters} className={ghostBtnCls}>
+            Reset filters
+          </button>
 
+          {/* Rail switch — below lg the two rails stack, so only one is mounted */}
+          <div className="ml-auto flex items-center gap-0.5 rounded-lg border border-slate-200 bg-[#F4F6F9] p-0.5 lg:hidden">
+            {([
+              { id: "directives", label: "Directives", n: filteredDirectives.length },
+              { id: "forms", label: "Forms", n: filteredForms.length },
+            ] as const).map((rail) => (
               <button
+                key={rail.id}
                 type="button"
-                onClick={() => window.print()}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#00263f] hover:bg-[#001d32] text-white font-semibold text-sm transition-colors shadow-sm"
+                onClick={() => setActiveRail(rail.id)}
+                aria-pressed={activeRail === rail.id}
+                className={cn(
+                  "inline-flex h-7 items-center gap-1 rounded px-2 text-[12px] font-semibold transition-colors",
+                  activeRail === rail.id
+                    ? "bg-[#00263f] text-white"
+                    : "text-slate-600 hover:bg-white",
+                )}
               >
-                <DownloadIcon className="w-4 h-4 text-[#FF9933]" />
-                <span>Export Regulatory Digest (PDF)</span>
+                {rail.label}
+                <span className="font-mono opacity-70">{rail.n}</span>
               </button>
-            </div>
+            ))}
           </div>
+        </div>
 
-          {/* Search & Jurisdiction Filter Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-6 pt-5 border-t border-slate-100">
-            {/* Search Input */}
-            <div className="md:col-span-6 relative flex items-center">
-              <SearchIcon className="w-4 h-4 absolute left-3.5 text-slate-400 pointer-events-none" />
-              <input
-                id="statutory-search"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by Rule number, Section (e.g. 3(p), 3(e)), Gazette notification, or Form ID..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#F4F6F9] text-[#111c2d] text-sm rounded-lg border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f] transition-all placeholder:text-slate-400"
-              />
-            </div>
-
-            {/* Jurisdiction Dropdown */}
-            <div className="md:col-span-4 flex items-center">
-              <Select
-                value={selectedJurisdiction}
-                onValueChange={(v) => setSelectedJurisdiction(v as JurisdictionType)}
+        {/* Category tabs — a scroll strip that can never widen the page */}
+        <div className="-mx-3 mt-1.5 flex min-w-0 items-center gap-1.5 overflow-x-auto px-3 pb-0.5 sm:-mx-4 sm:px-4">
+          {CATEGORY_TABS.map((tab) => {
+            const active = activeCategory === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveCategory(tab.id)}
+                aria-pressed={active}
+                className={cn(
+                  "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] font-semibold transition-colors",
+                  active
+                    ? "border-[#00263f] bg-[#00263f] text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100",
+                )}
               >
-                <SelectTrigger
-                  aria-label="Filter by jurisdiction"
-                  className="w-full gap-2.5 rounded-lg border-slate-200 bg-[#F4F6F9] px-3.5 text-sm text-[#111c2d] data-[size=default]:h-[42px] data-[state=open]:bg-white"
+                {tab.label}
+                <span
+                  className={cn(
+                    "rounded px-1 font-mono text-[12px]",
+                    active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500",
+                  )}
                 >
-                  <BankIcon className="w-4 h-4 shrink-0 text-slate-400" />
-                  <SelectValue className="flex-1 text-left" placeholder="Jurisdiction" />
-                </SelectTrigger>
-                <SelectContent className="[&_[data-slot=select-item]]:text-sm">
-                  <SelectItem value="all">Jurisdiction: All (IPO, WIPO &amp; Ayush)</SelectItem>
-                  <SelectItem value="ipo">Indian Patent Office (IPO / CGPDTM)</SelectItem>
-                  <SelectItem value="ayush">Ministry of Ayush Regulatory Board</SelectItem>
-                  <SelectItem value="nba">National Biodiversity Authority (NBA)</SelectItem>
-                  <SelectItem value="pct">WIPO / Patent Cooperation Treaty (PCT)</SelectItem>
-                </SelectContent>
-              </Select>
+                  {countFor(tab.id)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Section 3: Featured gazette alert (compact strip) ───────────── */}
+      {(activeCategory === "all" || activeCategory === "rules") && (
+        <section className="relative shrink-0 overflow-hidden bg-[#00263f] px-3 py-2.5 text-white sm:px-4">
+          {/* Saffron severity spine */}
+          <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-[#FF9933]" />
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pl-1.5">
+            <div className="min-w-[200px] flex-1">
+              {/* Meta row scrolls sideways on phones instead of stacking 3 lines */}
+              <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-0.5 text-[12px]">
+                <span className="shrink-0 rounded bg-[#692100] px-1.5 py-0.5 font-bold uppercase tracking-wide text-[#ff7d49]">
+                  Critical update
+                </span>
+                <span className="shrink-0 font-mono text-blue-200">G.S.R. 200(E) · CGPDTM</span>
+                <span className="shrink-0 text-blue-200">Published 15 Mar 2024</span>
+              </div>
+
+              <h2 className="mt-1 text-[15px] font-bold leading-snug tracking-tight sm:text-[16px]">
+                Patents (Amendment) Rules, 2024 — Operational Restructuring
+              </h2>
+
+              {/* The three operative deltas — one sideways row on phones, wrapped
+                  on larger screens. The clause-by-clause text is in the viewer. */}
+              <div className="-mx-3 mt-1.5 flex flex-nowrap gap-1.5 overflow-x-auto px-3 pb-0.5 sm:mx-0 sm:flex-wrap sm:px-0">
+                {[
+                  { icon: <ScheduleIcon className="h-3.5 w-3.5 shrink-0" />, label: "Rule 24B · FER response 3 + 2 months" },
+                  { icon: <CheckVerifiedIcon className="h-3.5 w-3.5 shrink-0" />, label: "Form 3 · Controller retrieves" },
+                  { icon: <ShieldIcon className="h-3.5 w-3.5 shrink-0" />, label: "Sec 3(p) · TKDL check binding" },
+                ].map((delta) => (
+                  <span
+                    key={delta.label}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-blue-900/60 bg-[#002855]/80 px-2 py-1 text-[12px] font-semibold text-[#FF9933]"
+                  >
+                    {delta.icon}
+                    <span className="text-blue-50">{delta.label}</span>
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {/* Reset Filters */}
-            <div className="md:col-span-2 flex items-center">
+            <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5 sm:shrink-0 sm:flex-wrap sm:overflow-visible">
               <button
                 type="button"
-                id="clear-search-btn"
-                onClick={handleResetFilters}
-                className="w-full py-2.5 px-3 rounded-lg bg-[#F4F6F9] hover:bg-slate-200 text-slate-700 font-semibold text-sm text-center transition-colors border border-slate-200"
+                onClick={() => setActiveModal("gazette")}
+                className={cn(H, "inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#FF9933] px-2.5 text-[12px] font-bold uppercase tracking-wide text-slate-900 transition-colors hover:bg-[#e08528]")}
               >
-                Reset Filters
+                <DocumentIcon className="h-3.5 w-3.5" />
+                Gazette PDF
               </button>
-            </div>
-          </div>
 
-          {/* Quick Statistics / Compliance Pills Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-4 pt-2">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#f0f3ff] border border-blue-100/80">
-              <div className="w-8 h-8 rounded bg-[#00263f] flex items-center justify-center shrink-0">
-                <GavelIcon className="w-4 h-4 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#00263f] truncate">
-                  Patents (Amendment) Rules 2024
-                </div>
-                <div className="text-[11px] text-slate-600 truncate">
-                  Active Gazette • In Effect 15-Mar-2024
-                </div>
-              </div>
-            </div>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    "/chat?prompt=" +
+                      encodeURIComponent(
+                        "Analyze the impact of Patents (Amendment) Rules 2024 on Ayush herbal patents, focusing on Rule 24B FER timelines and Section 3(p) objections.",
+                      ),
+                  )
+                }
+                className={cn(H, "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-blue-700 bg-[#0b3c5d] px-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-[#195280]")}
+              >
+                <SparklesIcon className="h-3.5 w-3.5 text-[#FF9933]" />
+                Analyze impact
+              </button>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#eaf7eb] border border-green-100/80">
-              <div className="w-8 h-8 rounded bg-[#2a6b2c] flex items-center justify-center shrink-0">
-                <PharmacyIcon className="w-4 h-4 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#00263f] truncate">
-                  Sec 3(p) Strict Scrutiny v2.4
-                </div>
-                <div className="text-[11px] text-slate-600 truncate">
-                  TKDL Prior Art Cross-Check Mandatory
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#e7eeff] border border-blue-100/80">
-              <div className="w-8 h-8 rounded bg-[#002855] flex items-center justify-center shrink-0">
-                <DocumentIcon className="w-4 h-4 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#00263f] truncate">
-                  14 Statutory Forms Pre-filled
-                </div>
-                <div className="text-[11px] text-slate-600 truncate">
-                  Form 3, 18A, 27 & NBA Form III ready
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#eaf7eb] border border-green-100/80">
-              <div className="w-8 h-8 rounded bg-[#138808] flex items-center justify-center shrink-0">
-                <CloudSyncIcon className="w-4 h-4 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#00263f] truncate">
-                  Sync: {lastSyncTime} IST
-                </div>
-                <div className="text-[11px] text-slate-600 truncate">
-                  IPO E-Gazette Direct Feeds Online
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={() => setActiveModal("gazette")}
+                className={cn(H, "hidden items-center px-1.5 text-[12px] text-blue-200 transition-colors hover:text-white sm:inline-flex")}
+              >
+                ⇄ Compare 2003 Rules
+              </button>
             </div>
           </div>
         </section>
+      )}
 
-        {/* ── Section 2: Segmented Filter Control Navigation ────────────── */}
-        <div className="flex items-center overflow-x-auto no-scrollbar gap-2 pb-1">
-          <button
-            type="button"
-            onClick={() => setActiveCategory("all")}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shadow-sm ${
-              activeCategory === "all"
-                ? "bg-[#00263f] text-white"
-                : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
-            }`}
-          >
-            All Statutory Items ({totalVisibleItems})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveCategory("rules")}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shadow-sm ${
-              activeCategory === "rules"
-                ? "bg-[#00263f] text-white"
-                : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
-            }`}
-          >
-            Patent Rules & Amendments (8)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveCategory("tkdl")}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shadow-sm ${
-              activeCategory === "tkdl"
-                ? "bg-[#00263f] text-white"
-                : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
-            }`}
-          >
-            TKDL & Classical Formulations (6)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveCategory("section3")}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shadow-sm ${
-              activeCategory === "section3"
-                ? "bg-[#00263f] text-white"
-                : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
-            }`}
-          >
-            Section 3(p) & 3(e) Directives (5)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveCategory("forms")}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shadow-sm ${
-              activeCategory === "forms"
-                ? "bg-[#00263f] text-white"
-                : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
-            }`}
-          >
-            Statutory Forms & Templates (9)
-          </button>
-        </div>
-
-        {/* ── Section 3: Prominent Featured Gazette Alert Card ───────────── */}
-        {(activeCategory === "all" || activeCategory === "rules") && (
-          <section className="relative overflow-hidden bg-[#00263f] rounded-xl p-6 sm:p-7 text-white shadow-md">
-            {/* Saffron left accent bar */}
-            <div className="absolute top-0 left-0 bottom-0 w-2 bg-[#FF9933]" />
-
-            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pl-2">
-              <div className="max-w-4xl">
-                <div className="flex flex-wrap items-center gap-2 mb-2.5">
-                  <span className="px-2.5 py-0.5 rounded bg-[#692100] text-[#ff7d49] text-[11px] font-bold uppercase tracking-wider">
-                    CRITICAL LEGISLATIVE UPDATE
-                  </span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-blue-200 font-mono text-[11px]">
-                    Notification No. G.S.R. 200(E) • DIPP / CGPDTM
-                  </span>
-                  <span className="text-slate-300 text-xs">Published: 15 March 2024</span>
-                </div>
-
-                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  Patents (Amendment) Rules, 2024 — Operational Restructuring
-                </h2>
-
-                <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                  Significant amendments promulgated for patent prosecution timelines in India. Direct impact on Ayush phytopharmaceutical patenting: streamlined timeline for filing First Examination Report (FER) responses reduced to 3 months (extendable by 2 months), revised Form 3 foreign filing disclosure mechanism, mandatory cross-referencing against CSIR-TKDL repository, and modified Form 27 working statements.
-                </p>
-
-                {/* 3 Highlight sub-boxes */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                  <div className="p-3 rounded-lg bg-[#002855]/80 border border-blue-900/50">
-                    <div className="flex items-center gap-2 text-[#FF9933] text-xs font-bold">
-                      <ScheduleIcon className="w-4 h-4 shrink-0" />
-                      <span>FER Response Window</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-1">
-                      Response interval shortened under Rule 24B with revised condonation fees.
-                    </p>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-[#002855]/80 border border-blue-900/50">
-                    <div className="flex items-center gap-2 text-[#FF9933] text-xs font-bold">
-                      <CheckVerifiedIcon className="w-4 h-4 shrink-0" />
-                      <span>Form 3 Simplified Duty</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-1">
-                      Controller now responsible for public database retrieval; applicant assists on request.
-                    </p>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-[#002855]/80 border border-blue-900/50">
-                    <div className="flex items-center gap-2 text-[#FF9933] text-xs font-bold">
-                      <ShieldIcon className="w-4 h-4 shrink-0" />
-                      <span>TKDL Section 3(p) Scrutiny</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-1">
-                      Binding examination standard for ASU synergy and traditional formulations.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons on the Alert Card */}
-              <div className="flex flex-col sm:flex-row xl:flex-col gap-2 shrink-0 self-start xl:self-center">
-                <button
-                  type="button"
-                  onClick={() => setActiveModal("gazette")}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#FF9933] hover:bg-[#e08528] text-slate-900 font-bold text-xs uppercase tracking-wider transition-colors shadow-sm"
-                >
-                  <DocumentIcon className="w-4 h-4" />
-                  <span>View Gazette PDF (Bilingual)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    router.push("/chat?prompt=" + encodeURIComponent("Analyze the impact of Patents (Amendment) Rules 2024 on Ayush herbal patents, focusing on Rule 24B FER timelines and Section 3(p) objections."));
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#0b3c5d] hover:bg-[#195280] text-white font-semibold text-xs transition-colors border border-blue-800 shadow-sm"
-                >
-                  <SparklesIcon className="w-4 h-4 text-[#FF9933]" />
-                  <span>Analyze Impact on Ayush Filings</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveModal("gazette")}
-                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-white transition-colors"
-                >
-                  <span>⇄ Compare with 2003 Rules</span>
-                </button>
-              </div>
+      {/* ── Section 4: The two content rails — only these scroll ────────── */}
+      <div className="rules-rails flex min-h-[230px] flex-1 flex-col gap-3 p-3 sm:gap-4 lg:min-h-0 lg:flex-row lg:p-4">
+        {/* Rail A — statutory notifications & directives */}
+        <section
+          className={cn(
+            "rules-rail min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm",
+            activeRail === "directives" ? "flex" : "hidden",
+            "lg:flex",
+          )}
+        >
+          <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <GavelIcon className="h-4 w-4 shrink-0 text-[#2a6b2c]" />
+              <h2 className="text-[13px] font-bold text-[#00263f]">
+                Statutory Notifications &amp; Directives
+              </h2>
             </div>
-          </section>
-        )}
+            <span className="shrink-0 rounded border border-slate-200 px-1.5 py-0.5 text-[12px] font-semibold text-slate-500">
+              {filteredDirectives.length} item{filteredDirectives.length === 1 ? "" : "s"} · updated weekly
+            </span>
+          </header>
 
-        {/* ── Section 4: Two-Column Responsive Content Grid ──────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-          {/* Column A (7 cols): Recent Statutory Notifications & Directives */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2">
-                <GavelIcon className="w-5 h-5 text-[#2a6b2c]" />
-                <h3 className="text-lg font-bold text-[#00263f]">
-                  Recent Statutory Notifications & Directives
-                </h3>
-              </div>
-              <span className="text-[11px] font-semibold text-slate-500 bg-white px-2.5 py-0.5 rounded border border-slate-200">
-                Updated Weekly
-              </span>
-            </div>
-
+          <div className="rules-rail-body min-h-0 flex-1 overflow-y-auto">
             {filteredDirectives.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center text-slate-500 border border-slate-200">
-                No statutory directives match your current filters.
-              </div>
+              <RailEmptyState label="statutory directives" onReset={handleResetFilters} />
             ) : (
               filteredDirectives.map((item) => (
                 <article
                   key={item.id}
-                  className="p-5 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden border border-slate-200"
+                  className="relative border-b border-slate-100 py-2.5 pl-4 pr-3 last:border-b-0 hover:bg-slate-50/70"
                 >
-                  {/* Left colored border accent */}
-                  <div
-                    className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                  {/* Severity spine */}
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "absolute inset-y-0 left-0 w-1",
                       item.id === "asu-guidelines-2024"
                         ? "bg-[#138808]"
                         : item.id === "nba-form-iii"
                         ? "bg-[#FF9933]"
-                        : "bg-[#000080]"
-                    }`}
+                        : "bg-[#000080]",
+                    )}
                   />
 
-                  <div className="flex flex-col gap-2 pl-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${item.badgeColor}`}>
-                          {item.badge}
-                        </span>
-                        <span className="text-xs text-slate-500 font-mono">{item.ref}</span>
-                      </div>
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
-                        <CalendarIcon className="w-3.5 h-3.5" />
-                        {item.date}
-                      </span>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className={cn("rounded px-1.5 py-0.5 text-[12px] font-bold uppercase", item.badgeColor)}>
+                      {item.badge}
+                    </span>
+                    <span className="font-mono text-[12px] text-slate-500">{item.ref}</span>
+                    <span className="ml-auto inline-flex items-center gap-1 text-[12px] text-slate-500">
+                      <CalendarIcon className="h-3.5 w-3.5" />
+                      {item.date}
+                    </span>
+                  </div>
 
-                    <h4 className="text-base font-bold text-[#00263f] mt-1 leading-snug">
-                      {item.title}
-                    </h4>
+                  <h3 className="mt-1 text-[13.5px] font-bold leading-snug text-[#00263f]">
+                    {item.title}
+                  </h3>
 
-                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      {item.description}
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-slate-600">
+                    {item.description}
+                  </p>
+
+                  {item.subBox && (
+                    <p className="mt-1.5 flex items-start gap-1.5 rounded-lg bg-slate-50 px-2 py-1.5 text-[12px] text-slate-700">
+                      <CheckVerifiedIcon className="mt-px h-3.5 w-3.5 shrink-0 text-[#138808]" />
+                      <span>{item.subBox}</span>
                     </p>
+                  )}
 
-                    {item.subBox && (
-                      <div className="flex items-center gap-2 p-2.5 rounded bg-slate-50 border border-slate-100 mt-1 text-xs text-slate-700">
-                        <CheckVerifiedIcon className="w-4 h-4 text-[#138808] shrink-0" />
-                        <span>{item.subBox}</span>
-                      </div>
-                    )}
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center rounded bg-[#e7eeff] px-1.5 py-0.5 text-[12px] font-medium text-[#00263f]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
 
-                    <div className="flex flex-wrap items-center justify-between pt-2 mt-1 border-t border-slate-100 gap-2">
-                      <div className="flex items-center gap-1.5">
-                        {item.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 bg-[#e7eeff] text-[#00263f] rounded"
-                          >
-                            🔖 {tag}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="ml-auto flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (item.id === "nba-form-iii") setActiveModal("nba");
+                          else if (item.id === "tkdl-protocol-v4") setActiveModal("tkdl_rules");
+                          else setActiveModal("gazette");
+                        }}
+                        className={ghostBtnCls}
+                        title={item.docSize}
+                      >
+                        <DownloadIcon className="h-3.5 w-3.5" />
+                        {item.docSize}
+                      </button>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (item.id === "nba-form-iii") setActiveModal("nba");
-                            else if (item.id === "tkdl-protocol-v4") setActiveModal("tkdl_rules");
-                            else setActiveModal("gazette");
-                          }}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-[#00263f] text-xs font-semibold transition-colors"
-                        >
-                          <DownloadIcon className="w-3.5 h-3.5" />
-                          <span>{item.docSize}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (item.actionType === "explain") {
-                              router.push(
-                                "/chat?prompt=" +
-                                  encodeURIComponent(
-                                    "Explain the CGPDTM/2024/ASU-04 guidelines for patent examination of ASU inventions, specifically regarding Section 3(p) and Section 3(e) non-obvious synergistic requirements."
-                                  )
-                              );
-                            } else if (item.actionType === "checklist") {
-                              setActiveModal("nba");
-                            } else if (item.actionType === "citation") {
-                              setActiveModal("tkdl_rules");
-                            }
-                          }}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded bg-[#00263f] text-white text-xs font-semibold hover:bg-[#001d32] transition-colors"
-                        >
-                          {item.actionType === "explain" && (
-                            <>
-                              <SparklesIcon className="w-3.5 h-3.5 text-[#FF9933]" />
-                              <span>Ask IP-SAKTI to Explain</span>
-                            </>
-                          )}
-                          {item.actionType === "checklist" && (
-                            <>
-                              <CheckVerifiedIcon className="w-3.5 h-3.5 text-[#FF9933]" />
-                              <span>Pre-check Docket</span>
-                            </>
-                          )}
-                          {item.actionType === "citation" && (
-                            <>
-                              <BookIcon className="w-3.5 h-3.5 text-[#FF9933]" />
-                              <span>Citation Rules</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (item.actionType === "explain") {
+                            router.push(
+                              "/chat?prompt=" +
+                                encodeURIComponent(
+                                  "Explain the CGPDTM/2024/ASU-04 guidelines for patent examination of ASU inventions, specifically regarding Section 3(p) and Section 3(e) non-obvious synergistic requirements."
+                                )
+                            );
+                          } else if (item.actionType === "checklist") {
+                            setActiveModal("nba");
+                          } else if (item.actionType === "citation") {
+                            setActiveModal("tkdl_rules");
+                          }
+                        }}
+                        className={solidBtnCls}
+                      >
+                        {item.actionType === "explain" && (
+                          <>
+                            <SparklesIcon className="h-3.5 w-3.5 text-[#FF9933]" />
+                            <span>Ask IP-SAKTI</span>
+                          </>
+                        )}
+                        {item.actionType === "checklist" && (
+                          <>
+                            <CheckVerifiedIcon className="h-3.5 w-3.5 text-[#FF9933]" />
+                            <span>Pre-check docket</span>
+                          </>
+                        )}
+                        {item.actionType === "citation" && (
+                          <>
+                            <BookIcon className="h-3.5 w-3.5 text-[#FF9933]" />
+                            <span>Citation rules</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </article>
               ))
             )}
           </div>
+        </section>
 
-          {/* Column B (5 cols): Statutory Forms & Filing Templates */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2">
-                <DocumentIcon className="w-5 h-5 text-[#2a6b2c]" />
-                <h3 className="text-lg font-bold text-[#00263f]">
-                  Statutory Forms & Filing Templates
-                </h3>
-              </div>
-              <span className="text-[11px] font-mono font-semibold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                E-Filing v2.0
-              </span>
+        {/* Rail B — statutory forms & filing templates */}
+        <section
+          className={cn(
+            "rules-rail min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:w-[380px] lg:flex-none xl:w-[420px]",
+            activeRail === "forms" ? "flex" : "hidden",
+            "lg:flex",
+          )}
+        >
+          <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <DocumentIcon className="h-4 w-4 shrink-0 text-[#2a6b2c]" />
+              <h2 className="text-[13px] font-bold text-[#00263f]">Statutory Forms &amp; Templates</h2>
             </div>
+            <span className="shrink-0 rounded border border-slate-200 px-1.5 py-0.5 font-mono text-[12px] font-semibold text-slate-500">
+              {filteredForms.length} · e-filing v2.0
+            </span>
+          </header>
 
+          <div className="rules-rail-body min-h-0 flex-1 overflow-y-auto">
             {filteredForms.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center text-slate-500 border border-slate-200">
-                No statutory forms match your current filters.
-              </div>
+              <RailEmptyState label="statutory forms" onReset={handleResetFilters} />
             ) : (
               filteredForms.map((item) => (
-                <div
+                <article
                   key={item.id}
-                  className="p-5 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-200"
+                  className="border-b border-slate-100 px-3 py-2.5 last:border-b-0 hover:bg-slate-50/70"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-[#00263f] text-white text-[11px] font-mono font-bold">
-                          {item.formNumber}
-                        </span>
-                        <span className={`text-xs font-bold flex items-center gap-1 ${item.badgeColor}`}>
-                          {item.id === "form-3" && <SparklesIcon className="w-3.5 h-3.5" />}
-                          {item.id === "form-18a" && <BoltIcon className="w-3.5 h-3.5" />}
-                          {item.id === "legal-draft-3p" && <ShieldIcon className="w-3.5 h-3.5" />}
-                          {item.badge}
-                        </span>
-                      </div>
-
-                      <h4 className="text-base font-bold text-[#00263f] mt-2">
-                        {item.title}
-                      </h4>
-
-                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="rounded bg-[#00263f] px-1.5 py-0.5 font-mono text-[12px] font-bold text-white">
+                      {item.formNumber}
+                    </span>
+                    <span className={cn("inline-flex items-center gap-1 text-[12px] font-bold", item.badgeColor)}>
+                      {item.id === "form-3" && <SparklesIcon className="h-3.5 w-3.5" />}
+                      {item.id === "form-18a" && <BoltIcon className="h-3.5 w-3.5" />}
+                      {item.id === "legal-draft-3p" && <ShieldIcon className="h-3.5 w-3.5" />}
+                      {item.badge}
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
-                    <span className="text-[11px] text-slate-400 font-medium">
-                      {item.formatOrFee}
-                    </span>
+                  <h3 className="mt-1 text-[13.5px] font-bold leading-snug text-[#00263f]">
+                    {item.title}
+                  </h3>
 
-                    <div className="flex items-center gap-2">
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-slate-600">
+                    {item.description}
+                  </p>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <span className="text-[12px] font-medium text-slate-500">{item.formatOrFee}</span>
+                    <div className="ml-auto flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => {
-                          if (item.id === "form-3") setActiveModal("form3");
-                          else if (item.id === "form-18a") setActiveModal("form18a");
+                          if (item.actionModal === "form3") setActiveModal("form3");
+                          else if (item.actionModal === "form18a") setActiveModal("form18a");
                           else setActiveModal("gazette");
                         }}
-                        className="p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-[#00263f] transition-colors"
-                        title="Download Template"
+                        className={iconBtnCls}
+                        title="Download blank template"
+                        aria-label={`Download ${item.formNumber} template`}
                       >
-                        <DownloadIcon className="w-4 h-4" />
+                        <DownloadIcon className="h-3.5 w-3.5" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => {
-                          if (item.id === "form-3") setActiveModal("form3");
-                          else if (item.id === "form-18a") setActiveModal("form18a");
+                          if (item.actionModal === "form3") setActiveModal("form3");
+                          else if (item.actionModal === "form18a") setActiveModal("form18a");
                           else if (item.id === "legal-draft-3p") {
                             router.push(
                               "/chat?prompt=" +
@@ -962,87 +960,59 @@ export default function RulesPage() {
                             setActiveModal("gazette");
                           }
                         }}
-                        className={`px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
-                          item.id === "form-3"
-                            ? "bg-[#2a6b2c] hover:bg-[#1e5020] text-white"
-                            : item.id === "form-18a"
-                            ? "bg-[#00263f] hover:bg-[#001d32] text-white"
-                            : item.id === "legal-draft-3p"
-                            ? "bg-[#00263f] hover:bg-[#001d32] text-white"
-                            : "bg-slate-100 hover:bg-slate-200 text-[#00263f]"
-                        }`}
+                        className={cn(
+                          solidBtnCls,
+                          item.id === "form-3" && "bg-[#2a6b2c] hover:bg-[#1e5020]",
+                        )}
                       >
                         {item.actionName}
                       </button>
                     </div>
                   </div>
-                </div>
+                </article>
               ))
             )}
           </div>
+        </section>
+      </div>
+
+      {/* ── Section 5: Concordance entry — actions left, label bottom-right ─ */}
+      <footer className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-slate-200 bg-white px-3 py-2 sm:px-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setActiveModal("concordance")}
+            className={ghostBtnCls}
+          >
+            Interactive Concordance
+          </button>
+          <a
+            href="https://ipindia.gov.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={solidBtnCls}
+          >
+            <SparklesIcon className="h-3.5 w-3.5 text-[#FF9933]" />
+            Gazette Registry Hub
+          </a>
         </div>
 
-        {/* ── Section 5: Statutory Concordance Banner ─────────────────────── */}
-        <section className="p-5 sm:p-6 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-[#f0f3ff] text-[#00263f] flex items-center justify-center shrink-0 border border-blue-100">
-              <TreeIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="text-base sm:text-lg font-bold text-[#00263f]">
-                Indian Patent Office & Ministry of Ayush Concordance Concordat
-              </h4>
-              <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                Complete cross-index matching 1,480 AYUSH classical formulations across Section 3(p), Biological Diversity Act Schedule I, and TKDL Digitized Folios.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 shrink-0 self-stretch sm:self-auto justify-end">
-            <button
-              type="button"
-              onClick={() => setActiveModal("concordance")}
-              className="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#00263f] text-xs font-semibold transition-colors border border-slate-200"
-            >
-              Interactive Concordance
-            </button>
-            <a
-              href="https://ipindia.gov.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[#00263f] text-white text-xs font-semibold hover:bg-[#001d32] transition-colors"
-            >
-              <SparklesIcon className="w-3.5 h-3.5 text-[#FF9933]" />
-              <span>Open Gazette Registry Hub</span>
-            </a>
-          </div>
-        </section>
-
-        {/* ── Section 6: Digital Integrity Verification Seal (Footer) ──────── */}
-        <footer className="p-3.5 rounded-lg bg-[#f0f3ff] border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
-          <div className="flex items-center gap-2">
-            <CheckVerifiedIcon className="w-4 h-4 text-[#138808] shrink-0" />
-            <span>
-              Digitally authenticated against official Controller General of Patents, Designs and Trade Marks (CGPDTM) and Ministry of Ayush statutory databases.
-            </span>
-          </div>
-          <div className="font-mono text-[11px] text-slate-500 shrink-0">
-            SHA-256: 8f07d2ca9d10e67a7... • NIC Data Center, New Delhi
-          </div>
-        </footer>
-
-      </div>
+        <span className="ml-auto flex min-w-0 items-center gap-1.5 text-[12px] font-bold text-[#00263f]">
+          <TreeIcon className="h-4 w-4 shrink-0" />
+          IPO &amp; Ayush Concordat · 1,480 formulations
+        </span>
+      </footer>
 
       {/* ── MODALS ──────────────────────────────────────────────────────── */}
 
       {/* 1. Gazette PDF & Clause Comparison Modal */}
       {activeModal === "gazette" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="p-5 bg-[#00263f] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200">
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-[#00263f] px-4 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
                 <DocumentIcon className="w-5 h-5 text-[#FF9933]" />
-                <h3 className="font-bold text-base sm:text-lg">
+                <h3 className="min-w-0 text-[15px] font-bold leading-snug sm:text-[16px]">
                   Patents (Amendment) Rules, 2024 — Official Gazette Viewer
                 </h3>
               </div>
@@ -1054,7 +1024,7 @@ export default function RulesPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 text-[12px] text-slate-700 sm:text-[13px]">
               <div className="p-3 rounded bg-amber-50 border border-amber-200 text-amber-900 text-xs">
                 <strong>Gazette Notification Ref:</strong> G.S.R. 200(E) dated 15th March 2024 published in the Gazette of India Extraordinary, Part II, Section 3, Sub-section (i).
               </div>
@@ -1091,10 +1061,10 @@ export default function RulesPage() {
               </p>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 p-3">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded bg-slate-200 text-slate-700 font-semibold text-xs"
+                className={cn(ghostBtnCls, "bg-slate-200 px-3 hover:bg-slate-300")}
               >
                 Close
               </button>
@@ -1103,7 +1073,7 @@ export default function RulesPage() {
                   alert("Official bilingual Gazette PDF download initiated.");
                   setActiveModal(null);
                 }}
-                className="px-4 py-2 rounded bg-[#00263f] text-white font-semibold text-xs flex items-center gap-1.5"
+                className={cn(solidBtnCls, "px-3")}
               >
                 <DownloadIcon className="w-3.5 h-3.5 text-[#FF9933]" />
                 <span>Download Gazette PDF (English / Hindi)</span>
@@ -1116,11 +1086,11 @@ export default function RulesPage() {
       {/* 2. Form 3 Pre-Fill Modal */}
       {activeModal === "form3" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="p-5 bg-[#00263f] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200">
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-[#00263f] px-4 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
                 <DocumentIcon className="w-5 h-5 text-[#2a6b2c]" />
-                <h3 className="font-bold text-base">
+                <h3 className="min-w-0 text-[15px] font-bold leading-snug">
                   Form 3 Generator — Statement & Undertaking under Section 8
                 </h3>
               </div>
@@ -1132,7 +1102,7 @@ export default function RulesPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 text-[12px] text-slate-700 sm:text-[13px]">
               <p className="text-xs text-slate-600">
                 Under Rule 12 of the Patents Rules, auto-populate corresponding patent application details across USPTO, EPO, and WIPO.
               </p>
@@ -1161,11 +1131,13 @@ export default function RulesPage() {
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 rounded border border-slate-200">
-                <div className="font-bold text-xs text-[#00263f] mb-2">
+              <div className="rounded border border-slate-200 bg-slate-50 p-3">
+                <div className="mb-2 text-xs font-bold text-[#00263f]">
                   Synchronized Foreign Filings (Docket ID: {form3AppNo}):
                 </div>
-                <table className="w-full text-[11px] text-left border-collapse">
+                {/* Sideways scroll on narrow screens rather than squeezing 4 columns */}
+                <div className="overflow-x-auto">
+                <table className="w-full min-w-[420px] border-collapse text-left text-[12px]">
                   <thead>
                     <tr className="border-b text-slate-500">
                       <th className="py-1">Jurisdiction</th>
@@ -1189,13 +1161,14 @@ export default function RulesPage() {
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 p-3">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded bg-slate-200 text-slate-700 font-semibold text-xs"
+                className={cn(ghostBtnCls, "bg-slate-200 px-3 hover:bg-slate-300")}
               >
                 Cancel
               </button>
@@ -1208,7 +1181,7 @@ export default function RulesPage() {
                     setActiveModal(null);
                   }, 800);
                 }}
-                className="px-4 py-2 rounded bg-[#2a6b2c] hover:bg-[#1e5020] text-white font-semibold text-xs flex items-center gap-1.5"
+                className={cn(solidBtnCls, "bg-[#2a6b2c] px-3 hover:bg-[#1e5020]")}
               >
                 <DownloadIcon className="w-3.5 h-3.5" />
                 <span>{form3Status === "generating" ? "Exporting..." : "Generate Form 3 (PDF & XML)"}</span>
@@ -1221,11 +1194,11 @@ export default function RulesPage() {
       {/* 3. Form 18A Expedited Examination Modal */}
       {activeModal === "form18a" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="p-5 bg-[#00263f] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200">
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-[#00263f] px-4 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
                 <BoltIcon className="w-5 h-5 text-[#FF9933]" />
-                <h3 className="font-bold text-base">
+                <h3 className="min-w-0 text-[15px] font-bold leading-snug">
                   Form 18A — Expedited Examination Docket Calculator
                 </h3>
               </div>
@@ -1237,7 +1210,7 @@ export default function RulesPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 text-[12px] text-slate-700 sm:text-[13px]">
               <p className="text-xs text-slate-600">
                 Rule 24C allows expedited disposal of Ayush formulation patents. Select applicant classification to calculate the official statutory fee rebate:
               </p>
@@ -1257,18 +1230,18 @@ export default function RulesPage() {
                         : "border-slate-200 hover:bg-slate-50"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
                       <input
                         type="radio"
                         name="applicant"
                         checked={applicantType === opt.id}
-                        onChange={() => setApplicantType(opt.id as any)}
+                        onChange={() => setApplicantType(opt.id as typeof applicantType)}
                       />
                       <span className="font-semibold text-slate-800 text-xs">{opt.label}</span>
                     </div>
                     <div className="text-right">
                       <span className="text-green-700 font-bold text-xs">{opt.fee}</span>
-                      <span className="text-[10px] text-slate-400 block">{opt.rebate}</span>
+                      <span className="text-[12px] text-slate-400 block">{opt.rebate}</span>
                     </div>
                   </label>
                 ))}
@@ -1279,10 +1252,10 @@ export default function RulesPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 p-3">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded bg-slate-200 text-slate-700 font-semibold text-xs"
+                className={cn(ghostBtnCls, "bg-slate-200 px-3 hover:bg-slate-300")}
               >
                 Close
               </button>
@@ -1291,7 +1264,7 @@ export default function RulesPage() {
                   alert("Form 18A dossier and certificate packet generated.");
                   setActiveModal(null);
                 }}
-                className="px-4 py-2 rounded bg-[#00263f] text-white font-semibold text-xs"
+                className={cn(solidBtnCls, "px-3")}
               >
                 Generate Form 18A Docket
               </button>
@@ -1303,11 +1276,11 @@ export default function RulesPage() {
       {/* 4. NBA Form III Checklist Modal */}
       {activeModal === "nba" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="p-5 bg-[#00263f] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200">
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-[#00263f] px-4 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
                 <CheckVerifiedIcon className="w-5 h-5 text-[#FF9933]" />
-                <h3 className="font-bold text-base">
+                <h3 className="min-w-0 text-[15px] font-bold leading-snug">
                   NBA Form III — Prior Approval Pre-Check Protocol
                 </h3>
               </div>
@@ -1319,7 +1292,7 @@ export default function RulesPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-3 text-xs sm:text-sm text-slate-700">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 text-[12px] text-slate-700 sm:text-[13px]">
               <p className="text-xs text-slate-600 leading-relaxed">
                 Under Section 6 of Biological Diversity Act 2002, patent applicants claiming inventions derived from Indian biological material must satisfy all 4 prerequisites:
               </p>
@@ -1329,7 +1302,7 @@ export default function RulesPage() {
                   <input type="checkbox" defaultChecked className="mt-0.5" />
                   <div>
                     <span className="font-bold text-slate-800">1. Geographical Sourcing Verification</span>
-                    <p className="text-slate-500 text-[11px]">Exact location of herbs/minerals documented with GPS coordinates or APMC mandi record.</p>
+                    <p className="text-slate-500 text-[12px]">Exact location of herbs/minerals documented with GPS coordinates or APMC mandi record.</p>
                   </div>
                 </div>
 
@@ -1337,7 +1310,7 @@ export default function RulesPage() {
                   <input type="checkbox" defaultChecked className="mt-0.5" />
                   <div>
                     <span className="font-bold text-slate-800">2. State Biodiversity Board (SBB) Intimation</span>
-                    <p className="text-slate-500 text-[11px]">Intimation filed under Section 7 for commercial utilization or extraction.</p>
+                    <p className="text-slate-500 text-[12px]">Intimation filed under Section 7 for commercial utilization or extraction.</p>
                   </div>
                 </div>
 
@@ -1345,7 +1318,7 @@ export default function RulesPage() {
                   <input type="checkbox" defaultChecked className="mt-0.5" />
                   <div>
                     <span className="font-bold text-slate-800">3. Benefit Sharing Agreement Draft</span>
-                    <p className="text-slate-500 text-[11px]">Commitment to deposit 0.1% to 0.5% ex-factory sale price with local Biodiversity Management Committees (BMC).</p>
+                    <p className="text-slate-500 text-[12px]">Commitment to deposit 0.1% to 0.5% ex-factory sale price with local Biodiversity Management Committees (BMC).</p>
                   </div>
                 </div>
 
@@ -1353,16 +1326,16 @@ export default function RulesPage() {
                   <input type="checkbox" defaultChecked className="mt-0.5" />
                   <div>
                     <span className="font-bold text-slate-800">4. Form III Application to National Biodiversity Authority, Chennai</span>
-                    <p className="text-slate-500 text-[11px]">Application submitted before the grant of Indian Patent Office specification.</p>
+                    <p className="text-slate-500 text-[12px]">Application submitted before the grant of Indian Patent Office specification.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 p-3">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded bg-slate-200 text-slate-700 font-semibold text-xs"
+                className={cn(ghostBtnCls, "bg-slate-200 px-3 hover:bg-slate-300")}
               >
                 Close
               </button>
@@ -1371,7 +1344,7 @@ export default function RulesPage() {
                   alert("NBA Form III checklist exported as compliance dossier.");
                   setActiveModal(null);
                 }}
-                className="px-4 py-2 rounded bg-[#00263f] text-white font-semibold text-xs"
+                className={cn(solidBtnCls, "px-3")}
               >
                 Export Compliance Dossier
               </button>
@@ -1383,11 +1356,11 @@ export default function RulesPage() {
       {/* 5. TKDL Citation Rules Modal */}
       {activeModal === "tkdl_rules" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="p-5 bg-[#00263f] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200">
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-[#00263f] px-4 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
                 <BookIcon className="w-5 h-5 text-[#FF9933]" />
-                <h3 className="font-bold text-base">
+                <h3 className="min-w-0 text-[15px] font-bold leading-snug">
                   TKDL Accession Protocol v4.1 & Examination Norms
                 </h3>
               </div>
@@ -1399,7 +1372,7 @@ export default function RulesPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-3 text-xs sm:text-sm text-slate-700">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 text-[12px] text-slate-700 sm:text-[13px]">
               <p className="text-xs text-slate-600">
                 Official protocol for addressing patent examiner citations quoting classical Sanskrit, Arabic, or Tamil digitized treatises:
               </p>
@@ -1424,10 +1397,10 @@ export default function RulesPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+            <div className="flex shrink-0 justify-end border-t border-slate-200 bg-slate-50 p-3">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded bg-[#00263f] text-white font-semibold text-xs"
+                className={cn(solidBtnCls, "px-3")}
               >
                 Close Protocol
               </button>
@@ -1439,11 +1412,11 @@ export default function RulesPage() {
       {/* 6. Interactive Concordance Modal */}
       {activeModal === "concordance" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="p-5 bg-[#00263f] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200">
+            <div className="flex shrink-0 items-center justify-between gap-3 bg-[#00263f] px-4 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
                 <TreeIcon className="w-5 h-5 text-[#FF9933]" />
-                <h3 className="font-bold text-base sm:text-lg">
+                <h3 className="min-w-0 text-[15px] font-bold leading-snug sm:text-[16px]">
                   AYUSH Classical Concordat Concordance (1,480 Formulations Index)
                 </h3>
               </div>
@@ -1455,20 +1428,22 @@ export default function RulesPage() {
               </button>
             </div>
 
-            <div className="p-5 border-b border-slate-200">
+            <div className="shrink-0 border-b border-slate-200 p-3">
               <input
                 type="text"
                 value={concordanceSearch}
                 onChange={(e) => setConcordanceSearch(e.target.value)}
-                placeholder="Filter by formulation name (e.g., Triphala, Ashwagandha, Trikatu, Chyawanprash)..."
-                className="w-full px-3 py-2 border rounded-lg border-slate-300 text-xs"
+                placeholder="Filter by formulation name (Triphala, Ashwagandha, Trikatu…)"
+                className={cn(fieldCls, "w-full px-3")}
               />
             </div>
 
-            <div className="p-6 overflow-y-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            {/* The five-column concordance can't fit a phone, so it scrolls
+                sideways inside the modal instead of squashing every cell. */}
+            <div className="min-h-0 flex-1 overflow-auto p-4">
+              <table className="w-full min-w-[620px] border-collapse text-left text-[12px]">
                 <thead>
-                  <tr className="bg-slate-100 text-slate-600 border-b">
+                  <tr className="border-b bg-slate-100 text-slate-600">
                     <th className="p-2 font-semibold">Formulation</th>
                     <th className="p-2 font-semibold">Classical Treatise</th>
                     <th className="p-2 font-semibold">IPC Code</th>
@@ -1496,7 +1471,7 @@ export default function RulesPage() {
                         <td className="p-2 text-slate-600">{row.text}</td>
                         <td className="p-2 font-mono text-slate-500">{row.ipc}</td>
                         <td className="p-2">
-                          <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-semibold">
+                          <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[12px] font-semibold">
                             {row.stat}
                           </span>
                         </td>
@@ -1507,10 +1482,10 @@ export default function RulesPage() {
               </table>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+            <div className="flex shrink-0 justify-end border-t border-slate-200 bg-slate-50 p-3">
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded bg-[#00263f] text-white font-semibold text-xs"
+                className={cn(solidBtnCls, "px-3")}
               >
                 Close
               </button>

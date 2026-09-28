@@ -382,23 +382,54 @@ body {
 }
 
 /* ── Formulation Lab dossier print (§13): print the dossier document only,
-      never the app shell. Replaces window.print() of the whole page. ── */
+      never the app shell. Replaces window.print() of the whole page.
+      Scoped with :has() so pages that never mount a dossier — e.g. the
+      Rules & Regulations "Export Digest" — are not blanked out by it. ── */
 @media print {
-  body * {
+  body:has(#dossier-root) * {
     visibility: hidden !important;
   }
-  #dossier-root,
-  #dossier-root * {
+  body:has(#dossier-root) #dossier-root,
+  body:has(#dossier-root) #dossier-root * {
     visibility: visible !important;
   }
-  #dossier-root {
+  body:has(#dossier-root) #dossier-root {
     position: absolute;
     inset: 0;
     margin: 0;
     padding: 0;
     width: 100%;
   }
-  #dossier-root .print\:hidden {
+  body:has(#dossier-root) #dossier-root .print\:hidden {
+    display: none !important;
+  }
+}
+
+/* ── Rules & Regulations digest print: the console is a fixed-height shell
+      whose two rails scroll internally, so a naive print yields one screenful
+      with everything below the fold silently dropped. Un-frame it for paper. ── */
+@media print {
+  #rules-shell {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .rules-rails {
+    display: block !important;
+    min-height: 0 !important;
+  }
+  .rules-rail {
+    display: flex !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    break-inside: avoid;
+    margin-bottom: 12px;
+  }
+  .rules-rail-body {
+    overflow: visible !important;
+  }
+  #rules-shell .print\:hidden {
     display: none !important;
   }
 }

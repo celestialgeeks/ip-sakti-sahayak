@@ -26,6 +26,8 @@ import { ContributionRows } from "@/components/formulation-lab/ContributionRows"
 import { EntryDoors } from "@/components/formulation-lab/EntryDoors";
 import { HerbDrawer } from "@/components/formulation-lab/HerbDrawer";
 import { PreFERView } from "@/components/formulation-lab/PreFERView";
+import { StageTrail } from "@/components/formulation-lab/StageTrail";
+import { computeStageAvailability, LabStage } from "@/lib/formulation/stages";
 import { DossierView, TrajectoryPoint } from "@/components/formulation-lab/DossierView";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { getApiUrl } from "@/lib/api";
@@ -37,7 +39,8 @@ import {
   SelectValue,
 } from "@/components/ui/interfaces-select";
 
-type LabView = "doors" | "bench" | "examine" | "dossier";
+// Doors → bench → examine → dossier (§3); the stage trail renders this same set.
+type LabView = LabStage;
 
 const DRAFT_KEY = "ipsakti.lab.draft";
 
@@ -607,6 +610,42 @@ export default function FormulationLabPage() {
 
   const staleAfterExport = exportedFor !== null && exportedFor !== benchSignature;
 
+  // ── Stage trail (§3) — availability is the ladder's own predicates, so a crumb
+  //    can never unlock something the CTA says is unmet. Locked crumbs display the
+  //    reason instead of disappearing (§11.1).
+  const stageAvailability = useMemo(
+    () =>
+      computeStageAvailability({
+        ingredientCount: ingredients.length,
+        isBalanced: sim.is_balanced,
+        totalRatio: sim.total_ratio,
+        canRunPreFer,
+        // A report exists this session, even if the bench moved under it — the
+        // dossier shows staleness rather than locking the crumb again (§13).
+        preFerSeen: preFerReport !== null,
+        onBench: ingredients.length > 0 || view !== "doors",
+      }),
+    [ingredients.length, sim.is_balanced, sim.total_ratio, canRunPreFer, preFerReport, view]
+  );
+
+  const handleStageNavigate = useCallback(
+    (next: LabStage) => {
+      if (next === view || !stageAvailability[next].unlocked) return;
+      if (next === "examine") {
+        // Clicking the crumb is the explicit action (§12) — Pre-FER never auto-fires.
+        runPreFER();
+        return;
+      }
+      setView(next);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [view, stageAvailability]
+  );
+
+  const stageTrail = view !== "doors" ? (
+    <StageTrail stage={view} availability={stageAvailability} onNavigate={handleStageNavigate} />
+  ) : null;
+
   // ── KPI tiles — ordered by lens; every lens keeps every tile reachable ────
   const kpiTiles = useMemo(() => {
     const tiles: Record<string, React.ReactNode> = {
@@ -679,6 +718,8 @@ export default function FormulationLabPage() {
 
       {view === "bench" && (
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+          {stageTrail}
+
           {/* Sub-header banner — the lab's signature element (§3/§10) */}
           <div className="rounded-xl overflow-hidden border border-tiranga-saffron/40 shadow-sm">
             <div className="h-1 bg-gradient-to-r from-tiranga-saffron via-white to-tiranga-green" />
@@ -938,7 +979,8 @@ export default function FormulationLabPage() {
       )}
 
       {view === "examine" && (
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4">
+          {stageTrail}
           <PreFERView
             report={preFerReport}
             isLoading={preFerLoading}
@@ -951,7 +993,8 @@ export default function FormulationLabPage() {
       )}
 
       {view === "dossier" && (
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4">
+          {stageTrail}
           <DossierView
             simulation={sim}
             ingredients={ingredients}

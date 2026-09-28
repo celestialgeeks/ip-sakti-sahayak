@@ -55,9 +55,11 @@ export default function RootLayout({
           {/* Left Sidebar */}
           <Sidebar />
 
-          {/* Main Content Area */}
+          {/* Main Content Area — `min-w-0` keeps this flex item shrinkable, so a
+              wide child (scroll rail, table, long label) can never push the
+              document wider than the viewport on small screens. */}
           <main
-            className="flex-1 min-h-[calc(100vh-95px)] flex flex-col"
+            className="flex-1 min-w-0 min-h-[calc(100vh-95px)] flex flex-col"
             style={{ marginLeft: "var(--sidebar-width)" }}
           >
             {children}
