@@ -38,9 +38,21 @@ test("useChat: exposes the documented API surface at mount", () => {
   assert.strictEqual(api.messages.length, 0, "messages must start empty");
   assert.strictEqual(api.isLoading, false);
   assert.strictEqual(api.isWaking, false);
+  assert.strictEqual(api.phase, "idle", "no request has been sent yet");
+  assert.strictEqual(api.isThinking, false, "the thinking state must not be visible at rest");
   for (const fn of ["send", "clear", "loadSession"]) {
     assert.strictEqual(typeof api[fn], "function", `${fn} must be a function`);
   }
+});
+
+test("useChat: keeps the thinking gate separate from the in-flight gate", () => {
+  const api = renderHook();
+  // `isLoading` covers the whole request (it locks the composer), while
+  // `isThinking` is the narrower window that ends at the first content chunk.
+  // Both are exposed so no component has to infer one from the other.
+  assert.strictEqual(typeof api.isLoading, "boolean");
+  assert.strictEqual(typeof api.isThinking, "boolean");
+  assert.strictEqual(["idle", "waiting", "answering", "done", "error"].includes(api.phase), true);
 });
 
 test("useChat: seeds sessionId from the initialSessionId argument", () => {

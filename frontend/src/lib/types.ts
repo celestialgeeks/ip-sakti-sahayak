@@ -2,6 +2,8 @@
  * TypeScript type definitions for IP-SAKTI Sahayak.
  */
 
+import type { ReasoningRecord } from "./reasoning";
+
 export type Jurisdiction = "india" | "international" | "both";
 
 export type ConfidenceLevel = "high" | "medium" | "low";
@@ -26,6 +28,11 @@ export interface Message {
   confidenceLevel?: ConfidenceLevel;
   timestamp?: string;
   statutoryAlert?: { title: string; description: string } | null;
+  /**
+   * Measured trace of how this answer was produced, rendered above the text as a
+   * reviewable log. Optional: rows restored from Supabase predate it.
+   */
+  reasoning?: ReasoningRecord;
 }
 
 export interface ChatRequest {

@@ -433,3 +433,143 @@ body {
     display: none !important;
   }
 }
+
+/* ── Animated thinking / reasoning panel (components/ui/thinking-reasoning) ──
+   Replaces the raw pipeline log with a ChatGPT-Claude style block: a shimmering
+   "Thinking…" header that folds into a "Thought for Ns" summary, over a
+   viewport that reveals the reasoning line by line and fades once capped. */
+.trr-root {
+  font-family: var(--font-body, var(--font-sans));
+  max-width: 42rem;
+}
+.trr-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--ink-muted, #64748b);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.trr-clickable {
+  cursor: pointer;
+  border-radius: var(--radius-md, 0.375rem);
+  transition: color 0.15s ease;
+}
+.trr-clickable:hover .trr-label {
+  color: var(--ink-primary, #0f172a);
+}
+.trr-icon {
+  flex-shrink: 0;
+}
+.trr-label {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}
+.trr-chevron {
+  flex-shrink: 0;
+  margin-left: 1px;
+  color: var(--ink-muted, #64748b);
+  transition: transform 0.25s ease;
+}
+.trr-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--ink-muted, #64748b) 0%,
+    var(--ink-muted, #64748b) 35%,
+    var(--ink-primary, #0f172a) 50%,
+    var(--ink-muted, #64748b) 65%,
+    var(--ink-muted, #64748b) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: tr-shine 2.4s ease-in-out infinite;
+}
+.trr-pulse {
+  animation: tr-pulse 1.6s ease-in-out infinite;
+}
+.trr-collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.28s ease;
+}
+.trr-collapsed {
+  grid-template-rows: 0fr;
+}
+.trr-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.trr-viewport {
+  overflow: hidden;
+  padding-left: 21px;
+  transition: max-height 0.28s ease;
+}
+.trr-scroll {
+  overflow-y: auto;
+}
+.trr-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+.trr-sentence {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 20px;
+  color: var(--ink-secondary, #475569);
+  animation: tr-sentence-in 0.32s ease both;
+}
+
+@keyframes tr-sentence-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tr-shine {
+  0%,
+  18% {
+    background-position: 100% 0;
+  }
+  82%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@keyframes tr-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trr-shimmer,
+  .trr-pulse,
+  .trr-sentence {
+    animation: none;
+  }
+  .trr-sentence {
+    opacity: 1;
+    transform: none;
+  }
+}
