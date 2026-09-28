@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from app.core.rag_pipeline import run_rag_pipeline
-from app.models.schemas import ChatRequest
+from app.models.schemas import ChatRequest, ChatResponse
 from app.api.middleware.auth import get_optional_user_id
 
 logger = logging.getLogger("app.chat")
@@ -37,6 +37,6 @@ async def chat(
         user_id=current_user_id,
     )
 
-    if stream:
+    if stream and not isinstance(result, ChatResponse):
         return StreamingResponse(result, media_type="text/event-stream")
     return result
