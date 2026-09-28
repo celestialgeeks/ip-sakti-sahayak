@@ -1,8 +1,13 @@
 "use client";
 
+import React from "react";
+import { FeatureCardDemo, SavingsPlanItem } from "@/components/ui/feature-card-demo";
 import Component from "@/components/ui/ai-sources";
 
-export default function DemoOne() {
+export default FeatureCardDemo;
+export { FeatureCardDemo, SavingsPlanItem };
+
+export function DemoOne() {
   return (
     <div className="flex min-h-[440px] w-full items-center justify-center bg-background p-10">
       <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-sm">
@@ -64,5 +69,3 @@ export default function DemoOne() {
     </div>
   );
 }
-
-export { DemoOne };
