@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* ─── IP-SAKTI Sahayak Design System ───────────────────────────
    Tokens extracted from Stitch project: "Ayurvedic Scholarly Interface"
@@ -48,6 +49,22 @@
   --font-sans: var(--font-inter), var(--font-noto-sans), sans-serif;
   --font-heading: var(--font-noto-sans), sans-serif;
   --font-label: var(--font-public-sans), sans-serif;
+
+  /* ── Semantic UI primitive tokens ──
+     Names used by the shared primitives in `components/ui` (Select, …).
+     Values are remapped to the IP-SAKTI portal palette — never the
+     library defaults — so overlays match the existing chrome. */
+  --color-foreground: #0F172A;
+  --color-border: #D2D9E2;
+  --color-input: #D2D9E2;
+  --color-ring: #0b3c5d;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0F172A;
+  --color-muted: #EEF3F8;
+  --color-muted-foreground: #64748B;
+  --color-accent: #EEF3F8;
+  --color-accent-foreground: #00263f;
+  --color-destructive: #ba1a1a;
 }
 
 /* ── Base Styles ── */

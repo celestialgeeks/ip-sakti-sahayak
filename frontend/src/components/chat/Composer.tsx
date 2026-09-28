@@ -1,6 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 interface ComposerProps {
   onSend: (message: string) => void;
@@ -188,16 +195,22 @@ export function Composer({
           </button>
 
           {/* Jurisdiction selector */}
-          <select
+          <Select
             value={jurisdiction}
-            onChange={(e) => onJurisdictionChange(e.target.value)}
+            onValueChange={onJurisdictionChange}
             disabled={disabled}
-            title="Select Jurisdiction"
-            className="self-center shrink-0 bg-transparent border-none text-[12px] font-semibold text-slate-500 uppercase cursor-pointer hover:text-[#0b3c5d] focus:outline-none"
           >
-            <option value="india">National (India)</option>
-            <option value="international">International</option>
-          </select>
+            <SelectTrigger
+              aria-label="Select Jurisdiction"
+              className="w-auto shrink-0 gap-1.5 self-center border-none bg-transparent px-2 text-[12px] font-semibold uppercase text-slate-500 shadow-none hover:text-[#0b3c5d] data-[size=default]:h-8"
+            >
+              <SelectValue placeholder="Jurisdiction" />
+            </SelectTrigger>
+            <SelectContent className="[&_[data-slot=select-item]]:text-xs">
+              <SelectItem value="india">National (India)</SelectItem>
+              <SelectItem value="international">International</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Input */}
           <textarea

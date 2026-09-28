@@ -35,6 +35,13 @@ import {
   setClassification,
 } from "@/lib/wizard/store";
 import { classifyFormulation } from "@/lib/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/interfaces-select";
 
 // ── Shared UI helpers ──────────────────────────────────────────────
 
@@ -113,14 +120,24 @@ function SelectField({
         {label}
         {required ? <span className="ml-0.5 text-[#E65100]">*</span> : null}
       </label>
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={inputCls + " mt-1"}>
-        <option value="">Select…</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger
+          id={id}
+          className="mt-1 w-full rounded border-[#D2D9E2] bg-white text-[14px] data-[size=default]:h-[38px]"
+        >
+          <SelectValue placeholder="Select…" />
+        </SelectTrigger>
+        <SelectContent>
+          {/* Radix forbids empty item values; the empty state is the placeholder above. */}
+          {options
+            .filter((o) => o.value !== "")
+            .map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+        </SelectContent>
+      </Select>
       {hint ? <p className="mt-1 text-[11.5px] text-slate-500">{hint}</p> : null}
     </div>
   );
@@ -274,20 +291,22 @@ export function ClassificationStep() {
           {loading ? "Classifying…" : "Classify my product"}
         </button>
         <span className="text-[12px] text-slate-400">or set manually:</span>
-        <select
-          className="rounded border border-[#D2D9E2] px-2 py-1.5 text-[12.5px]"
+        <Select
           value={productType === "UNKNOWN" ? "" : productType}
-          onChange={(e) => {
-            const v = e.target.value as ProductType | "";
+          onValueChange={(v) => {
             if (!v) return;
-            setClassification({ category: v.toLowerCase(), manual: true }, v);
+            setClassification({ category: v.toLowerCase(), manual: true }, v as ProductType);
           }}
         >
-          <option value="">Product type…</option>
-          <option value="AYUSH">Ayurvedic drug / proprietary medicine (AYUSH)</option>
-          <option value="FSSAI">Ayurvedic food / supplement (FSSAI Aahara)</option>
-          <option value="COSMETIC">Cosmetic</option>
-        </select>
+          <SelectTrigger className="w-[260px] rounded border-[#D2D9E2] bg-white text-[12.5px] data-[size=default]:h-[34px]">
+            <SelectValue placeholder="Product type…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="AYUSH">Ayurvedic drug / proprietary medicine (AYUSH)</SelectItem>
+            <SelectItem value="FSSAI">Ayurvedic food / supplement (FSSAI Aahara)</SelectItem>
+            <SelectItem value="COSMETIC">Cosmetic</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {error ? <p className="text-[12.5px] text-[#E65100]">{error}</p> : null}
