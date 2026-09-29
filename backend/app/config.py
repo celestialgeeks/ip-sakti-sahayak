@@ -29,9 +29,23 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("NVIDIA_NIM_API_KEY", "NVIDIA_API_KEY"),
     )
     NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
-    NVIDIA_LLM_MODEL: str = "nvidia/nemotron-3.5-lightning-30b-a3b"
+    # Measured against the live endpoint, not assumed. The shared serverless NIM
+    # catalogue is full of reasoning-flavoured models that spend minutes composing a
+    # hidden chain of thought before their first visible token and ignore both
+    # max_tokens and enable_thinking — that is what made the chat look dead. This one
+    # answered a real RAG prompt in ~2.5s to first token, twice out of twice.
+    NVIDIA_LLM_MODEL: str = "nvidia/nemotron-3-super-120b-a12b"
+    # Tried in order when the endpoint is congested or no longer deployed. A shared
+    # serverless model returns 404 or 503 at random, so one model is a single point
+    # of failure on the request path.
+    NVIDIA_LLM_FALLBACK_MODELS: str = "nvidia/nemotron-3-ultra-550b-a55b"
     NVIDIA_EMBED_MODEL: str = "nvidia/nemotron-3-embed-1b"
     NVIDIA_EMBED_DIMENSIONS: int = 2048
+    # Per-attempt budget and retry count. Three attempts at 120s each stacked into a
+    # 483s hang, so the budget is deliberately small: an honest failure inside a
+    # minute beats a spinner for eight.
+    NIM_TIMEOUT_SECONDS: float = 60.0
+    NIM_MAX_ATTEMPTS: int = 2
 
     # --- Qdrant ---
     QDRANT_URL: str = "http://localhost:6333"
@@ -53,6 +67,10 @@ class Settings(BaseSettings):
     RAG_CHUNK_OVERLAP: int = 50
     RAG_CONFIDENCE_HIGH: float = 0.85
     RAG_CONFIDENCE_MEDIUM: float = 0.60
+    # Generation budget for an answer. 8192 let the model run to 5,800+ characters,
+    # and every one of those characters is time the reader waits for the rest; a
+    # focused legal answer does not need four thousand.
+    RAG_MAX_TOKENS: int = 1500
 
     model_config = {
         "env_file": ("../.env", ".env"),
@@ -60,6 +78,20 @@ class Settings(BaseSettings):
         "case_sensitive": True,
         "extra": "ignore"
     }
+
+    @property
+    def llm_model_chain(self) -> list[str]:
+        """Primary model then every fallback, de-duplicated, blanks dropped."""
+        ids = [self.NVIDIA_LLM_MODEL] + [
+            m.strip() for m in (self.NVIDIA_LLM_FALLBACK_MODELS or "").split(",") if m.strip()
+        ]
+        seen: set[str] = set()
+        chain: list[str] = []
+        for model in ids:
+            if model not in seen:
+                seen.add(model)
+                chain.append(model)
+        return chain
 
 
 settings = Settings()

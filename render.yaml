@@ -16,11 +16,19 @@ services:
       - key: NVIDIA_NIM_BASE_URL
         value: https://integrate.api.nvidia.com/v1
       - key: NVIDIA_LLM_MODEL
-        value: nvidia/nemotron-3.5-lightning-30b-a3b
+        value: nvidia/nemotron-3-super-120b-a12b
+      - key: NVIDIA_LLM_FALLBACK_MODELS
+        value: nvidia/nemotron-3-ultra-550b-a55b
       - key: NVIDIA_EMBED_MODEL
         value: nvidia/nemotron-3-embed-1b
       - key: NVIDIA_EMBED_DIMENSIONS
         value: 2048
+      - key: NIM_TIMEOUT_SECONDS
+        value: 60
+      - key: NIM_MAX_ATTEMPTS
+        value: 2
+      - key: RAG_MAX_TOKENS
+        value: 1500
 
       # Sarvam
       - key: SARVAM_API_KEY
