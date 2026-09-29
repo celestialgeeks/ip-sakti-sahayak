@@ -13,7 +13,7 @@ import { Jurisdiction } from "@/lib/types";
 function ChatPageContent() {
   const searchParams = useSearchParams();
   const sessionParam = searchParams.get("session") || undefined;
-  const { messages, isLoading, isThinking, send, loadSession } = useChat(sessionParam);
+  const { messages, isLoading, isThinking, send, loadSession, sessionId } = useChat(sessionParam);
   const { isAuthenticated } = useAuth();
 
   // Seeded from the URL rather than set inside the effect below: an effect that
@@ -29,13 +29,18 @@ function ChatPageContent() {
   // the two streams overwrite each other's turn.
   const initialSentRef = useRef(false);
 
-  // Load session if URL changes to a different session and no active query is being sent
+  // Load a conversation only when the address moves to one this page is not
+  // already showing. `isLoading` used to be the gate here, so the instant a stream
+  // finished the effect re-ran and re-read the session the backend had just written,
+  // replacing the live transcript — which carries the reasoning trace and citations
+  // the stored rows do not — with a server copy. That read-back is what turned a
+  // duplicated stored row into a prompt and answer rendered twice on screen.
   useEffect(() => {
     const q = searchParams.get("q");
-    if (sessionParam && !q && !isLoading) {
-      loadSession(sessionParam);
-    }
-  }, [sessionParam, searchParams, loadSession, isLoading]);
+    if (!sessionParam || q) return;
+    if (sessionId === sessionParam && messages.length > 0) return;
+    loadSession(sessionParam);
+  }, [sessionParam, searchParams, loadSession, sessionId, messages.length]);
 
   // A `?q=` on arrival is a question the user already typed — somewhere else (the
   // welcome page, a shared link). This effect only sends it. The jurisdiction it

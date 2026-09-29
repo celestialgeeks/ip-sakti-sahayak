@@ -19,6 +19,7 @@ import {
   type ReasoningTracker,
 } from "@/lib/reasoning";
 import { createSSEParser, SSE_DONE } from "@/lib/sse";
+import { dedupeStoredTurns } from "@/lib/chat";
 
 /** Cold-start hedge: past this many ms with no bytes, say so on the trace. */
 const SLOW_START_MS = 25000;
@@ -87,12 +88,16 @@ export function useChat(initialSessionId?: string) {
         }
 
         if (data && data.length > 0 && !error) {
-          const loaded: Message[] = data.map((m: any) => ({
-            role: m.role as "user" | "assistant",
-            content: m.content,
-            citations: m.citations || undefined,
-            timestamp: m.created_at,
-          }));
+          // Rows stored while both the browser and the backend wrote a turn contain
+          // each message twice; collapse them so history reads the way it happened.
+          const loaded: Message[] = dedupeStoredTurns(
+            data.map((m: any) => ({
+              role: m.role as "user" | "assistant",
+              content: m.content,
+              citations: m.citations || undefined,
+              timestamp: m.created_at,
+            })),
+          );
           setMessages(loaded);
           setSessionId(targetSessionId);
           localStorage.setItem("chat_session", targetSessionId);
@@ -221,38 +226,17 @@ export function useChat(initialSessionId?: string) {
         }
       } catch (e) {}
 
-      // 1. Safe Supabase lookup in isolated try-catch so auth checks never block the query
+      // 1. Read the bearer token. Supabase is consulted here only for auth — the
+      // transcript is persisted by the backend, which writes the session row, the
+      // question and the answer, and is the only party holding the final text and
+      // its citations. Writing the same rows from the browser as well put two user
+      // rows and two assistant rows behind every turn, and the read-back on
+      // completion then rendered them as a prompt and answer shown twice.
       let session: any = null;
-      let user: any = null;
-      let supabaseClient: any = null;
       try {
         const { createClient } = await import("@/lib/supabase/client");
-        supabaseClient = createClient();
-        const { data } = await supabaseClient.auth.getSession();
+        const { data } = await createClient().auth.getSession();
         session = data?.session;
-        user = session?.user;
-
-        // Persist session & user message to Supabase if authenticated
-        if (user) {
-          try {
-            await supabaseClient.from("chat_sessions").upsert({
-              id: activeSessionId,
-              user_id: user.id,
-              title: query.length > 55 ? query.slice(0, 52) + "..." : query,
-            });
-
-            await supabaseClient.from("chat_messages").insert({
-              session_id: activeSessionId,
-              role: "user",
-              content: query,
-            });
-
-            // Notify Sidebar to refresh list
-            window.dispatchEvent(new Event("sessions_updated"));
-          } catch (dbErr) {
-            console.warn("Supabase user message persistence error:", dbErr);
-          }
-        }
       } catch (authErr) {
         console.warn("Non-fatal Supabase session error:", authErr);
       }
@@ -308,7 +292,6 @@ export function useChat(initialSessionId?: string) {
         let sawDone = false;
         let currentContent = "";
         let lastTraceWrite = 0;
-        let finalMetadata: any = null;
 
         // Applied to one whole SSE frame at a time. The parser only releases a
         // frame once its blank terminator line has arrived, so a frame cut in
@@ -396,7 +379,6 @@ export function useChat(initialSessionId?: string) {
                 attachReasoning(tracker);
               }
             } else if (parsed.metadata) {
-              finalMetadata = parsed.metadata;
               const returnedSessionId = parsed.metadata.session_id || activeSessionId;
               setSessionId(returnedSessionId);
 
@@ -486,20 +468,10 @@ export function useChat(initialSessionId?: string) {
         setPhase(tracker.phase);
         attachReasoning(tracker);
 
-        // Persist assistant response to Supabase after stream completes
-        if (supabaseClient && user && currentContent) {
-          try {
-            await supabaseClient.from("chat_messages").insert({
-              session_id: activeSessionId,
-              role: "assistant",
-              content: currentContent,
-              citations: finalMetadata?.citations || null,
-            });
-            window.dispatchEvent(new Event("sessions_updated"));
-          } catch (dbErr) {
-            console.warn("Failed saving assistant message to Supabase:", dbErr);
-          }
-        }
+        // The backend has already stored the answer and its citations as part of
+        // generating it; re-inserting it here is what duplicated the turn. Nudge the
+        // sidebar so the server-written session row shows up.
+        window.dispatchEvent(new Event("sessions_updated"));
 
       } catch (error: any) {
         clearTimeout(timeoutId);

@@ -300,6 +300,46 @@ async def test_chat_with_auth_header(async_client: AsyncClient, mock_supabase_se
 
 
 @pytest.mark.asyncio
+async def test_an_authenticated_turn_is_stored_exactly_once_per_role(
+    async_client: AsyncClient, mock_supabase_service, mock_nim_service, mock_qdrant_service
+):
+    """
+    Regression: the browser wrote the same rows the backend wrote, so one signed-in
+    turn produced two user rows and two assistant rows, and the transcript rendered
+    the question and the answer twice. The backend is the single writer — it is the
+    only party holding the final text and its citations.
+    """
+    import time
+    import jwt
+    from app.config import settings
+
+    settings.JWT_SECRET = "test-secret-key-123"
+    token = jwt.encode(
+        {"sub": "user_456", "aud": "authenticated", "exp": int(time.time()) + 3600},
+        "test-secret-key-123",
+        algorithm="HS256",
+    )
+
+    response = await async_client.post(
+        "/api/chat",
+        json={
+            "query": "Can I patent a turmeric and neem formulation for wound healing in India?",
+            "jurisdiction": "india",
+            "language": "en",
+            "session_id": "single-writer-check",
+            "stream": True,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    roles = [call.args[1] for call in mock_supabase_service.save_message.await_args_list]
+    assert roles.count("user") == 1, f"a question must store exactly one user row, got {roles}"
+    assert roles.count("assistant") == 1, f"an answer must store exactly one assistant row, got {roles}"
+    assert mock_supabase_service.save_session.await_count == 1
+
+
+@pytest.mark.asyncio
 async def test_chat_degraded_rag_log_carries_correlation_id(
     async_client: AsyncClient, mock_nim_service, caplog
 ):

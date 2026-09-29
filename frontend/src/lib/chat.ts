@@ -48,6 +48,25 @@ export function userQueryFor(messages: Message[], index: number): string | undef
 }
 
 /**
+ * Collapse the doubled rows left behind by the period when both the browser and the
+ * backend stored the same turn.
+ *
+ * Only *adjacent* identical (role, content) rows are merged, because that is exactly
+ * the shape the double-write produced: question, question, answer, answer, ordered by
+ * insertion time. A user genuinely asking the same thing twice is always separated by
+ * the answer in between, so this cannot swallow a real repeat.
+ *
+ * Stored history is deliberately not rewritten — this only stops the sessions already
+ * affected from rendering their prompt and answer twice when opened.
+ */
+export function dedupeStoredTurns<T extends Pick<Message, "role" | "content">>(rows: T[]): T[] {
+  return rows.filter((row, index) => {
+    const previous = rows[index - 1];
+    return !previous || previous.role !== row.role || previous.content !== row.content;
+  });
+}
+
+/**
  * Copy is a read, so it never changes the transcript — but it can be refused, and
  * a refusal that dismisses itself looks exactly like a copy that worked. The
  * failed label therefore stays until the next attempt.
