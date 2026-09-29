@@ -24,6 +24,20 @@ import re
 
 logger = logging.getLogger("app.rag")
 
+# Sentinel standing in for "the model stream died", so a mid-stream failure becomes an
+# item the loop can react to instead of an exception that aborts the response.
+_GENERATION_FAILED = object()
+
+GENERATION_FAILURE_MESSAGE = (
+    "_The language service could not produce an answer this time — it is overloaded or "
+    "unreachable. Nothing was generated; please try again in a moment._"
+)
+
+TRUNCATION_NOTICE = (
+    "\n\n> _Answer interrupted: the model service stopped partway through. "
+    "The text above is what completed._"
+)
+
 def response_to_sse(response: ChatResponse) -> AsyncGenerator[str, None]:
     """
     Wrap a fully-generated ChatResponse in the SSE event contract the client parses.
@@ -286,8 +300,28 @@ async def run_rag_pipeline(
         buffer = ""
         in_think_block = False
         thinking_cleared = False
-        
-        async for chunk in generator:
+        generation_failed = False
+
+        async def guarded() -> AsyncGenerator[object, None]:
+            """
+            Turn "the model stream died" into one more item rather than an exception.
+
+            This endpoint fails mid-stream under load. An exception here aborts the
+            response after the client has already been handed a 200 and a live
+            thinking panel, which is indistinguishable from the blank screen this
+            pipeline exists to avoid.
+            """
+            try:
+                async for chunk in generator:
+                    yield chunk
+            except Exception as e:
+                logger.error("Generation stream failed before completing: %r", e)
+                yield _GENERATION_FAILED
+
+        async for chunk in guarded():
+            if chunk is _GENERATION_FAILED:
+                generation_failed = True
+                break
             full_answer += chunk
 
             # If still checking initial stream for thinking preambles
@@ -332,6 +366,18 @@ async def run_rag_pipeline(
             cleaned = strip_reasoning(buffer)
             if cleaned:
                 yield f"data: {json.dumps({'chunk': cleaned})}\n\n"
+
+        if generation_failed and not full_answer.strip():
+            # Nothing arrived. Emit a real message so the reader sees a reason instead
+            # of an empty bubble, and let the stream finish normally so the client's
+            # thinking panel resolves rather than hanging on a dead connection.
+            full_answer = GENERATION_FAILURE_MESSAGE
+            yield f"data: {json.dumps({'chunk': GENERATION_FAILURE_MESSAGE})}\n\n"
+        elif generation_failed:
+            # Part of the answer made it: say where it stopped. The notice is sent to
+            # the reader but kept out of `full_answer`, so the stored answer and its
+            # citations describe what was actually generated.
+            yield f"data: {json.dumps({'chunk': TRUNCATION_NOTICE})}\n\n"
 
         # End of stream - compute citations and alerts on the sanitized full answer
         sanitized_full = strip_reasoning(full_answer)

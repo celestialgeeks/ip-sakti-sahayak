@@ -3,11 +3,12 @@ NVIDIA NIM Service — LLM inference and embedding generation.
 Uses OpenAI-compatible API via the `openai` Python SDK.
 """
 
+import inspect
 import logging
 from typing import List, Optional, AsyncGenerator
 
 from httpx import HTTPError, RemoteProtocolError, Timeout
-from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI
+from openai import APIConnectionError, APIError, APIStatusError, APITimeoutError, AsyncOpenAI
 
 from app.config import settings
 
@@ -51,10 +52,50 @@ def _is_transient(err: Exception) -> bool:
     """
     if isinstance(err, _RETRYABLE):
         return True
-    # getattr rather than a direct read: the status attribute has moved between
-    # openai major versions, and a predicate that raises while deciding whether an
-    # error is retryable would replace the real failure with a confusing one.
-    return isinstance(err, APIStatusError) and getattr(err, "status_code", 0) >= 500
+    if isinstance(err, APIStatusError):
+        # getattr rather than a direct read: the status attribute has moved between
+        # openai major versions, and a predicate that raises while deciding whether
+        # an error is retryable would replace the real failure with a confusing one.
+        status = getattr(err, "status_code", 0)
+        return status >= 500 or status in (408, 409, 429)
+    # The NIM endpoint reports "Service temporarily overloaded" as a bare APIError
+    # carrying no status code at all, usually raised from inside the stream rather
+    # than from create(). It is the most transient failure this system produces, so
+    # treating it as fatal abandons a model that works a second later — measured:
+    # the same call succeeded on retry.
+    return isinstance(err, APIError)
+
+
+def _delta_text(chunk) -> str:
+    """The visible text carried by one stream chunk, or an empty string."""
+    if not chunk or not getattr(chunk, "choices", None):
+        return ""
+    delta = chunk.choices[0].delta
+    return (getattr(delta, "content", None) or "") if delta else ""
+
+
+async def _close_quietly(stream) -> None:
+    """
+    Release a stream that is being abandoned.
+
+    A failed attempt still holds a pooled HTTP response. Under load, leaking one per
+    retry exhausts the connection pool, and the accessor differs between openai
+    versions, so both spellings are tried and neither is allowed to mask the real
+    error being reported.
+    """
+    if stream is None:
+        return
+    for name in ("aclose", "close"):
+        opener = getattr(stream, name, None)
+        if opener is None:
+            continue
+        try:
+            result = opener()
+            if inspect.isawaitable(result):
+                await result
+        except Exception:  # pragma: no cover - closing is best effort
+            pass
+        return
 
 
 class NvidiaIMService:
@@ -153,22 +194,31 @@ class NvidiaIMService:
     async def _stream_generate(
         self, messages: list[dict], temperature: float, max_tokens: Optional[int] = None
     ) -> AsyncGenerator[str, None]:
-        """Stream response tokens, failing over across the model chain."""
+        """
+        Stream response tokens, failing over across the model chain.
+
+        The endpoint's most common failure, "Service temporarily overloaded", is
+        raised from inside the stream after `create()` has already returned, so
+        opening a stream proves nothing. Each candidate is therefore asked for its
+        first event before it is committed to, and a model that cannot produce one is
+        replaced. Once text has reached the caller the answer cannot be restarted on
+        another model, so a later failure is surfaced rather than silently swallowed.
+        """
         if max_tokens is None:
             max_tokens = settings.RAG_MAX_TOKENS
         client = _nim_client()
-        stream = None
         last_err: Optional[Exception] = None
 
         for model in self.model_chain():
-            # `enable_thinking` is a chat-template argument: some endpoints reject
-            # the whole request for carrying it, so the plain call is retried once
-            # before the model itself is considered unusable.
-            attempts = [
+            # `enable_thinking` is a chat-template argument: an endpoint that does not
+            # understand it rejects the whole request, so the same model is asked
+            # again without it before being written off.
+            for extra in (
                 {"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}},
                 {},
-            ]
-            for extra in attempts:
+            ):
+                first = None
+                stream = None
                 try:
                     stream = await client.chat.completions.create(
                         model=model,
@@ -179,22 +229,35 @@ class NvidiaIMService:
                         timeout=settings.NIM_TIMEOUT_SECONDS,
                         **extra,
                     )
-                    break
+                    iterator = stream.__aiter__()
+                    try:
+                        first = await iterator.__anext__()
+                    except StopAsyncIteration:
+                        first = None
                 except Exception as e:
                     last_err = e
-                    logger.warning("NIM stream open failed on %s: %r", model, e)
+                    await _close_quietly(stream)
+                    logger.warning("NIM stream unusable on %s: %r", model, e)
                     if not _is_transient(e):
-                        break  # not deployed / bad request — try the next model
-            if stream is not None:
-                break
+                        break  # not deployed / request rejected — try the next model
+                    continue
 
-        if stream is None:
-            assert last_err is not None
+                # This model is answering: hand over the event that proved it.
+                text = _delta_text(first)
+                if text:
+                    yield text
+                try:
+                    async for chunk in iterator:
+                        text = _delta_text(chunk)
+                        if text:
+                            yield text
+                except Exception as e:
+                    logger.error("NIM stream broke mid-answer on %s: %r", model, e)
+                    raise
+                return
+
+        if last_err is not None:
             raise last_err
-
-        async for chunk in stream:
-            if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
-                yield chunk.choices[0].delta.content
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
         """
