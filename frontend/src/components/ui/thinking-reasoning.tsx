@@ -37,6 +37,12 @@ export interface ThinkingReasoningProps {
   label: string;
   /** Still working: shimmer the header, keep the panel open, follow the newest line. */
   live?: boolean;
+  /**
+   * There is answer text on screen, so the request is generating rather than
+   * thinking. Keeps `live`'s expanded, follow-the-newest-line behaviour while
+   * replacing the "Thinking…" claim with the summary of what actually happened.
+   */
+  answered?: boolean;
   /** Start expanded once done (the live state is always expanded regardless). */
   defaultOpen?: boolean;
   className?: string;
@@ -46,6 +52,7 @@ export function ThinkingReasoning({
   sentences,
   label,
   live = false,
+  answered = false,
   defaultOpen = false,
   className,
 }: ThinkingReasoningProps) {
@@ -56,20 +63,29 @@ export function ThinkingReasoning({
   const viewportRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<HTMLDivElement>(null);
 
+  // "Thinking…" is a promise about the future, so it may only appear while there
+  // is nothing to read yet. Once the answer has begun the same panel is a record
+  // of thought rather than a promise, and has to say so — the request is still
+  // genuinely in flight, which is why it stays open and keeps following the line.
+  const thinking = live && !answered;
+  // In flight and already answering: the lines are a replay of what the reader
+  // watched in the waiting panel, so they appear at once instead of re-typing.
+  const answering = live && answered;
   // While thinking the reasoning is always open; once done it folds into the
   // summary and the reader can toggle it back open.
   const expanded = live || open;
   const total = sentences.length;
-  const count = expanded ? (reduceMotion ? total : Math.min(revealed, total)) : 0;
+  const count = expanded ? (reduceMotion || answering ? total : Math.min(revealed, total)) : 0;
   const shown = sentences.slice(0, count);
 
   // Reveal one line at a time until the whole reasoning is on screen. Reduced
-  // motion shows it all at once, so the timer never runs.
+  // motion shows it all at once, so the timer never runs — and neither does the
+  // case where the lines are a replay of what the reader already watched.
   useEffect(() => {
-    if (reduceMotion || !expanded || revealed >= total) return;
+    if (reduceMotion || !expanded || answering || revealed >= total) return;
     const id = setTimeout(() => setRevealed((r) => Math.min(r + 1, total)), REVEAL_MS);
     return () => clearTimeout(id);
-  }, [expanded, revealed, total, reduceMotion]);
+  }, [expanded, revealed, total, reduceMotion, answering]);
 
   // Cap the viewport only once the content actually overflows it. The observer
   // fires on first subscribe, so no synchronous measure is needed here.
@@ -110,21 +126,21 @@ export function ThinkingReasoning({
         type="button"
         aria-expanded={expanded}
         aria-label="Toggle reasoning"
-        className={cn("trr-header", !live && "trr-clickable")}
-        onClick={live ? undefined : toggle}
+        className={cn("trr-header", !thinking && "trr-clickable")}
+        onClick={thinking ? undefined : toggle}
       >
         <Sparkles
           aria-hidden="true"
-          className={cn("trr-icon", live && "trr-pulse")}
+          className={cn("trr-icon", thinking && "trr-pulse")}
           size={13}
           style={{ color: "var(--saffron, #C0392B)" }}
         />
-        {live ? (
+        {thinking ? (
           <span className="trr-label trr-shimmer">Thinking…</span>
         ) : (
           <span className="trr-label">{label}</span>
         )}
-        {!live && (
+        {!thinking && (
           <svg
             className="trr-chevron"
             viewBox="0 0 24 24"

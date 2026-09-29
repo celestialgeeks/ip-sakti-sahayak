@@ -16,6 +16,7 @@ import {
   recordModelThinking,
   startReasoning,
   summarize,
+  thinkingLines,
   thinkingSpan,
   toRecord,
   type ReasoningTracker,
@@ -239,3 +240,52 @@ test("the stored record survives a localStorage round-trip", () => {
     record.steps.map((step) => step.label),
   );
 });
+
+// Regression: the animated panel is built from thinkingLines(), which mapped only
+// a fixed set of milestone ids. `slow-start` was recorded but never mapped, so a
+// two-minute cold start rendered as one static line behind a "Thinking…" shimmer —
+// indistinguishable from a stalled animation, which is how it was reported as one.
+test("the waiting panel admits a slow backend once the hedge lands", () => {
+  const before = toRecord(started());
+  assert.strictEqual(
+    thinkingLines(before).some((line) => /waking up|longer than usual/i.test(line)),
+    false,
+    "a request that has not waited must not claim the backend is slow",
+  );
+
+  const slow = toRecord(noteSlowStart(started(), T0 + 25_000, 25_000));
+  assert.ok(
+    thinkingLines(slow).some((line) => /waking up|longer than usual/i.test(line)),
+    "the recorded wait has to reach the reader",
+  );
+});
+
+test("thinking lines stay in the order the milestones actually happened", () => {
+  let tracker = started();
+  tracker = noteSlowStart(tracker, T0 + 25_000, 25_000);
+  tracker = openStream(tracker, T0 + 60_000, 200);
+
+  const lines = thinkingLines(toRecord(tracker));
+  assert.ok(lines.length >= 3, `expected the wait to add a line, got ${lines.length}`);
+  assert.ok(
+    lines.findIndex((line) => /waking up/i.test(line)) <
+      lines.findIndex((line) => /Retrieving the governing passages/i.test(line)),
+    "the wait is reported before the retrieval that followed it",
+  );
+});
+
+test("the model's own salvaged thinking is preferred over the milestone paraphrase", () => {
+  const tracker = recordModelThinking(started(), "Weigh the Section 3(p) bar against the cited accessions.");
+  const lines = thinkingLines(toRecord(tracker));
+
+  assert.deepStrictEqual(lines, ["Weigh the Section 3(p) bar against the cited accessions."]);
+});
+
+test("the panel is never handed an empty list to render", () => {
+  // A record with no recognised milestone must still say something truthful,
+  // otherwise the animation area collapses and looks like a broken component.
+  const bare = { startedAt: T0, thinkingMs: 0, summary: "", steps: [], modelThinking: "" };
+  assert.strictEqual(bare.steps.length, 0);
+  assert.ok(thinkingLines(bare).length > 0);
+});
+

@@ -399,6 +399,11 @@ export function thinkingLines(record: ReasoningRecord): string[] {
   const lines: string[] = [];
   if (ids.has("sent"))
     lines.push("Reading the question and framing it against the applicable Indian IP and Ayush rules.");
+  // The cold-start hedge has to reach the panel. Without it a two-minute wait on a
+  // sleeping backend shows as one static line and a shimmer, which is indistinguishable
+  // from a stalled animation — the wait is real, so the log has to say what it is.
+  if (ids.has("slow-start"))
+    lines.push("The backend is still waking up — the first byte is taking longer than usual.");
   if (ids.has("stream-open") || ids.has("first-token"))
     lines.push("Retrieving the governing passages from the corpus and ranking them by relevance.");
   if (ids.has("statutory-alert"))
