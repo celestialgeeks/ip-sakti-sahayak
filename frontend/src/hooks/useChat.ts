@@ -24,6 +24,14 @@ import { createSSEParser, SSE_DONE } from "@/lib/sse";
 const SLOW_START_MS = 25000;
 
 /**
+ * How often the live trace may be rewritten while an answer streams. The summary
+ * quotes a running character count, so it needs refreshing to stay true — but a
+ * write per token is pure waste, and a number frozen at the first token reads as a
+ * stalled panel even while the answer is arriving.
+ */
+const TRACE_REFRESH_MS = 1000;
+
+/**
  * Hook for managing chat state, API communication, and Supabase session persistence.
  *
  * Exposes two distinct loading signals, because the UI used to conflate them:
@@ -299,6 +307,7 @@ export function useChat(initialSessionId?: string) {
         let done = false;
         let sawDone = false;
         let currentContent = "";
+        let lastTraceWrite = 0;
         let finalMetadata: any = null;
 
         // Applied to one whole SSE frame at a time. The parser only releases a
@@ -362,9 +371,13 @@ export function useChat(initialSessionId?: string) {
                 return newMsgs;
               });
 
-              // Milestones only: the phase flip that hides the indicator, or
-              // new chain-of-thought text. Ordinary tokens skip this write.
-              if (wasThinking || tracker.modelThinking !== previousDraft) {
+              // Milestones: the phase flip that hides the indicator, or new
+              // chain-of-thought text. Between them the trace is rewritten on a
+              // throttle, because its summary quotes a running character count and
+              // a stale number looks like a dead panel.
+              const now = Date.now();
+              if (wasThinking || tracker.modelThinking !== previousDraft || now - lastTraceWrite >= TRACE_REFRESH_MS) {
+                lastTraceWrite = now;
                 setPhase(tracker.phase);
                 attachReasoning(tracker);
               }
