@@ -7,6 +7,7 @@ import { Composer } from "@/components/chat/Composer";
 import { SignInModal } from "@/components/auth/SignInModal";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
+import { jurisdictionFromParam } from "@/lib/chat";
 import { Jurisdiction } from "@/lib/types";
 
 function ChatPageContent() {
@@ -15,7 +16,12 @@ function ChatPageContent() {
   const { messages, isLoading, isThinking, send, loadSession } = useChat(sessionParam);
   const { isAuthenticated } = useAuth();
 
-  const [jurisdiction, setJurisdiction] = useState<Jurisdiction>("india");
+  // Seeded from the URL rather than set inside the effect below: an effect that
+  // writes state it could have initialised has to render twice, and the second
+  // render is where a `?j=` link briefly asks the wrong patent office.
+  const [jurisdiction, setJurisdiction] = useState<Jurisdiction>(
+    () => jurisdictionFromParam(searchParams.get("j")) ?? "india",
+  );
   const [showSignInModal, setShowSignInModal] = useState(false);
   const pendingMessageRef = useRef<string | null>(null);
   // A ref, not state: the guard has to be visible to the second effect run of the
@@ -31,21 +37,21 @@ function ChatPageContent() {
     }
   }, [sessionParam, searchParams, loadSession, isLoading]);
 
-  // Handle initial query from URL parameters
+  // A `?q=` on arrival is a question the user already typed — somewhere else (the
+  // welcome page, a shared link). This effect only sends it. The jurisdiction it
+  // carries was read into state during the first render, so there is nothing here
+  // to synchronise, and no second render before the request goes out.
   useEffect(() => {
     if (initialSentRef.current) return;
     const q = searchParams.get("q");
-    const j = searchParams.get("j") as Jurisdiction | null;
-    if (q) {
-      initialSentRef.current = true;
-      if (j) setJurisdiction(j);
-      send(q, j || "india");
-      const currentSession = searchParams.get("session");
-      if (currentSession && window.history?.replaceState) {
-        window.history.replaceState(null, "", `/chat?session=${currentSession}`);
-      }
+    if (!q) return;
+    initialSentRef.current = true;
+    send(q, jurisdiction);
+    const currentSession = searchParams.get("session");
+    if (currentSession && window.history?.replaceState) {
+      window.history.replaceState(null, "", `/chat?session=${currentSession}`);
     }
-  }, [searchParams, send]);
+  }, [searchParams, send, jurisdiction]);
 
   const handleSend = (message: string) => {
     if (!isAuthenticated) {
@@ -162,7 +168,12 @@ function ChatPageContent() {
             </div>
           </div>
         ) : (
-          <ChatCanvas isThinking={isThinking} isLoading={isLoading} messages={messages} />
+          <ChatCanvas
+            isThinking={isThinking}
+            isLoading={isLoading}
+            messages={messages}
+            onRetry={handleSend}
+          />
         )}
 
         <Composer
