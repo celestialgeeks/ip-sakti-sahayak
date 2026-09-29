@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { Message } from "@/lib/types";
+import { userQueryFor } from "@/lib/chat";
 
 interface ChatCanvasProps {
   messages: Message[];
@@ -15,9 +16,20 @@ interface ChatCanvasProps {
    * moment it flips false, and carries the reasoning trace from then on.
    */
   isThinking?: boolean;
+  /**
+   * Re-run a question from the transcript, fired by an answer's Retry action.
+   * Absent on canvases with no way to ask again (a read-only review, for
+   * instance), and the control is not rendered at all.
+   */
+  onRetry?: (query: string) => void;
 }
 
-export function ChatCanvas({ messages, isLoading = false, isThinking = false }: ChatCanvasProps) {
+export function ChatCanvas({
+  messages,
+  isLoading = false,
+  isThinking = false,
+  onRetry,
+}: ChatCanvasProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,11 +50,16 @@ export function ChatCanvas({ messages, isLoading = false, isThinking = false }: 
         if (msg.role === "assistant" && !msg.content) {
           return null;
         }
+        // Retry belongs to an answer, and only to one whose question is still in
+        // the transcript — a user turn has nothing above it to replay.
+        const question = msg.role === "assistant" ? userQueryFor(messages, i) : undefined;
         return (
           <MessageBubble
+            busy={isLoading}
             key={i}
             live={isLoading && i === messages.length - 1}
             message={msg}
+            onRetry={onRetry && question ? () => onRetry(question) : undefined}
           />
         );
       })}

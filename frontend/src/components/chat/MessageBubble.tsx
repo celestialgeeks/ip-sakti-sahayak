@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Message } from "@/lib/types";
-import { submitFeedback } from "@/lib/api";
-import AISources, { AISource } from "@/components/ui/ai-sources";
+import AISources from "@/components/ui/ai-sources";
+import { MessageActions } from "./MessageActions";
 import { ReasoningTrace } from "./ReasoningTrace";
 import { BookOpen, Leaf, Scale } from "lucide-react";
 
@@ -15,6 +15,18 @@ interface MessageBubbleProps {
   message: Message;
   /** This bubble is the one currently being streamed. */
   live?: boolean;
+  /**
+   * A request is in flight somewhere in the thread. Locks the action row: the
+   * stream writes into the last turn, so a retry started beside it would land in
+   * someone else's answer.
+   */
+  busy?: boolean;
+  /**
+   * Re-run the question behind this answer. Absent when there is nothing to re-run
+   * (a restored session whose question is no longer in memory, or the user's own
+   * turn), and the Retry control hides rather than sits inert.
+   */
+  onRetry?: () => void;
 }
 
 /**
@@ -126,26 +138,22 @@ function cleanDisplayContent(text: string): string {
     .trimStart();
 }
 
-export function MessageBubble({ message, live = false }: MessageBubbleProps) {
-  const { role, content, citations = [], confidenceLevel, timestamp, statutoryAlert, reasoning } = message;
+export function MessageBubble({
+  message,
+  live = false,
+  busy = false,
+  onRetry,
+}: MessageBubbleProps) {
+  const { role, content, citations = [], timestamp, statutoryAlert, reasoning } = message;
   const isUser = role === "user";
-  const [feedbackSent, setFeedbackSent] = useState(false);
 
-  const confidenceIcons: Record<string, string> = {
-    high: "🟢",
-    medium: "🟡",
-    low: "🔴",
-  };
-
-  const handleFeedback = async (rating: string) => {
-    if (feedbackSent) return;
-    try {
-      await submitFeedback(Math.random().toString(36).substring(7), rating);
-      setFeedbackSent(true);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  // The key the rating is filed under. Rows restored from Supabase carry their
+  // own created_at; a streamed turn carries the timestamp it was minted with.
+  // Fixed for the life of this bubble, so every action on an answer reports
+  // against the same record instead of a fresh name per click.
+  const [messageId] = useState(
+    () => `msg-${timestamp || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Date.now())}`,
+  );
 
   const sanitizedContent = isUser ? content : cleanDisplayContent(content);
 
@@ -170,7 +178,7 @@ export function MessageBubble({ message, live = false }: MessageBubbleProps) {
           isUser 
             ? "max-w-[85%] sm:max-w-[75%] px-4 py-3 user-bubble shadow-sm" 
             : "w-full flex-1 px-5 sm:px-6 py-5 assistant-bubble shadow-xs border border-slate-200/70"
-        } relative group transition-all`}
+        } relative transition-all`}
         style={{
           borderRadius: isUser ? "20px 20px 4px 20px" : "16px",
         }}
@@ -217,17 +225,12 @@ export function MessageBubble({ message, live = false }: MessageBubbleProps) {
           ) : null}
         </div>
 
-        {/* Confidence Badge (assistant only) */}
-        {!isUser && confidenceLevel && (
-          <div className="flex items-center gap-1.5 mt-3 pt-2.5" style={{ borderTop: "1px solid var(--border-hairline)" }}>
-            <span className="text-xs">{confidenceIcons[confidenceLevel]}</span>
-            <span className="text-[11px] font-medium" style={{ color: "var(--ink-muted)" }}>
-              {confidenceLevel === "high" && "High confidence — grounded in primary legislation"}
-              {confidenceLevel === "medium" && "Medium confidence — grounded in rules/commentary"}
-              {confidenceLevel === "low" && "Low confidence — consider human expert review"}
-            </span>
-          </div>
-        )}
+        {/* No confidence badge here by design. `confidenceLevel` still arrives on
+            the metadata and stays on the message — it is the pipeline's own
+            measure of how well the answer is grounded, and it belongs to the
+            decision of whether to answer at all, not to the answer's chrome.
+            Grading a legal opinion 🟢/🟡/🔴 invites the reader to trust the
+            colour instead of checking the sources below it. */}
 
         {/* Referenced Primary Sources animated with AISources */}
         {!isUser && citations.length > 0 && (
@@ -262,22 +265,19 @@ export function MessageBubble({ message, live = false }: MessageBubbleProps) {
           </div>
         )}
 
-        {/* Timestamp & Feedback (assistant only) */}
+        {/* Actions (assistant only). The turn's own clock used to sit on this
+            line — first as a raw ISO instant, then formatted — and it has been
+            dropped rather than restyled: a transcript reads the answer, not the
+            minute it landed. Left-aligned with the text it acts on, the way the
+            sources above it are. */}
         {!isUser && sanitizedContent && (
-          <div className="mt-2.5 flex items-center justify-between">
-            <span className="text-[10px]" style={{ color: "var(--ink-muted)" }}>
-              {timestamp || "Just now"}
-            </span>
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              {!feedbackSent ? (
-                <>
-                  <button onClick={() => handleFeedback("helpful")} className="text-xs hover:scale-110 transition-transform" title="Helpful">👍</button>
-                  <button onClick={() => handleFeedback("not_helpful")} className="text-xs hover:scale-110 transition-transform" title="Not helpful">👎</button>
-                </>
-              ) : (
-                <span className="text-[11px]" style={{ color: "var(--emerald)" }}>Feedback recorded</span>
-              )}
-            </div>
+          <div className="mt-2.5">
+            <MessageActions
+              content={sanitizedContent}
+              disabled={busy || live}
+              messageId={messageId}
+              onRetry={onRetry}
+            />
           </div>
         )}
       </div>

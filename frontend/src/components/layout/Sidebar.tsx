@@ -353,8 +353,11 @@ export function Sidebar() {
                             : "hover:bg-slate-800/80 text-slate-300"
                         }`}
                       >
-                        <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-emerald-400" : "bg-emerald-500"}`}></span>
+                        {/* No leading status dot: the group heading above already
+                            says when, and a green one would read as "unread" or
+                            "running" — which a saved session is neither. The
+                            spine and background below are the real state. */}
+                        <div className="overflow-hidden group-hover:text-white">
                           <span className="truncate" title={s.title}>{s.title}</span>
                         </div>
                         <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
@@ -384,8 +387,7 @@ export function Sidebar() {
                             : "hover:bg-slate-800/80 text-slate-300"
                         }`}
                       >
-                        <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-slate-500"></span>
+                        <div className="overflow-hidden group-hover:text-white">
                           <span className="truncate" title={s.title}>{s.title}</span>
                         </div>
                         <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>
@@ -415,8 +417,7 @@ export function Sidebar() {
                             : "hover:bg-slate-800/80 text-slate-300"
                         }`}
                       >
-                        <div className="flex items-center gap-2 overflow-hidden group-hover:text-white">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-slate-600"></span>
+                        <div className="overflow-hidden group-hover:text-white">
                           <span className="truncate" title={s.title}>{s.title}</span>
                         </div>
                         <span className="text-[10px] shrink-0 ml-1 text-slate-500 font-mono">{s.daysStr}</span>

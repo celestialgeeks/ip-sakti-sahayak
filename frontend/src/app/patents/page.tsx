@@ -162,157 +162,176 @@ export default function PatentsPage() {
     setTimeout(() => {
       setIsScanning(false);
       setScanComplete(true);
-      const resultsEl = document.getElementById("search-results-matrix");
+      // Land on the verdict deck, not past it in the ranked hits.
+      const resultsEl =
+        document.getElementById("scan-verdict") ||
+        document.getElementById("search-results-matrix");
       if (resultsEl) {
         resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 1000);
   };
 
+  // Plain page flow — no forced viewport-height sections. Each block is only
+  // as tall as its content, and blocks that hold a lot of content spread
+  // across columns instead of stacking into a narrow, gappy column.
+  const deck = "flex min-w-0 flex-col gap-3";
+
   return (
     <div className="w-full min-h-[calc(100vh-95px)] bg-[#F4F6F9] text-[#111c2d]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-3 py-4 sm:px-5 lg:px-6">
 
-        {/* ── Page Header & Action Bar ──────────────────────────────────── */}
-        <section className="bg-white p-5 sm:p-7 rounded-xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1.5 max-w-4xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#EEF3F8] text-[#00263f] text-[11px] font-semibold uppercase tracking-wider">
-                <CheckVerifiedIcon className="w-3.5 h-3.5 text-[#FF9933]" />
-                OFFICIAL PATENT GAZETTE & PRIOR ART CLEARANCE • CGPDTM / IPO & WIPO CONCORDANCE
-              </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 text-red-800 text-[11px] font-bold">
-                <GavelIcon className="w-3.5 h-3.5" />
-                Patent Act 1970 / Section 3(p) & 3(e) Verification Engine
-              </span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#00263f] tracking-tight">
+      {/* ═══ Scan — header, mode tabs, console ═══════════════════════════ */}
+      <section className={deck}>
+        {/* ── Compact Page Header & Sovereign Action Bar ────────────────── */}
+        <header className="flex shrink-0 flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0 flex-1 space-y-1">
+            <h1 className="text-lg font-bold tracking-tight text-[#00263f] sm:text-xl xl:text-2xl">
               Patent Database & Search Engine
             </h1>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="max-w-4xl text-[11px] leading-snug text-slate-600 line-clamp-2 sm:text-xs">
               Screen your Ayurvedic formulation, herbal composition, or bioactive extract against active patent applications, granted patents (IPO, USPTO, EPO, WIPO), and Traditional Knowledge prior art to evaluate novelty and Section 3(p) statutory patentability.
             </p>
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-center">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5 lg:shrink-0">
             <button
               type="button"
               onClick={() => alert("Connecting to IPO e-Gazette Bulk Docket stream...")}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-[#00263f] text-xs font-semibold rounded-lg transition-colors border border-slate-200 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#00263f] shadow-sm transition-colors hover:bg-slate-100"
             >
-              <SyncIcon className="w-4 h-4 text-[#00263f]" />
+              <SyncIcon className="w-3.5 h-3.5 text-[#00263f]" />
               <span>Bulk Docket Sync</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveModal("upload")}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-[#00263f] text-xs font-semibold rounded-lg transition-colors border border-slate-200 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#00263f] shadow-sm transition-colors hover:bg-slate-100"
             >
-              <UploadIcon className="w-4 h-4 text-[#E65100]" />
+              <UploadIcon className="w-3.5 h-3.5 text-[#E65100]" />
               <span>Upload Spec (.XML / .PDF)</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveModal("fto")}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2a6b2c] hover:bg-[#1e5020] text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#2a6b2c] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-colors hover:bg-[#1e5020]"
             >
-              <ShieldCheckIcon className="w-4 h-4" />
+              <ShieldCheckIcon className="w-3.5 h-3.5" />
               <span>Generate FTO Report</span>
             </button>
           </div>
-        </section>
+        </header>
 
-        {/* ── Dual Mode Navigation Tabs ─────────────────────────────────── */}
-        <div className="flex flex-wrap gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab("formulation")}
-            className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold rounded-t-lg transition-all shadow-sm ${
-              activeTab === "formulation"
-                ? "bg-[#0b3c5d] text-white"
-                : "bg-slate-200/80 hover:bg-slate-300 text-slate-700"
-            }`}
-          >
-            <BiotechIcon className="w-4 h-4" />
-            <span>Product Formulation & Composition Matcher (AI Patentability Check)</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded bg-[#FF9933] text-slate-900 text-[10px] font-bold">
-              RECOMMENDED
+        {/* ── Dual Mode Navigation + Provenance Badges ──────────────────── */}
+        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1.5 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+          <nav aria-label="Patent search mode" className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setActiveTab("formulation")}
+              aria-pressed={activeTab === "formulation"}
+              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
+                activeTab === "formulation"
+                  ? "bg-[#0b3c5d] text-white shadow-sm"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <BiotechIcon className="w-3.5 h-3.5" />
+              <span>Formulation &amp; Composition Matcher</span>
+              <span className="hidden rounded bg-[#FF9933] px-1 py-0.5 text-[9px] font-bold text-slate-900 sm:inline-block">
+                RECOMMENDED
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("boolean")}
+              aria-pressed={activeTab === "boolean"}
+              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
+                activeTab === "boolean"
+                  ? "bg-[#0b3c5d] text-white shadow-sm"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <SearchInsightsIcon className="w-3.5 h-3.5" />
+              <span>Advanced Boolean / IPC Gazette Search</span>
+              <span className={`hidden font-mono text-[9px] md:inline ${activeTab === "boolean" ? "text-blue-200" : "text-slate-400"}`}>
+                Class A61K 36/00
+              </span>
+            </button>
+          </nav>
+
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5 px-1 sm:ml-auto">
+            <span className="inline-flex items-center gap-1 rounded bg-[#EEF3F8] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#00263f]">
+              <CheckVerifiedIcon className="w-3 h-3 shrink-0 text-[#FF9933]" />
+              Official Patent Gazette &amp; Prior Art Clearance • CGPDTM / IPO &amp; WIPO Concordance
             </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("boolean")}
-            className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold rounded-t-lg transition-all shadow-sm ${
-              activeTab === "boolean"
-                ? "bg-[#0b3c5d] text-white"
-                : "bg-slate-200/80 hover:bg-slate-300 text-slate-700"
-            }`}
-          >
-            <SearchInsightsIcon className="w-4 h-4" />
-            <span>Advanced Boolean / IPC Gazette Search (Class A61K 36/00)</span>
-          </button>
+            <span className="inline-flex items-center gap-1 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-800">
+              <GavelIcon className="w-3 h-3 shrink-0" />
+              Patent Act 1970 / Section 3(p) &amp; 3(e) Verification Engine
+            </span>
+          </div>
         </div>
 
         {/* ── Tab 1: Product Formulation Console ─────────────────────────── */}
         {activeTab === "formulation" && (
-          <section className="bg-white p-6 sm:p-7 rounded-b-xl rounded-tr-xl border border-slate-200/80 shadow-sm space-y-6">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-6 bg-[#FF9933] rounded-full" />
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-[#00263f]">
-                    Check Your Product For Existing Patents & Classical Prior Art
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Cross-matches therapeutic fractions against 4.8M patent claims and 78,000+ TKDL medicinal formulations.
-                  </p>
-                </div>
+          <section className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+            {/* Panel header */}
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-100 pb-1.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="h-5 w-[3px] shrink-0 rounded-full bg-[#FF9933]" />
+                <h2 className="line-clamp-2 text-xs font-bold text-[#00263f] sm:text-sm 2xl:line-clamp-1">
+                  Check Your Product For Existing Patents &amp; Classical Prior Art
+                </h2>
+                <span className="hidden truncate text-[10px] text-slate-500 xl:inline">
+                  4.8M patent claims · 78,000+ TKDL medicinal formulations
+                </span>
               </div>
 
-              <div className="hidden sm:flex items-center gap-2 text-[#00263f] text-xs font-semibold bg-[#EEF3F8] px-3 py-1.5 rounded-lg">
-                <CheckVerifiedIcon className="w-4 h-4 text-[#1B5E20]" />
-                <span>IPO Gazette Sync: Weekly Bulletin v2024.36</span>
-              </div>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded bg-[#EEF3F8] px-1.5 py-0.5 text-[10px] font-semibold text-[#00263f]">
+                <CheckVerifiedIcon className="w-3 h-3 shrink-0 text-[#1B5E20]" />
+                IPO Gazette Sync: Weekly Bulletin v2024.36
+              </span>
             </div>
 
             {/* Input Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-12">
               {/* Product Working Title */}
-              <div className="md:col-span-8 space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              <div className="flex min-w-0 flex-col justify-center space-y-1 lg:col-span-8">
+                <label className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-slate-500">
                   <span>Product / Formulation Working Title <span className="text-red-500">*</span></span>
-                  <span className="font-normal text-slate-400">Standard INN / Ayush Nomenclature</span>
+                  <span className="hidden font-normal normal-case tracking-normal text-slate-400 sm:block">
+                    Standard INN / Ayush Nomenclature
+                  </span>
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3 text-slate-400">💊</span>
+                  <span className="pointer-events-none absolute left-2.5 text-xs">💊</span>
                   <input
                     type="text"
                     value={productTitle}
                     onChange={(e) => setProductTitle(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f]"
+                    className="h-8 w-full rounded-md border border-slate-200 bg-[#F4F6F9] pl-8 pr-2.5 text-xs text-[#00263f] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f]"
                   />
                 </div>
               </div>
 
               {/* Dosage Form */}
-              <div className="md:col-span-4 space-y-1.5">
-                <label htmlFor="dosageForm" className="text-xs font-bold text-slate-700">
+              <div className="flex min-w-0 flex-col justify-center space-y-1 lg:col-span-4">
+                <label htmlFor="dosageForm" className="block text-[10px] font-bold uppercase tracking-wide text-slate-500">
                   Formulation Type / Dosage Form <span className="text-red-500">*</span>
                 </label>
                 <Select value={dosageForm} onValueChange={setDosageForm}>
                   <SelectTrigger
                     id="dosageForm"
-                    className="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-800 data-[state=open]:bg-white"
+                    size="sm"
+                    className="w-full rounded-md border-slate-200 bg-[#F4F6F9] text-xs text-slate-800 data-[state=open]:bg-white"
                   >
                     <SelectValue placeholder="Select dosage form" />
                   </SelectTrigger>
-                  <SelectContent className="[&_[data-slot=select-item]]:text-sm">
+                  <SelectContent className="[&_[data-slot=select-item]]:text-xs">
                     <SelectItem value="Emulgel / Hydrogel Topical Matrix">Emulgel / Hydrogel Topical Matrix</SelectItem>
                     <SelectItem value="Tablet / Vati / Gutika">Tablet / Vati / Gutika</SelectItem>
                     <SelectItem value="Medicated Oil / Ghrita / Taila">Medicated Oil / Ghrita / Taila</SelectItem>
@@ -323,37 +342,38 @@ export default function PatentsPage() {
               </div>
 
               {/* Botanical Ingredients Tag Field */}
-              <div className="md:col-span-12 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                    <span>Botanical Ingredients & Bioactive Standardization Markers</span>
-                    <span className="text-slate-400 cursor-help" title="Quantified bioactives critical for Section 3(e) evaluation">ℹ️</span>
+              <div className="flex min-w-0 flex-col gap-1 lg:col-span-12">
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-0.5">
+                  <label className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    <span>Botanical Ingredients &amp; Bioactive Standardization Markers</span>
+                    <span className="cursor-help text-slate-400" title="Quantified bioactives critical for Section 3(e) evaluation">ℹ️</span>
                   </label>
                   <button
                     type="button"
                     onClick={handleAddTag}
-                    className="text-xs font-bold text-[#00263f] hover:text-[#001d32] flex items-center gap-1"
+                    className="text-[10px] font-bold text-[#00263f] hover:text-[#001d32]"
                   >
-                    <span>+ Add Herb / Excipient</span>
+                    + Add Herb / Excipient
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 min-h-[52px]">
+                <div className="flex min-w-0 flex-wrap items-center gap-1 rounded-md border border-slate-200 bg-[#F4F6F9] p-1.5">
                   {botanicalTags.map((tag) => (
-                    <div
+                    <span
                       key={tag.id}
-                      className="inline-flex items-center gap-2 px-3 py-1 rounded bg-white shadow-sm border border-slate-200 text-xs font-semibold text-[#00263f]"
+                      className="inline-flex max-w-full items-center gap-1.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#00263f] shadow-sm"
                     >
-                      <span className={`w-2 h-2 rounded-full ${tag.color}`} />
-                      <span>{tag.name}</span>
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${tag.color}`} />
+                      <span className="truncate">{tag.name}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag.id)}
-                        className="text-slate-400 hover:text-red-600 font-bold ml-1"
+                        aria-label={`Remove ${tag.name}`}
+                        className="shrink-0 font-bold text-slate-400 hover:text-red-600"
                       >
                         ✕
                       </button>
-                    </div>
+                    </span>
                   ))}
 
                   <input
@@ -366,86 +386,79 @@ export default function PatentsPage() {
                         handleAddTag();
                       }
                     }}
-                    placeholder="Type botanical name or CAS No and press Enter..."
-                    className="flex-1 min-w-[220px] bg-transparent text-xs text-slate-700 placeholder-slate-400 focus:outline-none px-2 py-1"
+                    placeholder="Botanical name or CAS No, then Enter..."
+                    className="min-w-[9rem] flex-1 bg-transparent px-1 py-0.5 text-[11px] text-slate-700 placeholder-slate-400 focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Claimed Utility */}
-              <div className="md:col-span-8 space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
+              <div className="flex min-w-0 flex-col gap-1 lg:col-span-6">
+                <label className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-500">
                   Intended Therapeutic Indication / Claimed Utility
                 </label>
                 <textarea
                   value={therapeuticUtility}
                   onChange={(e) => setTherapeuticUtility(e.target.value)}
                   rows={2}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f]"
+                  className="min-h-[58px] w-full resize-none rounded-md border border-slate-200 bg-[#F4F6F9] p-2 text-[11px] leading-snug text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f]"
                 />
               </div>
 
               {/* Extraction Chemistry */}
-              <div className="md:col-span-4 space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Extraction Chemistry & Claimed Synergy
+              <div className="flex min-w-0 flex-col gap-1 lg:col-span-6">
+                <label className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                  Extraction Chemistry &amp; Claimed Synergy
                 </label>
-                <div className="bg-[#EEF3F8] p-3 rounded-lg border border-slate-200 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Solvent Ratio:</span>
-                    <span className="font-mono font-bold text-[#00263f]">Hydro-ethanolic (60:40 v/v)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Synergistic Index (CI):</span>
-                    <span className="font-mono font-bold text-[#1B5E20]">1.42 (Combination Index)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Bioavailability Mod:</span>
-                    <span className="font-mono text-slate-700">12.4x Piperine boost</span>
-                  </div>
+                <div className="space-y-1 rounded-md border border-slate-200 bg-[#EEF3F8] p-2">
+                  {[
+                    ["Solvent Ratio:", "Hydro-ethanolic (60:40 v/v)", "text-[#00263f]"],
+                    ["Synergistic Index (CI):", "1.42 (Combination Index)", "text-[#1B5E20]"],
+                    ["Bioavailability Mod:", "12.4x Piperine boost", "text-slate-700"],
+                  ].map(([k, v, cls]) => (
+                    <div key={k} className="flex items-baseline justify-between gap-2 text-[11px]">
+                      <span className="shrink-0 text-slate-500">{k}</span>
+                      <span className={`text-right font-mono font-bold ${cls}`}>{v}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* Target Patent Jurisdictions */}
-              <div className="md:col-span-12">
-                <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-blue-50/70 border border-blue-100 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#00263f]">Target Repositories & Gazette Sources:</span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700">
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="accent-[#00263f]" />
-                      <span>Indian Patent Office (IPO / CGPDTM)</span>
-                    </label>
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="accent-[#00263f]" />
-                      <span>WIPO (Patentscope & PCT)</span>
-                    </label>
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="accent-[#00263f]" />
-                      <span>USPTO (US Patents & Pre-Grant)</span>
-                    </label>
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                      <input type="checkbox" defaultChecked className="accent-[#00263f]" />
-                      <span>EPO (Espacenet)</span>
-                    </label>
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                      <input type="checkbox" className="accent-[#00263f]" />
-                      <span>CNIPA (China)</span>
-                    </label>
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer font-bold text-[#1B5E20]">
-                      <input type="checkbox" defaultChecked className="accent-[#1B5E20]" />
-                      <span>TKDL Classical Veda Repositories</span>
-                    </label>
+              <div className="flex min-w-0 flex-col justify-center lg:col-span-12">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-md border border-blue-100 bg-blue-50/70 p-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-[#00263f]">
+                    Target Repositories &amp; Gazette Sources:
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { short: "IPO / CGPDTM", full: "Indian Patent Office (IPO / CGPDTM)", checked: true, accent: "#00263f" },
+                      { short: "WIPO Patentscope", full: "WIPO (Patentscope & PCT)", checked: true, accent: "#00263f" },
+                      { short: "USPTO", full: "USPTO (US Patents & Pre-Grant Publications)", checked: true, accent: "#00263f" },
+                      { short: "EPO Espacenet", full: "EPO (Espacenet)", checked: true, accent: "#00263f" },
+                      { short: "CNIPA", full: "CNIPA (China National IP Administration)", checked: false, accent: "#00263f" },
+                      { short: "TKDL Classical Vedas", full: "TKDL Classical Veda Repositories", checked: true, accent: "#1B5E20" },
+                    ].map((repo) => (
+                      <label
+                        key={repo.short}
+                        title={repo.full}
+                        className={`inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] shadow-sm ${
+                          repo.accent === "#1B5E20" ? "font-bold text-[#1B5E20]" : "text-slate-700"
+                        }`}
+                      >
+                        <input type="checkbox" defaultChecked={repo.checked} className="h-3 w-3" style={{ accentColor: repo.accent }} />
+                        <span>{repo.short}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Scan Action Row */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-100">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <LockIcon className="w-4 h-4 text-amber-600" />
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-slate-100 pt-2">
+              <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-slate-500">
+                <LockIcon className="w-3.5 h-3.5 shrink-0 text-amber-600" />
                 <span>Queries executed under Ministry of Ayush SAKTI Secure Sandbox. Strictly privileged.</span>
               </div>
 
@@ -454,17 +467,17 @@ export default function PatentsPage() {
                 id="scan-action-btn"
                 onClick={handleScan}
                 disabled={isScanning}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#00263f] hover:bg-[#001d32] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all active:scale-[0.99]"
+                className="inline-flex w-full min-w-0 items-center justify-center gap-1.5 rounded-md bg-[#00263f] px-3.5 py-2 text-center text-[11px] font-bold uppercase tracking-wide text-white shadow-md transition-all hover:bg-[#001d32] active:scale-[0.99] disabled:opacity-70 sm:w-auto"
               >
                 {isScanning ? (
                   <>
-                    <SyncIcon className="w-4 h-4 animate-spin text-[#FF9933]" />
-                    <span>Scanning IPO, WIPO & TKDL Dockets...</span>
+                    <SyncIcon className="w-3.5 h-3.5 animate-spin text-[#FF9933]" />
+                    <span>Scanning IPO, WIPO &amp; TKDL Dockets...</span>
                   </>
                 ) : (
                   <>
-                    <SearchInsightsIcon className="w-4 h-4 text-[#FF9933]" />
-                    <span>Scan Patent Repositories & Classical Prior Art</span>
+                    <SearchInsightsIcon className="w-3.5 h-3.5 text-[#FF9933]" />
+                    <span>Scan Patent Repositories &amp; Classical Prior Art</span>
                   </>
                 )}
               </button>
@@ -474,207 +487,205 @@ export default function PatentsPage() {
 
         {/* ── Tab 2: Advanced Boolean Search Console ──────────────────────── */}
         {activeTab === "boolean" && (
-          <section className="bg-white p-6 sm:p-7 rounded-b-xl rounded-tl-xl border border-slate-200/80 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-6 bg-[#000080] rounded-full" />
-                <h2 className="text-base sm:text-lg font-bold text-[#00263f]">
-                  Official CGPDTM Gazette & Boolean Expression Builder
+          <section className="shrink-0 space-y-2.5 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-100 pb-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="h-5 w-[3px] shrink-0 rounded-full bg-[#000080]" />
+                <h2 className="line-clamp-2 text-xs font-bold text-[#00263f] sm:text-sm 2xl:line-clamp-1">
+                  Official CGPDTM Gazette &amp; Boolean Expression Builder
                 </h2>
               </div>
-              <span className="font-mono text-xs text-slate-500">Standard: ST.36 / XML IPO Schema</span>
+              <span className="shrink-0 font-mono text-[10px] text-slate-500">Standard: ST.36 / XML IPO Schema</span>
             </div>
 
-            <div className="space-y-4">
-              <div className="p-4 bg-[#EEF3F8] rounded-lg space-y-2">
-                <label className="text-xs font-bold text-[#00263f]">Gazette Query Syntax</label>
+            <div className="space-y-2.5">
+              <div className="space-y-1 rounded-md bg-[#EEF3F8] p-2.5">
+                <label className="block text-[10px] font-bold uppercase tracking-wide text-[#00263f]">
+                  Gazette Query Syntax
+                </label>
                 <input
                   type="text"
                   defaultValue='(IPC:"A61K36/81" OR IPC:"A61K36/9066") AND ("Withania" AND "Curcuma") AND NOT APPLICANT:"Ministry of Ayush"'
-                  className="w-full p-2.5 bg-white font-mono text-xs text-slate-800 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00263f]"
+                  className="h-8 w-full min-w-0 rounded-md border border-slate-200 bg-white px-2.5 font-mono text-[11px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00263f]"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">IPC / CPC Classification</label>
-                  <input
-                    type="text"
-                    defaultValue="A61K 36/00, A61P 19/02"
-                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 text-xs rounded"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Gazette Publication Date Window</label>
-                  <input
-                    type="text"
-                    defaultValue="2020-01-01 to 2024-10-31"
-                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 text-xs rounded"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Applicant / Assignee Entity</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., L'Oreal, Dabur, Patanjali, Pfizer..."
-                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 text-xs rounded"
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                {[
+                  { label: "IPC / CPC Classification", value: "A61K 36/00, A61P 19/02" },
+                  { label: "Gazette Publication Date Window", value: "2020-01-01 to 2024-10-31" },
+                  { label: "Applicant / Assignee Entity", placeholder: "e.g., L'Oreal, Dabur, Patanjali, Pfizer..." },
+                ].map((field) => (
+                  <div key={field.label} className="min-w-0 space-y-1">
+                    <label className="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                      {field.label}
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue={field.value}
+                      placeholder={field.placeholder}
+                      className="h-8 w-full min-w-0 rounded-md border border-slate-200 bg-[#F4F6F9] px-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00263f]"
+                    />
+                  </div>
+                ))}
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-slate-100 pt-2.5">
+                <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-slate-500">
+                  <LockIcon className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                  <span>Queries executed under Ministry of Ayush SAKTI Secure Sandbox. Strictly privileged.</span>
+                </div>
                 <button
                   type="button"
                   onClick={handleScan}
-                  className="px-5 py-2.5 bg-[#00263f] text-white text-xs font-bold rounded-lg shadow-sm hover:bg-[#001d32] transition-colors"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-[#00263f] px-3.5 py-2 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-[#001d32]"
                 >
+                  <SearchInsightsIcon className="w-3.5 h-3.5 text-[#FF9933]" />
                   Execute Gazette Query
                 </button>
               </div>
             </div>
           </section>
         )}
+      </section>
 
-        {/* ── Real-Time Prior Art & Conflict Analysis Section ───────────── */}
-        {scanComplete && (
-          <div id="search-results-matrix" className="space-y-6 pt-2">
-
+      {/* ═══ Verdict — risk call + KPIs beside the classical prior-art hit ══ */}
+      {scanComplete && (
+        <section
+          id="scan-verdict"
+          aria-label="Scan verdict and conflict analysis"
+          className="grid min-w-0 grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_23rem]"
+        >
             {/* Executive Patentability Summary Card */}
-            <section className="bg-white p-6 sm:p-7 rounded-xl border border-slate-200/80 shadow-sm space-y-6">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div className="space-y-2 max-w-xl">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-red-100 text-red-800 text-[11px] font-bold uppercase tracking-wider">
-                      ⚠️ High Prior Art Overlap
-                    </span>
-                    <span className="font-mono text-xs text-slate-500">Docket Hash: #AYU-2024-GAZ-9941</span>
-                  </div>
+            <section className="shrink-0 space-y-2.5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-slate-100 pb-2">
+                <span className="inline-flex items-center gap-1 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-800">
+                  ⚠️ High Prior Art Overlap
+                </span>
+                <span className="font-mono text-[10px] text-slate-500">#AYU-2024-GAZ-9941</span>
+              </div>
 
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#00263f] tracking-tight">
-                    Moderate-to-High Section 3(p) & Section 3(e) Vulnerability (88% Prior Art Overlap)
-                  </h3>
+              <h3 className="shrink-0 text-base font-bold leading-snug tracking-tight text-[#00263f] sm:text-xl">
+                Moderate-to-High Section 3(p) &amp; Section 3(e) Vulnerability (88% Prior Art Overlap)
+              </h3>
 
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    Statutory objection expected under <strong className="text-[#00263f]">Section 3(p)</strong> (Traditional Knowledge) due to direct concordance with classical Ayurvedic texts, and <strong className="text-[#00263f]">Section 3(e)</strong> (Mere Admixture) unless non-obvious synergistic efficacy is substantiated by clinical combination index data.
-                  </p>
-                </div>
+              <p className="max-w-4xl shrink-0 text-[11px] leading-relaxed text-slate-600 sm:text-xs">
+                Statutory objection expected under <strong className="text-[#00263f]">Section 3(p)</strong> (Traditional Knowledge) due to direct concordance with classical Ayurvedic texts, and <strong className="text-[#00263f]">Section 3(e)</strong> (Mere Admixture) unless non-obvious synergistic efficacy is substantiated by clinical combination index data.
+              </p>
 
-                {/* Metric KPI Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
-                  <div className="p-3 bg-[#EEF3F8] border border-slate-200 rounded-lg text-center min-w-[110px]">
-                    <div className="text-2xl font-bold text-red-600">3</div>
-                    <div className="text-[11px] text-slate-600 font-semibold leading-tight">
-                      Granted Patents in Conflict
+              {/* Metric KPI Cards */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  { value: "3", valueCls: "text-red-600", label: "Granted Patents in Conflict", boxCls: "border-slate-200 bg-[#EEF3F8]", labelCls: "text-slate-600" },
+                  { value: "5", valueCls: "text-[#E65100]", label: "Pending Gazette Applications", boxCls: "border-slate-200 bg-[#EEF3F8]", labelCls: "text-slate-600" },
+                  { value: "4", valueCls: "text-[#000080]", label: "TKDL Classical Citations", boxCls: "border-slate-200 bg-[#EEF3F8]", labelCls: "text-slate-600" },
+                  { value: "1", valueCls: "text-[#1B5E20]", label: "Novel Extraction Ground", boxCls: "border-green-200 bg-[#eaf7eb]", labelCls: "text-[#0c5216]" },
+                ].map((kpi) => (
+                  <div key={kpi.label} className={`rounded-md border p-3 text-center ${kpi.boxCls}`}>
+                    <div className={`text-3xl font-bold leading-none ${kpi.valueCls}`}>{kpi.value}</div>
+                    <div className={`mt-1.5 text-[10px] font-semibold leading-tight ${kpi.labelCls}`}>
+                      {kpi.label}
                     </div>
                   </div>
-                  <div className="p-3 bg-[#EEF3F8] border border-slate-200 rounded-lg text-center min-w-[110px]">
-                    <div className="text-2xl font-bold text-[#E65100]">5</div>
-                    <div className="text-[11px] text-slate-600 font-semibold leading-tight">
-                      Pending Gazette Applications
-                    </div>
-                  </div>
-                  <div className="p-3 bg-[#EEF3F8] border border-slate-200 rounded-lg text-center min-w-[110px]">
-                    <div className="text-2xl font-bold text-[#000080]">4</div>
-                    <div className="text-[11px] text-slate-600 font-semibold leading-tight">
-                      TKDL Classical Citations
-                    </div>
-                  </div>
-                  <div className="p-3 bg-[#eaf7eb] border border-green-200 rounded-lg text-center min-w-[110px]">
-                    <div className="text-2xl font-bold text-[#1B5E20]">1</div>
-                    <div className="text-[11px] text-[#0c5216] font-semibold leading-tight">
-                      Novel Extraction Ground
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Visual Clearance Spectrum Bar */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
-                  <span className="flex items-center gap-1.5 text-[#00263f]">
+              <div className="shrink-0 space-y-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-[#00263f]">
                     📊 Prior Art Density Spectrum
                   </span>
-                  <span className="font-mono text-red-600 font-bold">
+                  <span className="font-mono text-[10px] font-bold text-red-600">
                     Novelty Clearance Score: 12% (Critical Statutory Challenge Zone)
                   </span>
                 </div>
 
-                <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden flex">
+                <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200">
                   <div className="h-full bg-red-600" style={{ width: "62%" }} title="Classical Ayurvedic Prior Art (62%)" />
                   <div className="h-full bg-[#FF9933]" style={{ width: "26%" }} title="Commercial Patent Filings (26%)" />
                   <div className="h-full bg-[#138808]" style={{ width: "12%" }} title="Clear Novel Scope (12%)" />
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 mt-2 font-medium">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block" /> 62% Classical Ayurvedic Formulations (TKDL)
+                <div className="grid gap-1.5 text-[10px] font-medium text-slate-500 sm:grid-cols-3">
+                  <span className="flex items-start gap-1.5">
+                    <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-red-600" />
+                    62% Classical Ayurvedic Formulations (TKDL)
                   </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#FF9933] inline-block" /> 26% Existing Modern Patent Filings (IPO / WIPO)
+                  <span className="flex items-start gap-1.5">
+                    <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-[#FF9933]" />
+                    26% Existing Modern Patent Filings (IPO / WIPO)
                   </span>
-                  <span className="flex items-center gap-1 text-[#1B5E20] font-bold">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#138808] inline-block" /> 12% Potentially Novel Scope (Carrier excipient synergy)
+                  <span className="flex items-start gap-1.5 font-bold text-[#1B5E20]">
+                    <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-[#138808]" />
+                    12% Potentially Novel Scope (Carrier excipient synergy)
                   </span>
                 </div>
               </div>
             </section>
 
             {/* Classical Knowledge Bar (TKDL Concordance Citation) */}
-            <section className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm bg-gradient-to-r from-blue-50/40 via-white to-blue-50/40">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#00263f] text-white flex items-center justify-center shrink-0">
-                    <BookIcon className="w-5 h-5 text-[#FF9933]" />
+            <section className="flex flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+              <div className="flex flex-col gap-3">
+                <div className="flex min-w-0 items-start gap-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#00263f] text-white">
+                    <BookIcon className="h-4 w-4 text-[#FF9933]" />
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-bold text-[#000080] bg-blue-100 px-2 py-0.5 rounded">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#000080]">
                         TKDL Institutional Concordance
                       </span>
-                      <span className="font-mono text-xs text-slate-500 font-bold">
-                        Citation Codes: RS/1024 & AK/409
+                      <span className="font-mono text-[10px] font-bold text-slate-500">
+                        RS/1024 &amp; AK/409
                       </span>
                     </div>
 
-                    <h4 className="text-base font-bold text-[#00263f]">
-                      Charaka Samhita (Chikitsa Sthana 28/45) & Bhavaprakasha Nighantu (Haritakyadi Varga)
+                    <h4 className="text-xs font-bold leading-snug text-[#00263f] sm:text-sm">
+                      Charaka Samhita (Chikitsa Sthana 28/45) &amp; Bhavaprakasha Nighantu (Haritakyadi Varga)
                     </h4>
 
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="max-w-4xl text-[11px] leading-snug text-slate-600">
                       Exhaustive documentation confirms topical co-application of <em>Ashwagandha</em> (Withania somnifera) and <em>Haridra</em> (Curcuma longa) in lipid carriers for Sandhigata Vata (Arthritis) predating 1000 BCE. Immediate statutory basis for Pre-Grant Opposition under Section 25(1)(d).
                     </p>
                   </div>
                 </div>
 
-                <div className="shrink-0 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/tkdl")}
-                    className="px-4 py-2 bg-[#00263f] text-white text-xs font-semibold rounded-lg hover:bg-[#001d32] shadow-sm transition-colors"
-                  >
-                    Inspect TKDL Treatises
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => router.push("/tkdl")}
+                  className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[#00263f] px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-colors hover:bg-[#001d32]"
+                >
+                  Inspect TKDL Treatises
+                </button>
               </div>
             </section>
+        </section>
+      )}
+
+      {/* ═══ Ranked patent landscape ═══════════════════════════════════ */}
+      {scanComplete && (
+        <div id="search-results-matrix" className={deck}>
 
             {/* Detailed Patent Landscape Section */}
-            <div className="flex items-center justify-between pt-1">
-              <div>
-                <h3 className="text-lg font-bold text-[#00263f]">
-                  Detailed Patent Landscape & Overlapping Claims
+            <div className="flex shrink-0 flex-wrap items-end justify-between gap-x-3 gap-y-1.5">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-[#00263f] sm:text-base">
+                  Detailed Patent Landscape &amp; Overlapping Claims
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-[11px] text-slate-500">
                   Ranked by claim similarity, IPC classification, and legal enforceability in Indian territory.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 font-medium">Sort by:</span>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="hidden text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:inline">
+                  Sort by:
+                </span>
                 <Select defaultValue="Claim Similarity (% High to Low)">
                   <SelectTrigger
                     size="sm"
                     aria-label="Sort patent landscape results"
-                    className="rounded-lg border-slate-200 bg-white text-xs text-slate-800"
+                    className="w-[14rem] max-w-full min-w-0 rounded-md border-slate-200 bg-white text-[11px] text-slate-800 [&_[data-slot=select-value]]:min-w-0"
                   >
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -687,12 +698,12 @@ export default function PatentsPage() {
               </div>
             </div>
 
-            {/* 3 Patent Landscape Cards */}
-            <div className="grid grid-cols-1 gap-4">
+            {/* 3 Patent Landscape Cards — equal height, actions bottom-aligned */}
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
 
               {/* Card 1: Granted Patent IN-349821-B */}
-              <article className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <article className="@container flex min-h-0 flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-slate-100 pb-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded bg-red-100 text-red-800 font-mono font-bold text-xs">
                       IN-349821-B (GRANTED)
@@ -712,9 +723,9 @@ export default function PatentsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-3">
-                  <div className="lg:col-span-8 space-y-2">
-                    <h4 className="text-base font-bold text-[#00263f]">
+                <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_auto] gap-3 pt-2.5 @2xl:grid-cols-[minmax(0,1fr)_14rem] @2xl:grid-rows-1">
+                  <div className="min-w-0 space-y-1.5">
+                    <h4 className="text-sm font-bold leading-snug text-[#00263f]">
                       Topical anti-inflammatory composition comprising Withania and Curcumin extract in vesicular carrier
                     </h4>
                     <p className="text-xs text-slate-500">
@@ -731,17 +742,17 @@ export default function PatentsPage() {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 flex flex-col justify-between gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <div className="space-y-1.5 text-xs">
-                      <div className="flex justify-between text-slate-500">
+                  <div className="flex min-w-0 shrink-0 flex-col justify-between gap-2 rounded-md border border-slate-200 bg-slate-50 p-2.5 @2xl:justify-start">
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Filing Office:</span>
                         <span className="font-semibold text-slate-800">IPO Chennai Branch</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Status:</span>
                         <span className="font-bold text-red-600">Sub-Judice Revocation</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Legal Risk to You:</span>
                         <span className="font-bold text-red-600">High Infringement Risk</span>
                       </div>
@@ -775,8 +786,8 @@ export default function PatentsPage() {
               </article>
 
               {/* Card 2: Published Application 202311048291 A */}
-              <article className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <article className="@container flex min-h-0 flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-slate-100 pb-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded bg-slate-100 text-[#00263f] font-mono font-bold text-xs">
                       202311048291 A (APPLICATION)
@@ -796,9 +807,9 @@ export default function PatentsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-3">
-                  <div className="lg:col-span-8 space-y-2">
-                    <h4 className="text-base font-bold text-[#00263f]">
+                <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_auto] gap-3 pt-2.5 @2xl:grid-cols-[minmax(0,1fr)_14rem] @2xl:grid-rows-1">
+                  <div className="min-w-0 space-y-1.5">
+                    <h4 className="text-sm font-bold leading-snug text-[#00263f]">
                       Synergistic botanical nano-emulsion for joint care and chondrocyte protection
                     </h4>
                     <p className="text-xs text-slate-500">
@@ -815,17 +826,17 @@ export default function PatentsPage() {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 flex flex-col justify-between gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <div className="space-y-1.5 text-xs">
-                      <div className="flex justify-between text-slate-500">
+                  <div className="flex min-w-0 shrink-0 flex-col justify-between gap-2 rounded-md border border-slate-200 bg-slate-50 p-2.5 @2xl:justify-start">
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Gazette Status:</span>
                         <span className="font-semibold text-slate-800">Published (FER Pending)</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Opp. Window:</span>
                         <span className="font-bold text-[#1B5E20]">Open for Sec 25(1) Opp.</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Prior Art Advantage:</span>
                         <span className="font-bold text-[#000080]">TKDL Pre-dating</span>
                       </div>
@@ -852,8 +863,8 @@ export default function PatentsPage() {
               </article>
 
               {/* Card 3: US Patent US9844572B2 */}
-              <article className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <article className="@container flex min-h-0 flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-slate-100 pb-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded bg-slate-100 text-[#00263f] font-mono font-bold text-xs">
                       US9844572B2 (USPTO)
@@ -873,9 +884,9 @@ export default function PatentsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-3">
-                  <div className="lg:col-span-8 space-y-2">
-                    <h4 className="text-base font-bold text-[#00263f]">
+                <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_auto] gap-3 pt-2.5 @2xl:grid-cols-[minmax(0,1fr)_14rem] @2xl:grid-rows-1">
+                  <div className="min-w-0 space-y-1.5">
+                    <h4 className="text-sm font-bold leading-snug text-[#00263f]">
                       Method of isolating active withanolide-curcuminoid conjugate for sub-dermal delivery
                     </h4>
                     <p className="text-xs text-slate-500">
@@ -888,17 +899,17 @@ export default function PatentsPage() {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 flex flex-col justify-between gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <div className="space-y-1.5 text-xs">
-                      <div className="flex justify-between text-slate-500">
+                  <div className="flex min-w-0 shrink-0 flex-col justify-between gap-2 rounded-md border border-slate-200 bg-slate-50 p-2.5 @2xl:justify-start">
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Indian Jurisdiction:</span>
                         <span className="font-bold text-[#1B5E20]">Public Domain in India</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>US Export Barrier:</span>
                         <span className="font-bold text-[#E65100]">Requires Claim Carve-out</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex items-baseline justify-between gap-2 text-slate-500">
                         <span>Expiry Date:</span>
                         <span className="font-mono text-slate-800">2035-09-12</span>
                       </div>
@@ -918,34 +929,37 @@ export default function PatentsPage() {
               </article>
 
             </div>
+        </div>
+      )}
 
+      {/* ═══ Prosecution toolkits + regulatory footer ══════════════════ */}
+      {scanComplete && (
+        <section className={deck}>
             {/* Legal Toolkit Action Console */}
-            <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-100">
-                <div>
-                  <span className="text-[11px] font-bold uppercase text-[#1B5E20]">
-                    Statutory Compliance & Prosecution Actions
-                  </span>
-                  <h3 className="text-lg font-bold text-[#00263f]">
-                    Ayush Legal Advisor Automated Toolkits
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Generate legally compliant drafts and documentation adhering to the Patents Act 1970.
-                  </p>
-                </div>
+            <section className="shrink-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="min-w-0 border-b border-slate-100 pb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-[#1B5E20]">
+                  Statutory Compliance &amp; Prosecution Actions
+                </span>
+                <h3 className="text-sm font-bold text-[#00263f] sm:text-base">
+                  Ayush Legal Advisor Automated Toolkits
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Generate legally compliant drafts and documentation adhering to the Patents Act 1970.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="grid grid-cols-1 gap-3 pt-3 md:grid-cols-3">
                 {/* Toolkit 1 */}
-                <div className="p-4 bg-[#EEF3F8] rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="flex min-h-0 flex-col justify-between gap-2 rounded-md border border-slate-200 bg-[#EEF3F8] p-3">
                   <div className="space-y-1">
                     <div className="w-8 h-8 rounded bg-[#00263f] text-white flex items-center justify-center">
                       <PdfDocIcon className="w-4 h-4 text-[#FF9933]" />
                     </div>
-                    <h4 className="text-sm font-bold text-[#00263f] pt-1">
+                    <h4 className="pt-1 text-xs font-bold leading-snug text-[#00263f]">
                       Download Patent Landscape Dossier
                     </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-[11px] leading-snug text-slate-600">
                       Comprehensive 38-page audit containing all 8 patent citations, claims overlap percentages, and TKDL concordance tables.
                     </p>
                   </div>
@@ -954,44 +968,44 @@ export default function PatentsPage() {
                     onClick={() => {
                       alert("Generating comprehensive 38-page Patent Landscape PDF Dossier...");
                     }}
-                    className="w-full py-2 px-3 bg-[#00263f] hover:bg-[#001d32] text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
+                    className="w-full rounded-md bg-[#00263f] px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-colors hover:bg-[#001d32]"
                   >
                     Generate PDF Dossier (1.8 MB)
                   </button>
                 </div>
 
                 {/* Toolkit 2 */}
-                <div className="p-4 bg-[#EEF3F8] rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="flex min-h-0 flex-col justify-between gap-2 rounded-md border border-slate-200 bg-[#EEF3F8] p-3">
                   <div className="space-y-1">
                     <div className="w-8 h-8 rounded bg-red-600 text-white flex items-center justify-center">
                       <GavelIcon className="w-4 h-4" />
                     </div>
-                    <h4 className="text-sm font-bold text-[#00263f] pt-1">
+                    <h4 className="pt-1 text-xs font-bold leading-snug text-[#00263f]">
                       Draft Pre-Grant Opposition (Form 7A)
                     </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-[11px] leading-snug text-slate-600">
                       Auto-populates Statement of Case with TKDL references for filing under Section 25(1)(d) against app 202311048291 A.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveModal("form7a")}
-                    className="w-full py-2 px-3 bg-[#2a6b2c] hover:bg-[#1e5020] text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
+                    className="w-full rounded-md bg-[#2a6b2c] px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-colors hover:bg-[#1e5020]"
                   >
                     Open Form 7A Legal Drafter
                   </button>
                 </div>
 
                 {/* Toolkit 3 */}
-                <div className="p-4 bg-[#EEF3F8] rounded-xl border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="flex min-h-0 flex-col justify-between gap-2 rounded-md border border-slate-200 bg-[#EEF3F8] p-3">
                   <div className="space-y-1">
                     <div className="w-8 h-8 rounded bg-[#002855] text-white flex items-center justify-center">
                       <BiotechIcon className="w-4 h-4 text-green-400" />
                     </div>
-                    <h4 className="text-sm font-bold text-[#00263f] pt-1">
+                    <h4 className="pt-1 text-xs font-bold leading-snug text-[#00263f]">
                       Section 3(e) Synergistic Protocol
                     </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-[11px] leading-snug text-slate-600">
                       Statutory testing protocol template for validating non-obvious synergistic enhancement to overcome Patent Office objections.
                     </p>
                   </div>
@@ -1000,7 +1014,7 @@ export default function PatentsPage() {
                     onClick={() => {
                       alert("Downloading Section 3(e) Laboratory Testing Protocol (.DOCX)...");
                     }}
-                    className="w-full py-2 px-3 bg-white hover:bg-slate-100 text-[#00263f] text-xs font-bold rounded-lg border border-slate-200 shadow-sm transition-colors"
+                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#00263f] shadow-sm transition-colors hover:bg-slate-100"
                   >
                     Download Lab Template (.DOCX)
                   </button>
@@ -1008,31 +1022,30 @@ export default function PatentsPage() {
               </div>
             </section>
 
-          </div>
-        )}
+            {/* ── Official Regulatory Authenticity Footer ───────────────── */}
+            <footer className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-lg border border-slate-200 bg-[#EEF3F8] px-3 py-2 text-[11px] text-slate-600">
+              <div className="min-w-0 space-y-0.5">
+                <div className="text-[11px] font-bold text-[#00263f]">
+                  GOVERNMENT OF INDIA • MINISTRY OF AYUSH • TRADITIONAL KNOWLEDGE DIGITAL LIBRARY (TKDL) ACCESS DESK
+                </div>
+                <div className="font-mono text-[10px] text-slate-500">
+                  Concordance with IPO Official Gazette (CGPDTM Weekly Bulletin v2024.36), WIPO Patentscope API, and Ministry of Ayush Prior Art Unit.
+                </div>
+              </div>
 
-        {/* ── Official Regulatory Authenticity Footer ─────────────────────── */}
-        <footer className="p-4 bg-[#EEF3F8] rounded-xl border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-600">
-          <div className="space-y-0.5">
-            <div className="text-xs font-bold text-[#00263f]">
-              GOVERNMENT OF INDIA • MINISTRY OF AYUSH • TRADITIONAL KNOWLEDGE DIGITAL LIBRARY (TKDL) ACCESS DESK
-            </div>
-            <div className="font-mono text-[11px] text-slate-500">
-              Concordance with IPO Official Gazette (CGPDTM Weekly Bulletin v2024.36), WIPO Patentscope API, and Ministry of Ayush Prior Art Unit.
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 font-mono text-[10px] shrink-0">
-            <div className="flex items-center gap-1 bg-white px-2.5 py-1 rounded shadow-sm border border-slate-200">
-              <span className="text-[#1B5E20]">🛡️</span>
-              <span>SHA-256: 8FA1-C039-DE02-77EA</span>
-            </div>
-            <div className="flex items-center gap-1 bg-white px-2.5 py-1 rounded shadow-sm border border-slate-200 text-[#00263f] font-semibold">
-              <span className="text-[#FF9933]">🔒</span>
-              <span>GIGW Compliant Level-3</span>
-            </div>
-          </div>
-        </footer>
+              <div className="flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
+                <div className="flex items-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 shadow-sm">
+                  <span className="text-[#1B5E20]">🛡️</span>
+                  <span>SHA-256: 8FA1-C039-DE02-77EA</span>
+                </div>
+                <div className="flex items-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 font-semibold text-[#00263f] shadow-sm">
+                  <span className="text-[#FF9933]">🔒</span>
+                  <span>GIGW Compliant Level-3</span>
+                </div>
+              </div>
+            </footer>
+        </section>
+      )}
 
       </div>
 
@@ -1051,7 +1064,8 @@ export default function PatentsPage() {
               </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[34rem] text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-100 text-slate-700 border-b">
                     <th className="p-2.5 font-bold">Patent Claim Element (IN-349821-B)</th>
@@ -1077,6 +1091,7 @@ export default function PatentsPage() {
                   </tr>
                 </tbody>
               </table>
+              </div>
             </div>
             <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
               <button onClick={() => setActiveModal(null)} className="px-4 py-2 bg-[#00263f] text-white text-xs font-semibold rounded">
