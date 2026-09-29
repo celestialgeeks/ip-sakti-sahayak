@@ -80,6 +80,17 @@ class Settings(BaseSettings):
     }
 
     @property
+    def supabase_jwks_url(self) -> str:
+        """
+        Where Supabase publishes the public keys that sign user access tokens.
+
+        Those keys are short-lived and rotated, so they are fetched and cached at
+        request time rather than copied into configuration — a pasted secret here
+        is what goes stale and locks every signed-in user out.
+        """
+        return self.NEXT_PUBLIC_SUPABASE_URL.rstrip("/") + "/auth/v1/.well-known/jwks.json"
+
+    @property
     def llm_model_chain(self) -> list[str]:
         """Primary model then every fallback, de-duplicated, blanks dropped."""
         ids = [self.NVIDIA_LLM_MODEL] + [
