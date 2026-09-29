@@ -14,7 +14,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from openai import APIConnectionError, APIStatusError
+from openai import APIConnectionError, APIError, APIStatusError
 
 from app.config import Settings, settings
 from app.services import nvidia_nim
@@ -75,6 +75,31 @@ def _delta_stream(*texts: str):
     async def generator():
         for text in texts:
             yield SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=text))])
+    return generator()
+
+
+def _overloaded_error() -> APIError:
+    """
+    The error the NIM endpoint actually raises for "Service temporarily overloaded".
+
+    It arrives as a bare APIError with no status code, usually from inside the stream
+    after create() has already returned — which is why a status-code-only notion of
+    "transient" wrote every model off at once and returned an empty answer.
+    """
+    httpx = _http()
+    request = httpx.Request("POST", "https://nim.invalid/v1/chat/completions")
+    try:
+        return APIError("Service temporarily overloaded", request=request, body=None)
+    except TypeError:  # constructor drift between openai majors
+        return APIError(message="Service temporarily overloaded", request=request, body=None)
+
+
+def _dying_stream(error: Exception):
+    """A stream that opens and then immediately fails."""
+    async def generator():
+        raise error
+        yield  # pragma: no cover - makes this an async generator
+
     return generator()
 
 
@@ -312,3 +337,84 @@ async def test_health_reports_the_model_actually_running(async_client):
     assert generation["model"] == settings.NVIDIA_LLM_MODEL
     assert generation["max_tokens"] == settings.RAG_MAX_TOKENS
     assert generation["fallbacks"] == settings.llm_model_chain[1:]
+
+
+# ── the failure mode that produced the empty screen ──────────────────────────
+
+
+def test_overload_without_a_status_code_is_still_worth_another_try():
+    """
+    Regression: "Service temporarily overloaded" arrives as a bare APIError with no
+    status code. Judging transience by status code alone wrote every model off on the
+    first attempt and the endpoint returned an answer of zero bytes.
+    """
+    assert _is_transient(_overloaded_error())
+
+
+@pytest.mark.asyncio
+async def test_a_stream_that_dies_immediately_fails_over_to_the_next_model(nim_chain):
+    service, tried, wire = nim_chain
+
+    async def handler(**kwargs):
+        tried.append(kwargs["model"])
+        if kwargs["model"] == "primary/model":
+            # create() succeeds; the failure only surfaces from inside the stream.
+            return _dying_stream(_overloaded_error())
+        return _delta_stream("salvaged answer")
+
+    wire(handler)
+    chunks = [c async for c in service._stream_generate([{"role": "user", "content": "q"}], 0.2, 64)]
+
+    assert "".join(chunks) == "salvaged answer"
+    assert tried[-1] == "fallback/model", "an opened-but-dead stream is not an answer"
+
+
+def _failing_generator_factory(error_text: str = "Service temporarily overloaded"):
+    async def side_effect(messages, temperature=0.2, max_tokens=None, stream=False):
+        async def dying():
+            raise RuntimeError(error_text)
+            yield ""  # pragma: no cover
+
+        return dying()
+
+    return side_effect
+
+
+@pytest.mark.asyncio
+async def test_an_unavailable_model_never_delivers_silence(
+    async_client, mock_nim_service, mock_qdrant_service
+):
+    """
+    The reader must get a reason, not an empty bubble: the response is already a 200
+    with a live thinking panel by the time generation fails, so silence is exactly the
+    blank screen this pipeline exists to prevent.
+    """
+    mock_nim_service.generate = AsyncMock(side_effect=_failing_generator_factory())
+
+    response = await async_client.post("/api/chat", json={**_chat_payload(RELEVANT), "stream": True})
+
+    body = response.text
+    assert response.status_code == 200
+    assert "could not produce an answer" in body, "the failure has to be stated, not swallowed"
+    assert "data: [DONE]" in body, "the stream must close so the thinking panel resolves"
+    assert '"confidence_level": "low"' in body or '"confidence_level":"low"' in body
+
+
+@pytest.mark.asyncio
+async def test_a_partially_delivered_answer_says_where_it_stopped(
+    async_client, mock_nim_service, mock_qdrant_service
+):
+    async def side_effect(messages, temperature=0.2, max_tokens=None, stream=False):
+        async def partial():
+            yield "Section 3(p) bars patents on traditional knowledge"
+            raise RuntimeError("connection reset")
+
+        return partial()
+
+    mock_nim_service.generate = AsyncMock(side_effect=side_effect)
+    response = await async_client.post("/api/chat", json={**_chat_payload(RELEVANT), "stream": True})
+
+    body = response.text
+    assert "Section 3(p) bars patents" in body, "what did arrive must still be shown"
+    assert "Answer interrupted" in body, "and the reader has to know it is incomplete"
+    assert "data: [DONE]" in body
