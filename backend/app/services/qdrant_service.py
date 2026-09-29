@@ -2,6 +2,7 @@
 Qdrant Service — Vector database operations for RAG.
 """
 
+import asyncio
 import logging
 
 logger = logging.getLogger("app.qdrant_service")
@@ -197,35 +198,53 @@ class QdrantService:
         # Always include case law
         collections.append(QdrantCollection.CASE_LAW.value)
 
-        all_results = []
-        for coll in collections:
+        per_collection = limit // len(collections) + 1
+        jurisdiction_filter = jurisdiction if jurisdiction != "both" else None
+
+        async def probe(coll: str):
+            """Return (results, needs_reseed) for one collection."""
             try:
-                results = await self.search(
+                found = await self.search(
                     collection=coll,
                     query_vector=query_vector,
-                    limit=limit // len(collections) + 1,
-                    jurisdiction_filter=jurisdiction if jurisdiction != "both" else None,
+                    limit=per_collection,
+                    jurisdiction_filter=jurisdiction_filter,
                 )
-                all_results.extend(results)
+                return found, False
             except LookupError:
-                # Ephemeral Qdrant was wiped (free-tier sleep/restart):
-                # reseed just this collection, then retry once.
-                try:
-                    from app.core.seed import seed_collection
+                return [], True
+            except Exception as e:
+                logger.warning("Search over %s failed: %r", coll, e)
+                return [], False
 
-                    logger.info("🔄 {coll} missing, reseeding on demand...")
-                    await seed_collection(coll)
-                    results = await self.search(
+        # Fan the collections out. Each is an independent network round trip, and
+        # awaiting them one after another made the common path five sequential waits
+        # (measured 2.79s against a 0.35s concurrent floor) for no benefit, since the
+        # results are merged and re-ranked afterwards regardless of arrival order.
+        outcomes = await asyncio.gather(*(probe(coll) for coll in collections))
+        all_results = [hit for found, _ in outcomes for hit in found]
+
+        # A collection that has vanished (free-tier sleep/restart) is reseeded one at
+        # a time, deliberately not inside the gather: reseeding re-embeds a whole
+        # corpus, and concurrent attempts would stampede the embedding service.
+        for coll, (_, needs_reseed) in zip(collections, outcomes):
+            if not needs_reseed:
+                continue
+            try:
+                from app.core.seed import seed_collection
+
+                logger.info("%s missing, reseeding on demand", coll)
+                await seed_collection(coll)
+                all_results.extend(
+                    await self.search(
                         collection=coll,
                         query_vector=query_vector,
-                        limit=limit // len(collections) + 1,
-                        jurisdiction_filter=jurisdiction if jurisdiction != "both" else None,
+                        limit=per_collection,
+                        jurisdiction_filter=jurisdiction_filter,
                     )
-                    all_results.extend(results)
-                except Exception as e:
-                    logger.info("⚠️ Error searching {coll}: {e}")
+                )
             except Exception as e:
-                logger.info("⚠️ Error searching {coll}: {e}")
+                logger.warning("Reseed or retry of %s failed: %r", coll, e)
 
         # Sort by score descending, take top-k
         all_results.sort(key=lambda x: x["score"], reverse=True)

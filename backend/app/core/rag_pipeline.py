@@ -15,6 +15,7 @@ from app.core.jurisdiction import get_jurisdiction_context
 from app.utils.prompts import build_system_prompt, build_rag_prompt
 from app.models.enums import Jurisdiction, Language, ConfidenceLevel
 from app.models.schemas import ChatResponse, Citation
+from app.config import settings
 
 
 import json
@@ -113,25 +114,13 @@ async def run_rag_pipeline(
     elif any(t in _q_lower for t in _irrelevant_triggers):
         intent = "irrelevant"
     else:
-        # Stage 2: LLM classifier only for ambiguous queries
-        intent_prompt = f"""You are a strict intent classifier for IP-SAKTI Sahayak, an Ayurveda IP assistant.
-Classify the query into exactly one label. Respond with ONLY the label word, nothing else.
-
-Labels:
-- relevant: about IP, Patents, Trademarks, Ayurveda, Traditional Knowledge, TKDL, herbs, formulations, law, biodiversity
-- chit_chat: greeting, gratitude, pleasantry, or identity question
-- irrelevant: unrelated to Ayurveda/IP (coding help, general facts, entertainment, harmful)
-
-Query: "{query}"
-Label:"""
-        intent = await nim_service.generate(
-            [{"role": "user", "content": intent_prompt}],
-            temperature=0.0, max_tokens=5
-        )
-        intent = str(intent).strip().lower().split()[0] if intent else "relevant"
-        # Normalise any variation
-        if intent not in ("relevant", "chit_chat", "irrelevant"):
-            intent = "relevant"
+        # Stage 2 used to ask the LLM to classify anything ambiguous. Measured on the
+        # live endpoint it cost 483s for a 5-token answer, ignored max_tokens entirely,
+        # and replied "Here's a thinking process" — which the code then normalised to
+        # "relevant", exactly what a default gives for free. Retrieval-grounding an
+        # answer is the safe outcome anyway, so no question now waits on a second
+        # model call: one LLM round trip per answer, not two.
+        intent = "relevant"
 
     if intent in ("chit_chat", "irrelevant"):
         if intent == "chit_chat":
@@ -238,8 +227,10 @@ Label:"""
         return None
 
     if not stream:
-        # Non-streaming path with 8192 max tokens
-        answer = await nim_service.generate(messages, temperature=0.2, max_tokens=8192)
+        # Non-streaming path: used by translation, which needs the whole answer.
+        answer = await nim_service.generate(
+            messages, temperature=0.2, max_tokens=settings.RAG_MAX_TOKENS
+        )
         answer = strip_reasoning(answer)
         
         citations = extract_citations(answer, context_chunks)
@@ -288,7 +279,9 @@ Label:"""
 
     # Streaming path with smart preamble buffering
     async def stream_generator() -> AsyncGenerator[str, None]:
-        generator = await nim_service.generate(messages, temperature=0.2, max_tokens=8192, stream=True)
+        generator = await nim_service.generate(
+            messages, temperature=0.2, max_tokens=settings.RAG_MAX_TOKENS, stream=True
+        )
         full_answer = ""
         buffer = ""
         in_think_block = False
