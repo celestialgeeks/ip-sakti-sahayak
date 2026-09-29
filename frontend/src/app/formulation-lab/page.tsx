@@ -50,6 +50,8 @@ interface LabDraft {
   ingredients: IngredientRatio[];
   entityType: "domestic" | "foreign";
   entityChosen: boolean;
+  /** Epoch ms of the last autosave — powers the doors "resume" card (§4.5). */
+  savedAt?: number;
 }
 
 export default function FormulationLabPage() {
@@ -65,6 +67,10 @@ export default function FormulationLabPage() {
   const [view, setView] = useState<LabView>("doors");
   const [lens, setLens] = useState<Lens>("medicine");
   const [guided, setGuided] = useState(true);
+  // Autosaved draft from a previous visit — surfaced as a "resume" card on the
+  // doors (§4.5) rather than auto-jumping to the bench, so navigation into the
+  // lab always lands on its home.
+  const [savedDraft, setSavedDraft] = useState<LabDraft | null>(null);
 
   // Active formulation
   const [scenarioId] = useState<string>(
@@ -130,6 +136,9 @@ export default function FormulationLabPage() {
   }, []);
 
   // Restore a local draft (works even with the server down) or a ?scenario= id.
+  // A ?scenario= deep link is an explicit handoff and opens the bench directly;
+  // a plain visit to /formulation-lab always lands on the doors, with the draft
+  // surfaced as a resume card instead of silently jumping into the bench.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const scenarioParam = params.get("scenario");
@@ -165,15 +174,10 @@ export default function FormulationLabPage() {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (raw) {
         const d = JSON.parse(raw) as LabDraft;
-        if (d.ingredients?.length) {
-          applyDraft(d);
-          setActivePresetId("draft");
-          setView("bench");
-          return;
-        }
+        if (d.ingredients?.length) setSavedDraft(d);
       }
     } catch {
-      /* corrupt draft — fall through to doors */
+      /* corrupt draft — doors shows nothing to resume */
     }
     setView("doors");
   }, []);
@@ -230,7 +234,9 @@ export default function FormulationLabPage() {
   // ── Autosave (§14.7): localStorage immediately, server when reachable ─────
   useEffect(() => {
     if (view === "doors" || ingredients.length === 0) return;
-    const draft: LabDraft = { id: scenarioId, title: formulationTitle, ingredients, entityType, entityChosen };
+    const draft: LabDraft = { id: scenarioId, title: formulationTitle, ingredients, entityType, entityChosen, savedAt: Date.now() };
+    // Keep the doors resume card in sync within the session, not just at boot.
+    setSavedDraft(draft);
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     } catch {
@@ -453,6 +459,20 @@ export default function FormulationLabPage() {
       setView("doors");
     }
   }, []);
+
+  // Resume the autosaved draft from the doors' resume card (§4.5) — the only
+  // way back into the bench for past work is now an explicit click.
+  const resumeDraft = useCallback(() => {
+    if (!savedDraft) return;
+    setFormulationTitle(savedDraft.title);
+    setActivePresetId("draft");
+    setIngredients(savedDraft.ingredients.map((i) => ({ ...i })));
+    setStartRatios(Object.fromEntries(savedDraft.ingredients.map((i) => [i.herb_id, i.ratio])));
+    setEntityType(savedDraft.entityType);
+    setEntityChosen(savedDraft.entityChosen);
+    setUndoState(null);
+    setView("bench");
+  }, [savedDraft]);
 
   // ── Pre-FER (explicit action, never auto-fired; entry gate §12) ───────────
   const canRunPreFer = sim.is_balanced && ingredients.length >= 3;
@@ -709,9 +729,21 @@ export default function FormulationLabPage() {
           presets={presets}
           scenarios={scenarios}
           catalogOffline={catalogOffline}
+          draft={
+            savedDraft
+              ? {
+                  title: savedDraft.title,
+                  herbCount: savedDraft.ingredients.length,
+                  totalRatio: savedDraft.ingredients.reduce((s, i) => s + i.ratio, 0),
+                  entityType: savedDraft.entityType,
+                  savedAt: savedDraft.savedAt,
+                }
+              : null
+          }
           onSelectPreset={loadPreset}
           onStartFromHerbs={startFromHerbs}
           onContinue={continueScenario}
+          onResumeDraft={resumeDraft}
           onNewBlank={handleNewBlank}
         />
       )}

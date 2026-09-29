@@ -10,14 +10,25 @@ import { getApiUrl } from "@/lib/api";
 
 type DoorId = "condition" | "hero" | "classical" | "ranked";
 
+interface DraftSummary {
+  title: string;
+  herbCount: number;
+  totalRatio: number;
+  entityType: "domestic" | "foreign";
+  savedAt?: number;
+}
+
 interface EntryDoorsProps {
   herbs: BotanicalItem[];
   presets: PresetFormulation[];
   scenarios: ScenarioSummary[];
   catalogOffline: boolean;
+  /** Autosaved local draft, shown as the "resume" card; null when none. */
+  draft: DraftSummary | null;
   onSelectPreset: (preset: PresetFormulation) => void;
   onStartFromHerbs: (title: string, ingredients: IngredientRatio[]) => void;
   onContinue: (scenarioId: string) => void;
+  onResumeDraft: () => void;
   onNewBlank: () => void;
 }
 
@@ -52,14 +63,31 @@ function patentPositionScore(p: PresetFormulation): number {
   return s;
 }
 
+/** "just now / 12 min ago / 3 days ago" — the recency line on resume cards. */
+function relativeTime(ts?: string | number): string {
+  if (ts === undefined || ts === null || ts === "") return "recently";
+  const t = typeof ts === "number" ? ts : Date.parse(ts);
+  if (Number.isNaN(t)) return "recently";
+  const min = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
+  const day = Math.round(hr / 24);
+  if (day < 30) return `${day} day${day === 1 ? "" : "s"} ago`;
+  return `${Math.round(day / 30)} mo ago`;
+}
+
 export function EntryDoors({
   herbs,
   presets,
   scenarios,
   catalogOffline,
+  draft,
   onSelectPreset,
   onStartFromHerbs,
   onContinue,
+  onResumeDraft,
   onNewBlank,
 }: EntryDoorsProps) {
   const [door, setDoor] = useState<DoorId | null>(null);
@@ -219,32 +247,6 @@ export function EntryDoors({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-8 space-y-6">
-      {/* Continue recent work first when saved scenarios exist (§4.5, §14.7) */}
-      {scenarios.length > 0 && (
-        <div className="rounded-xl border border-primary/30 bg-portal-surface-subtle p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="material-symbols-outlined text-[18px] text-primary">history</span>
-            <span className="font-label-md text-label-md font-bold uppercase tracking-wider text-primary">
-              Continue recent work
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {scenarios.slice(0, 4).map((s) => (
-              <button
-                key={s.id}
-                onClick={() => onContinue(s.id)}
-                className="px-3 py-2 rounded-lg border border-portal-border bg-surface-container-lowest hover:border-primary text-left"
-              >
-                <span className="text-xs font-semibold text-portal-navy-deep block max-w-[220px] truncate">{s.title}</span>
-                <span className="text-xs text-outline">
-                  {s.herb_count} herbs · {s.total_ratio.toFixed(1)}% · {s.entity_type}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="text-center pt-2">
         <h1 className="font-title-lg text-title-lg md:text-[28px] font-bold text-portal-navy-deep">
           Formulation Lab — what are you holding?
@@ -345,6 +347,77 @@ export function EntryDoors({
           ＋ New from scratch
         </button>
       </div>
+
+      {/* Resume / continue (§4.5, §14.7): past work is surfaced here — the lab
+          no longer auto-jumps to the bench, so the navigation link always
+          lands on this home. Parked below the doors and the from-scratch link
+          and one notch tighter than the doors grid, so starting fresh stays
+          the headline action and resuming supports it without overshadowing. */}
+      {(draft || scenarios.length > 0) && (
+        <section
+          aria-label="Resume formulation history"
+          className="rounded-xl border border-primary/30 bg-portal-surface-subtle p-3.5 space-y-2.5"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-primary">history</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                Pick up where you left off
+              </span>
+            </div>
+            <span className="text-xs text-outline hidden sm:block">
+              Autosaved — nothing is filed or submitted from here
+            </span>
+          </div>
+
+          {draft && (
+            <button
+              onClick={onResumeDraft}
+              className="w-full text-left rounded-lg border border-tiranga-saffron/50 bg-surface-container-lowest hover:border-tiranga-saffron hover:shadow-md transition-all px-3.5 py-2.5 flex items-center justify-between gap-3 group"
+            >
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-tiranga-saffron-deep">
+                  Last session draft · edited {relativeTime(draft.savedAt)}
+                </p>
+                <p className="text-sm font-bold text-portal-navy-deep truncate mt-0.5">
+                  {draft.title}
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  {draft.herbCount} herbs · {draft.totalRatio.toFixed(1)}% w/w · {draft.entityType} entity
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1 shrink-0 rounded-lg bg-tiranga-saffron px-3 py-1.5 text-xs font-bold text-white group-hover:gap-2 transition-all">
+                Resume
+                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </span>
+            </button>
+          )}
+
+          {scenarios.length > 0 && (
+            <div>
+              {draft && (
+                <p className="text-[11px] font-bold uppercase tracking-wider text-outline mb-1.5">
+                  Saved scenarios
+                </p>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                {scenarios.slice(0, 4).map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => onContinue(s.id)}
+                    className="text-left rounded-lg border border-portal-border bg-surface-container-lowest hover:border-primary hover:shadow-sm transition-all px-3 py-2"
+                  >
+                    <span className="text-xs font-semibold text-portal-navy-deep block truncate">{s.title}</span>
+                    <span className="text-[11px] text-outline mt-0.5 block">
+                      {s.herb_count} herbs · {s.total_ratio.toFixed(1)}% · {s.entity_type} · {relativeTime(s.updated_at)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
